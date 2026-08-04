@@ -1378,6 +1378,10 @@ body {
      ═══════════════════════════════════════════ -->
 <div id="toast" class="toast"></div>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase_init.js"></script>
+
 <script>
 /* ═══════════════════════════════════════════
    USER CREDENTIALS — stored in localStorage
@@ -1392,35 +1396,26 @@ const DEFAULT_USERS = {
 // Recovery PIN
 const RECOVERY_PIN = '96513';
 
-// Admin Logger
-window.slwLogActivity = function(action) {
-  try {
-    const user = sessionStorage.getItem('slw_user_v3') || localStorage.getItem('slw_user_v3');
-    if (!user) return;
-    let logs = JSON.parse(localStorage.getItem('slw_activity_logs')) || [];
-    logs.unshift({ user: user, action: action, time: new Date().toISOString() });
-    if (logs.length > 100) logs = logs.slice(0, 100);
-    localStorage.setItem('slw_activity_logs', JSON.stringify(logs));
-    localStorage.setItem('slw_last_active_' + user, new Date().toISOString());
-  } catch (e) { console.error("Log err", e); }
-};
 
-// Load users from localStorage or use defaults
-function loadUsers() {
-  const saved = localStorage.getItem('slw_users_v3');
-  if (saved) {
-    return JSON.parse(saved);
-  }
-  localStorage.setItem('slw_users_v3', JSON.stringify(DEFAULT_USERS));
-  return JSON.parse(JSON.stringify(DEFAULT_USERS));
-}
-
-function saveUsers() {
-  localStorage.setItem('slw_users_v3', JSON.stringify(USERS));
-}
-
-let USERS = loadUsers();
+let USERS = JSON.parse(JSON.stringify(DEFAULT_USERS));
 let currentUser = null;
+
+// Real-time user sync with Firebase
+if (typeof db !== 'undefined') {
+  db.collection('slw_credentials').onSnapshot(snapshot => {
+    if (snapshot.empty) {
+      // First time, write defaults to Firestore
+      Object.keys(DEFAULT_USERS).forEach(username => {
+        db.collection('slw_credentials').doc(username).set(DEFAULT_USERS[username])
+          .catch(e => console.error("Error writing default user", e));
+      });
+    } else {
+      snapshot.forEach(doc => {
+        USERS[doc.id] = doc.data();
+      });
+    }
+  });
+}
 
 /* ═══════════════════════════════════════════
    STARS BACKGROUND
@@ -1454,9 +1449,8 @@ const passwordInput = document.getElementById('password');
 
 // Check if user was previously logged in
 window.addEventListener('DOMContentLoaded', () => {
-  USERS = loadUsers();
   const savedUser = sessionStorage.getItem('slw_user_v3') || localStorage.getItem('slw_user_v3');
-  if (savedUser && USERS[savedUser]) {
+  if (savedUser) {
     showMainApp(savedUser);
   }
   updateClock();
@@ -1465,7 +1459,6 @@ window.addEventListener('DOMContentLoaded', () => {
 
 loginForm.addEventListener('submit', (e) => {
   e.preventDefault();
-  USERS = loadUsers();
   const user = usernameInput.value.trim().toLowerCase();
   const pass = passwordInput.value;
 
@@ -1597,9 +1590,16 @@ function handleRecovery() {
     return;
   }
 
-  // Update the password
-  USERS[user].password = newPw;
-  saveUsers();
+  // Update the password in Firestore
+  if (typeof db !== 'undefined') {
+    db.collection('slw_credentials').doc(user).update({
+      password: newPw
+    }).catch(e => {
+       console.error("Error updating password in cloud", e);
+    });
+  } else {
+    USERS[user].password = newPw;
+  }
 
   recoveryError.classList.remove('show');
   recoveryFormSection.style.display = 'none';

@@ -145,7 +145,12 @@
         </div>
       </div>
     </div>
+    </div>
   </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="firebase_init.js"></script>
 
   <script>
     // Security check: Only allow admin
@@ -160,19 +165,21 @@
       'chatura': { name: 'Chatura' }
     };
 
-    function renderAdminDashboard() {
+    let latestLogs = [];
+    let latestStatuses = {};
+
+    function renderStatuses() {
       const statusContainer = document.getElementById('admin-user-status');
       if (!statusContainer) return;
-
       statusContainer.innerHTML = '';
       
       const now = new Date();
       ['ruvini', 'chatura'].forEach(u => {
-        const lastActiveStr = localStorage.getItem('slw_last_active_' + u);
+        const lastActive = latestStatuses[u];
         let isOnline = false;
         let timeText = 'Never logged in';
-        if (lastActiveStr) {
-          const lastActive = new Date(lastActiveStr);
+        
+        if (lastActive) {
           const diffMin = (now - lastActive) / 60000;
           if (diffMin < 5) {
             isOnline = true;
@@ -196,19 +203,18 @@
         `;
         statusContainer.appendChild(div);
       });
-      
+    }
+
+    function renderLogs() {
       const feedContainer = document.getElementById('admin-activity-feed');
-      let logs = [];
-      try { logs = JSON.parse(localStorage.getItem('slw_activity_logs')) || []; } catch(e){}
-      
       feedContainer.innerHTML = '';
-      if (logs.length === 0) {
+      
+      if (latestLogs.length === 0) {
         feedContainer.innerHTML = '<div style="color:var(--text2); padding:20px; text-align:center;">No recent activity to display.</div>';
       } else {
-        // Group logs by date
         const groupedLogs = {};
-        logs.forEach(log => {
-          const logDate = new Date(log.time).toLocaleDateString();
+        latestLogs.forEach(log => {
+          const logDate = log.time.toLocaleDateString();
           if (!groupedLogs[logDate]) groupedLogs[logDate] = [];
           groupedLogs[logDate].push(log);
         });
@@ -222,8 +228,7 @@
           dateLogs.forEach(log => {
             const div = document.createElement('div');
             div.className = 'activity-item';
-            const logTime = new Date(log.time);
-            const timeStr = logTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            const timeStr = log.time.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
             div.innerHTML = `
               <strong>${(USERS[log.user] ? USERS[log.user].name : log.user)}</strong> ${log.action}
               <span class="activity-time">${timeStr}</span>
@@ -235,25 +240,59 @@
     }
 
     function clearLogs() {
-      localStorage.removeItem('slw_activity_logs');
-      renderAdminDashboard();
-      
       // Show temporary inline feedback
       const btn = document.querySelector('button[onclick="clearLogs()"]');
       if (btn) {
         const originalText = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-check"></i> Cleared!';
-        btn.style.background = '#10b981';
-        setTimeout(() => {
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Clearing...';
+        
+        // Delete logs from Firestore
+        db.collection('slw_activity_logs').get().then(snapshot => {
+          const batch = db.batch();
+          snapshot.docs.forEach(doc => {
+            batch.delete(doc.ref);
+          });
+          return batch.commit();
+        }).then(() => {
+          btn.innerHTML = '<i class="fas fa-check"></i> Cleared!';
+          btn.style.background = '#10b981';
+          setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.style.background = '#ef4444';
+          }, 2000);
+        }).catch(err => {
+          console.error('Error clearing logs', err);
           btn.innerHTML = originalText;
-          btn.style.background = '#ef4444';
-        }, 2000);
+        });
       }
     }
 
-    if (currentUser === 'admin') {
-      renderAdminDashboard();
-      setInterval(renderAdminDashboard, 3000);
+    if (currentUser === 'admin' && typeof db !== 'undefined') {
+      // Listen for user status updates
+      db.collection('slw_user_status').onSnapshot(snapshot => {
+        snapshot.forEach(doc => {
+           let data = doc.data();
+           if(data.lastActive) {
+               latestStatuses[doc.id] = data.lastActive.toDate();
+           }
+        });
+        renderStatuses();
+      });
+
+      // Listen for activity log updates
+      db.collection('slw_activity_logs').orderBy('time', 'desc').limit(100).onSnapshot(snapshot => {
+        latestLogs = [];
+        snapshot.forEach(doc => {
+           let data = doc.data();
+           if (data.time) {
+             latestLogs.push({ ...data, time: data.time.toDate(), id: doc.id });
+           }
+        });
+        renderLogs();
+      });
+
+      // Refresh timestamps every minute
+      setInterval(renderStatuses, 60000);
     }
   </script>
 </body>

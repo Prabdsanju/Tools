@@ -115,14 +115,23 @@ body{font-family:'Roboto',Arial,sans-serif;background:#f0f2f5;color:#333;font-si
   .copyright-bar{display:none !important}
 }
 </style>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase_init.js"></script>
+function doPrint() {
+  window.slwLogActivity && window.slwLogActivity('Printed Airfare Quotation PDF');
+  window.print();
+}
+</script>
 </head>
 <body>
+<a href="index.html" class="no-print" style="position: fixed; top: 20px; left: 20px; z-index: 99999; background: #0055a5; color: white; padding: 10px 20px; border-radius: 8px; font-family: sans-serif; text-decoration: none; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">&larr; Back to Home</a>
 
 <div id="toolbar">
   <span>&#9992; Quotation Editor</span>
   <button class="btn" onclick="addFlight()">+ Add Flight</button>
   <button class="btn secondary" onclick="addPriceRow()">+ Price Row</button>
-  <button class="btn success" onclick="window.print()">&#128424; Print / Save PDF</button>
+  <button class="btn success" onclick="doPrint()">&#128424; Print / Save PDF</button>
   <button class="btn secondary" onclick="saveDraft()">&#128190; Save Draft</button>
   <button class="btn secondary" onclick="loadDraft()">&#128194; Load Draft</button>
   <button class="btn whatsapp" onclick="shareWhatsApp()">&#128262; WhatsApp Share</button>
@@ -571,6 +580,7 @@ function applyCalc(prefix){
 
 // ── WHATSAPP SHARE ───────────────────────────────────────
 function shareWhatsApp(){
+  window.slwLogActivity && window.slwLogActivity('Shared Airfare Quotation on WhatsApp');
   var company = el('f-company').value || 'Customer';
   var prepfor = el('f-prepfor').value || '';
   var prepby  = el('f-prepby').value || '';
