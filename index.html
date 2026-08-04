@@ -1081,9 +1081,10 @@ body {
   }
 
   .navbar {
-    padding: 12px 16px;
-  }
+    .copyright-bar{display:none !important}
 }
+
+
 </style>
 </head>
 <body>
@@ -1283,6 +1284,9 @@ body {
         <div class="user-avatar" id="user-avatar">A</div>
         <span id="display-username">Admin</span>
       </div>
+      <a href="admin_dashboard.html" class="btn-settings" id="btn-admin" title="Admin Panel" style="display: none; background: #e0f5e5; color: var(--accent-teal); margin-right: 10px; border: 1px solid var(--border); text-decoration: none; align-items: center; gap: 6px; padding: 0 15px; border-radius: 20px; font-weight: 600;">
+        <i class="fas fa-user-shield"></i> <span style="font-size: 14px;">Admin Panel</span>
+      </a>
       <button class="btn-settings" onclick="openChangePw()" id="btn-settings" title="Change Password">
         <i class="fas fa-cog"></i>
       </button>
@@ -1292,6 +1296,8 @@ body {
       </button>
     </div>
   </nav>
+
+
 
   <!-- Hero -->
   <section class="hero">
@@ -1307,8 +1313,8 @@ body {
   <section class="tools-section">
     <div class="tools-grid">
 
-      <!-- Tool 1: Air Asia Flight Check -->
-      <a class="tool-card card-gold" href="Air Asia.html" target="_blank" id="tool-airasia">
+      <!-- Tool 1: AirAsia Link Builder -->
+      <a class="tool-card card-red" href="Air Asia.html" target="_blank" id="tool-airasia" onclick="window.slwLogActivity('Opened AirAsia Link Builder')">
         <div class="tool-icon">
           <i class="fas fa-plane-departure"></i>
         </div>
@@ -1325,7 +1331,7 @@ body {
       </a>
 
       <!-- Tool 2: Airfare Quotation -->
-      <a class="tool-card card-blue" href="airfare_quotation_template Final.html" target="_blank" id="tool-quotation">
+      <a class="tool-card card-blue" href="airfare_quotation_template Final.html" target="_blank" id="tool-quotation" onclick="window.slwLogActivity('Opened Airfare Quotation Tool')">
         <div class="tool-icon">
           <i class="fas fa-file-invoice-dollar"></i>
         </div>
@@ -1342,7 +1348,7 @@ body {
       </a>
 
       <!-- Tool 3: Itinerary Builder -->
-      <a class="tool-card card-teal" href="Itinerary_Builder_App New.html" target="_blank" id="tool-itinerary">
+      <a class="tool-card card-teal" href="Itinerary_Builder_App New.html" target="_blank" id="tool-itinerary" onclick="window.slwLogActivity('Opened Tour Itinerary Builder')">
         <div class="tool-icon">
           <i class="fas fa-route"></i>
         </div>
@@ -1379,25 +1385,38 @@ body {
    ═══════════════════════════════════════════ */
 const DEFAULT_USERS = {
   'admin': { password: 'admin123', name: 'Admin' },
-  'agent': { password: 'agent123', name: 'Agent' },
-  'sunleisure': { password: 'slw2025', name: 'Sun Leisure' }
+  'ruvini': { password: 'agent123', name: 'Ruvini' },
+  'chatura': { password: 'slw2025', name: 'Chatura' }
 };
 
 // Recovery PIN
 const RECOVERY_PIN = '96513';
 
+// Admin Logger
+window.slwLogActivity = function(action) {
+  try {
+    const user = localStorage.getItem('slw_user_v3');
+    if (!user) return;
+    let logs = JSON.parse(localStorage.getItem('slw_activity_logs')) || [];
+    logs.unshift({ user: user, action: action, time: new Date().toISOString() });
+    if (logs.length > 100) logs = logs.slice(0, 100);
+    localStorage.setItem('slw_activity_logs', JSON.stringify(logs));
+    localStorage.setItem('slw_last_active_' + user, new Date().toISOString());
+  } catch (e) { console.error("Log err", e); }
+};
+
 // Load users from localStorage or use defaults
 function loadUsers() {
-  const saved = localStorage.getItem('slw_users');
+  const saved = localStorage.getItem('slw_users_v3');
   if (saved) {
     return JSON.parse(saved);
   }
-  localStorage.setItem('slw_users', JSON.stringify(DEFAULT_USERS));
+  localStorage.setItem('slw_users_v3', JSON.stringify(DEFAULT_USERS));
   return JSON.parse(JSON.stringify(DEFAULT_USERS));
 }
 
 function saveUsers() {
-  localStorage.setItem('slw_users', JSON.stringify(USERS));
+  localStorage.setItem('slw_users_v3', JSON.stringify(USERS));
 }
 
 let USERS = loadUsers();
@@ -1436,7 +1455,7 @@ const passwordInput = document.getElementById('password');
 // Check if user was previously logged in
 window.addEventListener('DOMContentLoaded', () => {
   USERS = loadUsers();
-  const savedUser = localStorage.getItem('slw_user');
+  const savedUser = localStorage.getItem('slw_user_v3');
   if (savedUser && USERS[savedUser]) {
     showMainApp(savedUser);
   }
@@ -1454,11 +1473,12 @@ loginForm.addEventListener('submit', (e) => {
     loginError.classList.remove('show');
 
     if (document.getElementById('remember-me').checked) {
-      localStorage.setItem('slw_user', user);
+      localStorage.setItem('slw_user_v3', user);
     }
 
     showMainApp(user);
     showToast('Welcome back, ' + USERS[user].name + '!', 'success');
+    window.slwLogActivity('Logged In');
   } else {
     loginError.classList.add('show');
     passwordInput.value = '';
@@ -1474,11 +1494,20 @@ function showMainApp(user) {
   const userData = USERS[user];
   document.getElementById('display-username').textContent = userData.name;
   document.getElementById('user-avatar').textContent = userData.name.charAt(0).toUpperCase();
+
+  if (user === 'admin') {
+    document.getElementById('btn-admin').style.display = 'inline-flex';
+  } else {
+    document.getElementById('btn-admin').style.display = 'none';
+  }
 }
 
+
+
 function handleLogout() {
+  window.slwLogActivity('Logged Out');
   currentUser = null;
-  localStorage.removeItem('slw_user');
+  localStorage.removeItem('slw_user_v3');
   mainApp.classList.remove('show');
   loginOverlay.classList.remove('hidden');
   usernameInput.value = '';

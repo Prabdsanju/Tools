@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard — Sun Leisure World</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #f09819;
+      --primary-dark: #e88a0e;
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --surface2: #f1f5f9;
+      --text: #1e293b;
+      --text2: #64748b;
+      --border: #e2e8f0;
+      --radius-sm: 6px;
+      --radius-md: 12px;
+      --radius-lg: 20px;
+      --green: #10b981;
+      --gradient-primary: linear-gradient(135deg, #f09819 0%, #edde5d 100%);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .navbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+    }
+    
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      text-decoration: none;
+      color: var(--primary);
+      font-weight: 800;
+      font-size: 1.4rem;
+      letter-spacing: 0.5px;
+    }
+
+    .nav-brand img { height: 40px; }
+    
+    .btn-back {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .btn-back:hover { background: var(--border); }
+
+    .dashboard-container {
+      max-width: 1200px;
+      margin: 40px auto;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
+
+    .admin-header {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
+      border-bottom: 1px solid var(--border); padding-bottom: 15px;
+    }
+    .admin-header h2 { font-size: 1.5rem; color: var(--text); display: flex; align-items: center; gap: 10px; margin: 0; }
+    .admin-header h2 i { color: var(--primary); }
+    .admin-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 30px; }
+    @media (max-width: 768px) { .admin-grid { grid-template-columns: 1fr; } }
+    
+    .admin-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; }
+    .admin-card h3 { font-size: 1.1rem; margin-bottom: 15px; color: var(--text); border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-top: 0; }
+    
+    .user-status-list { display: flex; flex-direction: column; gap: 15px; }
+    .user-status-item { display: flex; align-items: center; gap: 15px; padding: 10px; background: var(--surface); border-radius: var(--radius-sm); border: 1px solid var(--border); }
+    .user-status-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--gradient-primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem; }
+    .user-status-info { flex: 1; }
+    .user-status-name { font-weight: 600; color: var(--text); margin-bottom: 3px; display: block; text-transform: capitalize; }
+    .user-status-time { font-size: 0.8rem; color: var(--text2); }
+    .status-dot { width: 10px; height: 10px; border-radius: 50%; background: #ccc; }
+    .status-dot.online { background: var(--green); box-shadow: 0 0 8px var(--green); animation: pulse 2s infinite; }
+    
+    .activity-feed { max-height: 500px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 10px; }
+    .activity-item { padding: 12px; background: var(--surface); border-left: 3px solid var(--primary); border-radius: 4px; border-top: 1px solid var(--border); border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); font-size: 0.9rem; line-height: 1.4; }
+    .activity-time { font-size: 0.75rem; color: var(--text2); margin-top: 5px; display: block; }
+    
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <a class="nav-brand" href="index.html">
+      <img src="Image/LOGO.png" alt="Sun Leisure World">
+      <span>SUN LEISURE WORLD</span>
+    </a>
+    <a href="index.html" class="btn-back"><i class="fas fa-arrow-left"></i> Back to Portal</a>
+  </nav>
+
+  <div class="dashboard-container">
+    <div class="admin-header">
+      <h2><i class="fas fa-user-shield"></i> Admin Monitoring Dashboard</h2>
+      <span style="color:var(--text2); font-size:0.9rem;">Real-time Activity Tracker</span>
+    </div>
+    <div class="admin-grid">
+      <div class="admin-card">
+        <h3>Agents Online Status</h3>
+        <div class="user-status-list" id="admin-user-status">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+      <div class="admin-card">
+        <h3>Live Activity Feed</h3>
+        <div class="activity-feed" id="admin-activity-feed">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Security check: Only allow admin
+    const currentUser = localStorage.getItem('slw_user_v3');
+    if (currentUser !== 'admin') {
+      document.body.innerHTML = '<div style="text-align:center; padding:50px; color:var(--text);"><h2>Access Denied</h2><p>You must be logged in as admin to view this page.</p><a href="index.html">Back to Home</a></div>';
+    }
+
+    const USERS = {
+      'admin': { name: 'Admin' },
+      'ruvini': { name: 'Ruvini' },
+      'chatura': { name: 'Chatura' }
+    };
+
+    function renderAdminDashboard() {
+      const statusContainer = document.getElementById('admin-user-status');
+      if (!statusContainer) return;
+
+      statusContainer.innerHTML = '';
+      
+      const now = new Date();
+      ['ruvini', 'chatura'].forEach(u => {
+        const lastActiveStr = localStorage.getItem('slw_last_active_' + u);
+        let isOnline = false;
+        let timeText = 'Never logged in';
+        if (lastActiveStr) {
+          const lastActive = new Date(lastActiveStr);
+          const diffMin = (now - lastActive) / 60000;
+          if (diffMin < 5) {
+            isOnline = true;
+            timeText = 'Online Now';
+          } else if (diffMin < 60) {
+            timeText = `Last active ${Math.floor(diffMin)} mins ago`;
+          } else {
+            timeText = `Last active ${Math.floor(diffMin / 60)} hours ago`;
+          }
+        }
+        
+        const div = document.createElement('div');
+        div.className = 'user-status-item';
+        div.innerHTML = `
+          <div class="user-status-avatar">${u.charAt(0).toUpperCase()}</div>
+          <div class="user-status-info">
+            <span class="user-status-name">${USERS[u] ? USERS[u].name : u}</span>
+            <span class="user-status-time">${timeText}</span>
+          </div>
+          <div class="status-dot ${isOnline ? 'online' : ''}"></div>
+        `;
+        statusContainer.appendChild(div);
+      });
+      
+      const feedContainer = document.getElementById('admin-activity-feed');
+      let logs = [];
+      try { logs = JSON.parse(localStorage.getItem('slw_activity_logs')) || []; } catch(e){}
+      
+      feedContainer.innerHTML = '';
+      if (logs.length === 0) {
+        feedContainer.innerHTML = '<div style="color:var(--text2); padding:20px; text-align:center;">No recent activity to display.</div>';
+      } else {
+        logs.forEach(log => {
+          const div = document.createElement('div');
+          div.className = 'activity-item';
+          const logTime = new Date(log.time);
+          const timeStr = logTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) + ' on ' + logTime.toLocaleDateString();
+          div.innerHTML = `
+            <strong>${(USERS[log.user] ? USERS[log.user].name : log.user)}</strong> ${log.action}
+            <span class="activity-time">${timeStr}</span>
+          `;
+          feedContainer.appendChild(div);
+        });
+      }
+    }
+
+    if (currentUser === 'admin') {
+      renderAdminDashboard();
+      setInterval(renderAdminDashboard, 3000);
+    }
+  </script>
+</body>
+</html>
