@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AirAsia Agent Link Builder — Sun Leisure World</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#06080a;
+  --surface:#0c1015;
+  --surface2:#111820;
+  --surface3:#17202a;
+  --border:#1c2730;
+  --border2:#253040;
+  --border3:#2e3d50;
+  --text:#dde8f0;
+  --text2:#7a9ab0;
+  --text3:#3d5568;
+  --red:#e8273a;
+  --red2:#b81e2e;
+  --red-glow:rgba(232,39,58,.14);
+  --gold:#e8a020;
+  --gold2:#c07a10;
+  --gold-glow:rgba(232,160,32,.12);
+  --teal:#00c8a0;
+  --teal-glow:rgba(0,200,160,.1);
+  --blue:#1a88dd;
+  --blue2:#1268aa;
+  --blue-glow:rgba(26,136,221,.12);
+  --green:#00d878;
+  --green-glow:rgba(0,216,120,.08);
+  --amber:#ffaa18;
+}
+
+body.light{
+  --bg:#edf2f7;
+  --surface:#ffffff;
+  --surface2:#f4f7fb;
+  --surface3:#e8eef5;
+  --border:#d5dde8;
+  --border2:#bfcbd8;
+  --border3:#a0b4c5;
+  --text:#0f1a25;
+  --text2:#3d5568;
+  --text3:#7a9ab0;
+  --red-glow:rgba(232,39,58,.08);
+  --gold-glow:rgba(232,160,32,.08);
+  --teal-glow:rgba(0,200,160,.07);
+  --blue-glow:rgba(26,136,221,.07);
+  --green-glow:rgba(0,200,100,.07);
+}
+body.light .ap-dropdown{background:#fff;box-shadow:0 16px 50px rgba(0,0,0,.2);}
+body.light .date-inp::-webkit-calendar-picker-indicator{filter:invert(.5);}
+body.light .styled-sel{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%237a9ab0'/%3E%3C/svg%3E");}
+body.light .agent-badge{background:rgba(232,160,32,.1);border-color:rgba(232,160,32,.3);}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Syne',sans-serif;
+  min-height:100vh;
+  padding:36px 20px 90px;
+  background-image:
+    radial-gradient(ellipse 70% 50% at 15% -5%,rgba(232,160,32,.05) 0%,transparent 55%),
+    radial-gradient(ellipse 50% 40% at 85% 105%,rgba(232,39,58,.04) 0%,transparent 55%);
+}
+a{color:inherit;text-decoration:none;}
+button{font-family:'Syne',sans-serif;cursor:pointer;}
+input,select{font-family:'Syne',sans-serif;}
+
+::-webkit-scrollbar{width:3px;height:3px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border3);border-radius:2px;}
+
+.wrap{max-width:1080px;margin:0 auto;}
+
+/* ── HEADER ── */
+.header{text-align:center;margin-bottom:38px;position:relative;}
+.header-badges{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:18px;flex-wrap:wrap;}
+.hbadge{
+  display:inline-flex;align-items:center;gap:5px;
+  border-radius:20px;padding:4px 13px 4px 9px;
+  font-size:.58rem;font-family:'DM Mono',monospace;
+  letter-spacing:1px;text-transform:uppercase;
+}
+.hbadge.live{background:var(--surface2);border:1px solid var(--border2);color:var(--text3);}
+.hbadge.live .dot{width:5px;height:5px;background:var(--green);border-radius:50%;animation:pulse 2s infinite;}
+.agent-badge{
+  background:rgba(232,160,32,.08);
+  border:1px solid rgba(232,160,32,.25);
+  color:var(--gold);
+}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(.75);}}
+
+.logo{font-size:2.8rem;font-weight:800;letter-spacing:-2.5px;line-height:1;margin-bottom:6px;}
+.logo .air{color:var(--text);}
+.logo .asia{color:var(--red);}
+.logo .suffix{color:var(--text3);font-weight:400;font-size:1.6rem;letter-spacing:-1px;}
+.tagline{color:var(--text3);font-size:.62rem;letter-spacing:4px;text-transform:uppercase;font-family:'DM Mono',monospace;}
+
+/* ── THEME TOGGLE ── */
+.theme-toggle{
+  position:absolute;top:0;right:0;
+  background:var(--surface2);border:1px solid var(--border2);
+  border-radius:20px;padding:5px 13px 5px 10px;
+  display:inline-flex;align-items:center;gap:6px;
+  cursor:pointer;transition:all .2s;
+  font-size:.6rem;font-family:'DM Mono',monospace;
+  color:var(--text3);user-select:none;
+}
+.theme-toggle:hover{border-color:var(--border3);color:var(--text2);}
+.theme-toggle .tg-icon{font-size:.8rem;transition:transform .3s;}
+.theme-toggle:hover .tg-icon{transform:rotate(20deg);}
+@media(max-width:480px){.theme-toggle{position:static;margin-bottom:12px;}}
+
+/* ── TABS (mode switcher) ── */
+.mode-bar{
+  display:flex;background:var(--surface);border:1px solid var(--border);
+  border-radius:14px;overflow:hidden;margin-bottom:16px;
+}
+.mode-tab{
+  flex:1;background:none;border:none;color:var(--text3);
+  font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:1px;text-transform:uppercase;
+  padding:12px 10px;cursor:pointer;transition:all .2s;
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  border-right:1px solid var(--border);
+}
+.mode-tab:last-child{border-right:none;}
+.mode-tab.active.consumer{background:var(--red);color:#fff;box-shadow:0 0 20px var(--red-glow);}
+.mode-tab.active.agent{background:var(--gold);color:#0a0805;box-shadow:0 0 20px var(--gold-glow);}
+.mode-tab:not(.active):hover{background:var(--surface2);color:var(--text2);}
+.mode-indicator{
+  display:none;align-items:center;gap:7px;
+  padding:9px 16px;border-radius:10px;margin-bottom:16px;
+  font-size:.62rem;font-family:'DM Mono',monospace;
+}
+.mode-indicator.show{display:flex;}
+.mode-indicator.consumer{background:var(--red-glow);border:1px solid rgba(232,39,58,.2);color:#ff6070;}
+.mode-indicator.agent{background:var(--gold-glow);border:1px solid rgba(232,160,32,.25);color:var(--gold);}
+
+/* ── AGENT CONFIG SECTION ── */
+.agent-section{
+  display:none;margin-bottom:14px;
+}
+.agent-section.show{display:block;}
+.agent-config-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+@media(max-width:700px){.agent-config-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:460px){.agent-config-grid{grid-template-columns:1fr;}}
+
+/* ── CONFIG GRID ── */
+.config-grid{display:grid;grid-template-columns:1fr 1.4fr;gap:14px;margin-bottom:14px;}
+@media(max-width:720px){.config-grid{grid-template-columns:1fr;}}
+
+/* ── CARDS ── */
+.card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:20px 22px;
+}
+.card.gold-border{border-color:rgba(232,160,32,.2);}
+.card-title{
+  font-size:.58rem;font-family:'DM Mono',monospace;
+  letter-spacing:3px;text-transform:uppercase;
+  color:var(--text3);margin-bottom:16px;
+  display:flex;align-items:center;gap:8px;
+}
+.card-title .ct-bar{width:3px;height:12px;border-radius:2px;flex-shrink:0;}
+.card-title .ct-bar.red{background:var(--red);}
+.card-title .ct-bar.gold{background:var(--gold);}
+.card-title .ct-bar.blue{background:var(--blue);}
+
+/* ── PAX ── */
+.pax-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+@media(max-width:420px){.pax-row{grid-template-columns:1fr;}}
+.pax-block label{display:block;font-size:.58rem;font-family:'DM Mono',monospace;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:3px;}
+.pax-block .pax-hint{font-size:.52rem;color:var(--text3);opacity:.55;margin-bottom:7px;}
+.pax-ctrl{display:flex;align-items:center;background:var(--surface2);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.pax-btn{background:none;border:none;color:var(--text3);font-size:1.1rem;width:36px;height:36px;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;}
+.pax-btn:hover:not(:disabled){background:var(--surface3);color:var(--red);}
+.pax-btn:disabled{opacity:.3;cursor:not-allowed;}
+.pax-val{flex:1;text-align:center;font-family:'DM Mono',monospace;font-weight:500;font-size:1rem;color:var(--text);}
+
+/* ── OPTIONS ── */
+.opts-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+@media(max-width:500px){.opts-grid{grid-template-columns:1fr 1fr;}}
+.opt-block label{display:block;font-size:.58rem;font-family:'DM Mono',monospace;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:6px;}
+.styled-sel{
+  width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:9px;
+  color:var(--text);font-family:'DM Mono',monospace;font-size:.7rem;padding:8px 10px;outline:none;cursor:pointer;
+  transition:border-color .2s;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%233d5568'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 10px center;padding-right:28px;
+}
+.styled-sel:focus{border-color:var(--blue);}
+.styled-input{
+  width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:9px;
+  color:var(--text);font-family:'DM Mono',monospace;font-size:.7rem;
+  padding:8px 10px;outline:none;transition:border-color .2s;
+}
+.styled-input:focus{border-color:var(--gold);}
+.styled-input.agent-field:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(232,160,32,.06);}
+.styled-input::placeholder{color:var(--text3);}
+
+/* ── AGENT KEY STATUS ── */
+.key-status{
+  display:flex;align-items:center;gap:6px;margin-top:6px;
+  font-size:.55rem;font-family:'DM Mono',monospace;
+}
+.key-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.key-dot.green{background:var(--green);}
+.key-dot.amber{background:var(--amber);}
+.key-dot.red{background:var(--red);}
+.key-text.ok{color:#00d878;}
+.key-text.warn{color:var(--amber);}
+.key-text.err{color:var(--red);}
+
+/* ── ROUTE MAP ── */
+.route-map-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px 22px;margin-bottom:14px;overflow:hidden;}
+.route-strip{display:flex;align-items:center;flex-wrap:nowrap;overflow-x:auto;padding:4px 0 6px;gap:0;-ms-overflow-style:none;scrollbar-width:none;}
+.route-strip::-webkit-scrollbar{display:none;}
+.rnode{display:flex;flex-direction:column;align-items:center;gap:2px;flex-shrink:0;}
+.rnode-code{font-family:'DM Mono',monospace;font-weight:500;font-size:.92rem;color:var(--red);line-height:1;}
+.rnode-city{font-size:.48rem;color:var(--text3);letter-spacing:.5px;white-space:nowrap;}
+.rarrow{display:flex;flex-direction:column;align-items:center;padding:0 10px;padding-bottom:6px;flex-shrink:0;gap:1px;}
+.rarrow-line{font-size:.8rem;color:var(--border3);}
+.rarrow-line.rt{color:var(--blue);opacity:.8;}
+.rarrow-tag{font-size:.4rem;font-family:'DM Mono',monospace;letter-spacing:1px;text-transform:uppercase;}
+.rarrow-tag.ow{color:var(--text3);}
+.rarrow-tag.rt{color:var(--blue);}
+
+/* ── FLIGHT CARDS ── */
+.flights-stack{display:flex;flex-direction:column;gap:12px;margin-bottom:12px;}
+.fcard{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:visible;transition:border-color .2s,box-shadow .2s;}
+.fcard:hover{border-color:var(--border2);box-shadow:0 6px 30px rgba(0,0,0,.4);}
+
+.fcard-top{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--surface2);border-bottom:1px solid var(--border);border-radius:16px 16px 0 0;gap:12px;flex-wrap:wrap;}
+.fcard-top-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.leg-num{font-family:'DM Mono',monospace;font-size:.58rem;color:var(--text3);background:var(--surface3);border:1px solid var(--border2);border-radius:5px;padding:2px 7px;white-space:nowrap;flex-shrink:0;}
+.leg-name{background:none;border:none;border-bottom:1px dashed var(--border3);color:var(--text2);font-family:'DM Mono',monospace;font-size:.66rem;width:110px;outline:none;padding:1px 3px;transition:border-color .2s,color .2s;}
+.leg-name:focus{border-color:var(--blue);color:var(--text);}
+.leg-name::placeholder{color:var(--border3);}
+
+.tt{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;flex-shrink:0;}
+.tt-btn{background:none;border:none;color:var(--text3);font-size:.6rem;font-family:'DM Mono',monospace;letter-spacing:.5px;text-transform:uppercase;padding:5px 12px;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.tt-btn.sep{border-right:1px solid var(--border);}
+.tt-btn.on-ow{background:var(--red);color:#fff;}
+.tt-btn.on-rt{background:var(--blue);color:#fff;}
+.tt-btn:not(.on-ow):not(.on-rt):hover{background:var(--surface3);color:var(--text2);}
+
+.fcard-top-right{display:flex;align-items:center;gap:6px;}
+.icon-btn{background:none;border:1px solid var(--border);color:var(--text3);border-radius:7px;padding:4px 9px;font-size:.58rem;font-family:'DM Mono',monospace;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.icon-btn:hover{border-color:var(--green);color:var(--green);}
+.del-btn{background:none;border:none;color:var(--border3);border-radius:6px;padding:4px 8px;font-size:.75rem;cursor:pointer;transition:all .15s;}
+.del-btn:hover{background:rgba(232,39,58,.1);color:var(--red);}
+.collapse-btn{background:none;border:none;color:var(--text3);font-size:.75rem;cursor:pointer;padding:4px 7px;border-radius:5px;transition:all .15s;line-height:1;}
+.collapse-btn:hover{color:var(--text2);}
+
+.fcard-body{padding:14px 16px;display:grid;grid-template-columns:1fr 34px 1fr auto auto;align-items:end;gap:10px;}
+@media(max-width:760px){.fcard-body{grid-template-columns:1fr 34px 1fr;}.fcard-dates{grid-column:1/-1;}.fcard-actions{grid-column:1/-1;flex-direction:row;justify-content:flex-end;}}
+
+.flabel{font-size:.53rem;font-family:'DM Mono',monospace;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:5px;display:block;}
+
+/* Airport picker */
+.ap-wrap{position:relative;}
+.ap-btn{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:9px;color:var(--text);font-family:'DM Mono',monospace;font-size:.72rem;padding:9px 12px;outline:none;cursor:pointer;transition:border-color .2s,background .2s;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;}
+.ap-btn:hover,.ap-btn.open{border-color:var(--red);background:var(--surface3);}
+.ap-dropdown{display:none;position:absolute;top:calc(100% + 5px);left:0;min-width:290px;background:#0d1520;border:1px solid var(--border2);border-radius:12px;max-height:220px;overflow-y:auto;z-index:3000;box-shadow:0 16px 50px rgba(0,0,0,.9);}
+.ap-dropdown.open{display:block;}
+.ap-search{width:100%;background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:.68rem;padding:10px 14px;outline:none;}
+.ap-search::placeholder{color:var(--text3);}
+.ap-opt{display:flex;align-items:center;gap:8px;padding:8px 14px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.03);transition:background .1s;}
+.ap-opt:hover{background:rgba(232,39,58,.07);}
+.ap-code{font-family:'DM Mono',monospace;font-weight:500;color:var(--red);font-size:.73rem;min-width:30px;}
+.ap-city{color:var(--text2);font-size:.63rem;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ap-ctry{color:var(--text3);font-size:.53rem;white-space:nowrap;}
+.ap-empty{padding:12px 14px;color:var(--text3);font-size:.66rem;font-style:italic;}
+.recent-label{font-size:.5rem;font-family:'DM Mono',monospace;letter-spacing:1px;text-transform:uppercase;color:var(--text3);padding:8px 14px 4px;border-bottom:1px solid var(--border);}
+.recent-opt{background:rgba(232,160,32,.04);}
+
+.swap-btn{background:none;border:1px solid var(--border);color:var(--gold);border-radius:8px;width:34px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;flex-shrink:0;font-size:.9rem;align-self:flex-end;}
+.swap-btn:hover{border-color:var(--gold);background:var(--gold-glow);transform:rotate(180deg);}
+
+.fcard-dates{display:flex;align-items:flex-end;gap:8px;}
+.date-grp{display:flex;flex-direction:column;}
+.date-sep{color:var(--text3);padding-bottom:9px;font-size:.8rem;flex-shrink:0;}
+.date-inp{background:var(--surface2);border:1px solid var(--border);border-radius:9px;color:var(--text);font-family:'DM Mono',monospace;font-size:.7rem;padding:9px 10px;outline:none;cursor:pointer;transition:border-color .2s;min-width:136px;width:100%;}
+.date-inp:focus{border-color:var(--blue);}
+.date-inp::-webkit-calendar-picker-indicator{filter:invert(.35);cursor:pointer;}
+
+.quick-dates{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap;}
+.qd-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text3);border-radius:6px;padding:3px 8px;font-family:'DM Mono',monospace;font-size:.54rem;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.qd-btn:hover{border-color:var(--blue);color:var(--blue);}
+
+.fcard-actions{display:flex;flex-direction:column;gap:5px;align-items:flex-end;flex-shrink:0;}
+.open-btn{display:inline-flex;align-items:center;gap:5px;background:var(--red);color:#fff;border:none;border-radius:9px;padding:9px 14px;font-family:'Syne',sans-serif;font-weight:600;font-size:.66rem;letter-spacing:.3px;white-space:nowrap;cursor:pointer;text-decoration:none;transition:background .15s,transform .1s,box-shadow .15s;box-shadow:0 2px 12px rgba(232,39,58,.25);}
+.open-btn:hover{background:var(--red2);transform:translateY(-1px);box-shadow:0 4px 20px rgba(232,39,58,.35);}
+.open-btn.rt{background:var(--blue);box-shadow:0 2px 12px rgba(26,136,221,.2);}
+.open-btn.rt:hover{background:var(--blue2);box-shadow:0 4px 20px rgba(26,136,221,.3);}
+.open-btn.off{background:var(--surface3);color:var(--text3);pointer-events:none;box-shadow:none;}
+.open-btn.agent-mode{background:var(--gold);color:#0a0805;box-shadow:0 2px 12px rgba(232,160,32,.25);}
+.open-btn.agent-mode:hover{background:var(--gold2);box-shadow:0 4px 20px rgba(232,160,32,.35);}
+.open-btn.agent-mode.rt{background:var(--teal);color:#020f0a;box-shadow:0 2px 12px rgba(0,200,160,.2);}
+.open-btn.agent-mode.rt:hover{background:#00a888;}
+.copy-btn{background:none;border:1px solid var(--border);color:var(--text3);border-radius:8px;padding:6px 11px;font-family:'DM Mono',monospace;font-size:.58rem;cursor:pointer;white-space:nowrap;transition:all .15s;}
+.copy-btn:hover{border-color:var(--border3);color:var(--text2);}
+.copy-btn.ok{border-color:var(--green);color:var(--green);}
+
+/* ── ADD BUTTON ── */
+.add-btn{width:100%;background:transparent;border:1px dashed var(--border);color:var(--text3);border-radius:12px;padding:12px;font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:2px;cursor:pointer;transition:all .15s;margin-bottom:14px;}
+.add-btn:hover{border-color:var(--green);color:var(--green);background:var(--green-glow);}
+
+/* ── ACTIONS ROW ── */
+.actions-row{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
+.action-btn{display:flex;align-items:center;gap:7px;border-radius:10px;padding:10px 16px;font-family:'DM Mono',monospace;font-size:.63rem;cursor:pointer;transition:all .15s;white-space:nowrap;border:none;}
+.wa-btn{background:rgba(37,211,102,.08);border:1px solid rgba(37,211,102,.22);color:#25d366;}
+.wa-btn:hover{background:rgba(37,211,102,.15);}
+.csv-btn{background:rgba(26,136,221,.08);border:1px solid rgba(26,136,221,.2);color:var(--blue);}
+.csv-btn:hover{background:rgba(26,136,221,.15);}
+.copy-all-btn{background:rgba(232,160,32,.07);border:1px solid rgba(232,160,32,.2);color:var(--gold);}
+.copy-all-btn:hover{background:rgba(232,160,32,.13);}
+.copy-all-btn.ok{background:rgba(0,216,120,.07);border-color:rgba(0,216,120,.22);color:var(--green);}
+
+/* ── SUMMARY TABLE ── */
+.summary-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;}
+.summary-head{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:var(--surface2);border-bottom:1px solid var(--border);}
+.summary-title{font-size:.6rem;font-family:'DM Mono',monospace;letter-spacing:3px;text-transform:uppercase;color:var(--text3);}
+.sumtable{width:100%;border-collapse:collapse;}
+.sumtable td{padding:10px 16px;border-bottom:1px solid var(--border);font-size:.68rem;vertical-align:middle;}
+.sumtable tr:last-child td{border-bottom:none;}
+.sumtable tr:hover td{background:var(--surface2);}
+.td-n{color:var(--text3);font-family:'DM Mono',monospace;font-size:.56rem;width:20px;}
+.td-label{color:var(--text3);font-size:.6rem;font-style:italic;max-width:90px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.td-route{font-family:'DM Mono',monospace;font-weight:500;color:var(--red);white-space:nowrap;}
+.td-route.rt{color:var(--blue);}
+.badge{display:inline-flex;align-items:center;gap:3px;font-size:.5rem;font-family:'DM Mono',monospace;letter-spacing:.5px;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+.badge.ow{background:rgba(232,39,58,.08);color:#ff7080;border:1px solid rgba(232,39,58,.18);}
+.badge.rt{background:rgba(26,136,221,.08);color:#66b0ff;border:1px solid rgba(26,136,221,.18);}
+.badge.agent{background:rgba(232,160,32,.1);color:var(--gold);border:1px solid rgba(232,160,32,.22);}
+.td-date{color:var(--text2);white-space:nowrap;font-family:'DM Mono',monospace;font-size:.65rem;}
+.td-pax{color:var(--text3);font-size:.6rem;white-space:nowrap;}
+.td-link a{color:var(--green);font-size:.63rem;}
+.td-link a:hover{text-decoration:underline;}
+.nd{color:var(--border3);font-style:italic;}
+.td-act button{background:none;border:1px solid var(--border);color:var(--text3);border-radius:5px;padding:3px 8px;font-size:.56rem;font-family:'DM Mono',monospace;cursor:pointer;transition:all .15s;}
+.td-act button:hover{border-color:var(--border3);color:var(--text2);}
+.td-act button.ok{border-color:var(--green);color:var(--green);}
+.empty-msg{padding:28px;text-align:center;color:var(--text3);font-size:.68rem;font-style:italic;}
+
+/* ── TRIP STATS ── */
+.trip-stats{display:flex;gap:16px;padding:12px 20px;background:var(--surface2);border-top:1px solid var(--border);flex-wrap:wrap;}
+.trip-stat{display:flex;flex-direction:column;gap:2px;}
+.ts-label{font-size:.5rem;font-family:'DM Mono',monospace;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);}
+.ts-val{font-size:.76rem;font-family:'DM Mono',monospace;color:var(--text2);font-weight:500;}
+
+/* ── COLLAPSE ── */
+.fcard.collapsed .fcard-body{display:none;}
+.fcard.collapsed .fcard-top{border-radius:16px;border-bottom:none;}
+.card-summary-line{font-family:'DM Mono',monospace;font-size:.6rem;color:var(--text2);display:none;align-items:center;gap:8px;flex-wrap:wrap;}
+.fcard.collapsed .card-summary-line{display:flex;}
+.csl-route{color:var(--red);font-weight:500;}
+.csl-route.rt{color:var(--blue);}
+.csl-date{color:var(--text3);}
+
+/* ── VALIDATION ── */
+.val-warn{display:none;align-items:center;gap:6px;background:rgba(255,170,24,.07);border:1px solid rgba(255,170,24,.2);border-radius:8px;padding:7px 12px;margin-top:8px;font-size:.6rem;color:var(--amber);font-family:'DM Mono',monospace;}
+.val-warn.show{display:flex;}
+
+/* ── QUICK ROUTES ── */
+.popular-section{margin-bottom:14px;}
+.pop-routes-wrap{display:flex;flex-wrap:wrap;gap:7px;}
+.pop-btn{background:var(--surface2);border:1px solid var(--border2);color:var(--text2);border-radius:8px;padding:6px 12px;font-family:'DM Mono',monospace;font-size:.6rem;cursor:pointer;transition:all .15s;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;}
+.pop-btn:hover{background:var(--surface3);border-color:var(--red);color:var(--red);}
+.pop-btn .pop-count{background:rgba(232,39,58,.13);color:var(--red);border-radius:4px;padding:1px 5px;font-size:.5rem;min-width:18px;text-align:center;}
+.pop-btn .pop-type{color:var(--text3);font-size:.5rem;}
+.pop-btn .pop-del{color:var(--text3);font-size:.68rem;margin-left:2px;opacity:0;transition:opacity .15s;background:none;border:none;cursor:pointer;padding:0;font-family:inherit;}
+.pop-btn:hover .pop-del{opacity:1;}
+.quick-empty{color:var(--text3);font-size:.63rem;font-style:italic;padding:4px 0;font-family:'DM Mono',monospace;}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--surface3);border:1px solid var(--border2);color:var(--text);border-radius:10px;padding:10px 18px;font-size:.68rem;font-family:'DM Mono',monospace;z-index:9999;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;box-shadow:0 8px 30px rgba(0,0,0,.6);display:flex;align-items:center;gap:8px;}
+.toast .t-dot{width:6px;height:6px;background:var(--green);border-radius:50%;flex-shrink:0;}
+.toast.show{opacity:1;transform:translateY(0);}
+
+footer{text-align:center;margin-top:50px;padding-top:20px;border-top:1px solid var(--border);color:var(--text3);font-size:.55rem;font-family:'DM Mono',monospace;letter-spacing:2px;text-transform:uppercase;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HEADER -->
+  <div class="header">
+    <button class="theme-toggle" onclick="toggleTheme()">
+      <span class="tg-icon" id="theme-icon">☀️</span>
+      <span id="theme-label">Light</span>
+    </button>
+    <div class="header-badges">
+      <span class="hbadge live"><span class="dot"></span>AirAsia Link Builder v3.0</span>
+      <span class="hbadge agent-badge">✦ Travel Agent Edition</span>
+    </div>
+    <div class="logo"><span class="air">Air</span><span class="asia">Asia</span><span class="suffix"> Link Builder</span></div>
+    <div class="tagline" style="margin-top:8px;">Sun Leisure World · Colombo · Agent Portal</div>
+  </div>
+
+  <!-- MODE SELECTOR -->
+  <div class="mode-bar">
+    <button class="mode-tab consumer active" id="tab-consumer" onclick="setMode('consumer')">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8z"/></svg>
+      Public Website
+    </button>
+    <button class="mode-tab agent" id="tab-agent" onclick="setMode('agent')">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
+      Travel Agent Portal
+    </button>
+  </div>
+
+  <div class="mode-indicator consumer show" id="mode-ind">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+    <span id="mode-ind-text">Public website mode — standard airasia.com links</span>
+  </div>
+
+  <!-- AGENT CONFIG (hidden by default) -->
+  <div class="agent-section" id="agent-section">
+    <div class="card gold-border">
+      <div class="card-title"><span class="ct-bar gold"></span>Agent Portal Parameters</div>
+      <div class="agent-config-grid">
+        <div class="opt-block">
+          <label>API Key</label>
+          <input class="styled-input agent-field" id="agent-key" 
+            value="39f6e0cda49aa9fdbc35ff4d5eaffe5f4c6bf8672f87656446b28e3210a71e1c"
+            placeholder="Paste your agent key here"
+            oninput="validateKey();refrAll();" maxlength="200" style="font-size:.6rem;letter-spacing:.3px;">
+          <div class="key-status" id="key-status">
+            <span class="key-dot green" id="key-dot"></span>
+            <span class="key-text ok" id="key-text">Key set — ready</span>
+          </div>
+        </div>
+        <div class="opt-block">
+          <label>Zone / Agency Code (zs)</label>
+          <input class="styled-input agent-field" id="agent-zs" value="DOMARCOTVL" placeholder="e.g. DOMARCOTVL" oninput="refrAll();">
+        </div>
+        <div class="opt-block">
+          <label>Consumer ID</label>
+          <input class="styled-input agent-field" id="agent-consumer" value="LEMON" placeholder="e.g. LEMON" oninput="refrAll();">
+        </div>
+        <div class="opt-block">
+          <label>TA IDs (taIDs)</label>
+          <input class="styled-input agent-field" id="agent-taids" value="" placeholder="Leave blank if unused" oninput="refrAll();">
+        </div>
+        <div class="opt-block">
+          <label>Airline Profile</label>
+          <select class="styled-sel" id="agent-profile" onchange="refrAll()">
+            <option value="dotrez" selected>dotrez (Agent default)</option>
+            <option value="k,d,g">k,d,g (Public)</option>
+            <option value="dotrez,k">dotrez,k (Combined)</option>
+          </select>
+        </div>
+        <div class="opt-block">
+          <label>Upsell Options</label>
+          <select class="styled-sel" id="agent-upsell" onchange="refrAll()">
+            <option value="both" selected>Both widgets (default)</option>
+            <option value="widget-only">Upsell widget only</option>
+            <option value="flatbed-only">Premium flatbed only</option>
+            <option value="none">None</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <span style="font-size:.55rem;font-family:'DM Mono',monospace;color:var(--text3);">Quick preset:</span>
+        <button onclick="loadPreset('sun')" style="background:var(--gold-glow);border:1px solid rgba(232,160,32,.25);color:var(--gold);border-radius:6px;padding:4px 12px;font-family:'DM Mono',monospace;font-size:.57rem;cursor:pointer;transition:all .15s;" onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='1'">✦ Sun Leisure World</button>
+        <button onclick="clearAgentFields()" style="background:none;border:1px solid var(--border);color:var(--text3);border-radius:6px;padding:4px 12px;font-family:'DM Mono',monospace;font-size:.57rem;cursor:pointer;transition:all .15s;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--text3)'">Clear all fields</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONFIG ROW -->
+  <div class="config-grid">
+    <div class="card">
+      <div class="card-title"><span class="ct-bar red"></span>
+        <span>Passengers</span>
+        <span style="margin-left:auto;font-size:.58rem;font-family:'DM Mono',monospace;color:var(--text3);font-weight:400;letter-spacing:1px;" id="pax-total">1 / 9</span>
+      </div>
+      <div class="pax-row">
+        <div class="pax-block">
+          <label>Adults</label><div class="pax-hint">12+ yrs</div>
+          <div class="pax-ctrl">
+            <button class="pax-btn" onclick="chPax('adult',-1)">−</button>
+            <span class="pax-val" id="v-adult">1</span>
+            <button class="pax-btn" onclick="chPax('adult',1)">+</button>
+          </div>
+        </div>
+        <div class="pax-block">
+          <label>Children</label><div class="pax-hint">2–11 yrs</div>
+          <div class="pax-ctrl">
+            <button class="pax-btn" onclick="chPax('child',-1)">−</button>
+            <span class="pax-val" id="v-child">0</span>
+            <button class="pax-btn" onclick="chPax('child',1)">+</button>
+          </div>
+        </div>
+        <div class="pax-block">
+          <label>Infants</label><div class="pax-hint">&lt; 2 yrs</div>
+          <div class="pax-ctrl">
+            <button class="pax-btn" onclick="chPax('infant',-1)">−</button>
+            <span class="pax-val" id="v-infant">0</span>
+            <button class="pax-btn" onclick="chPax('infant',1)">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="ct-bar blue"></span>Search Options</div>
+      <div class="opts-grid">
+        <div class="opt-block">
+          <label>Currency</label>
+          <select class="styled-sel" id="sel-cur" onchange="refrAll()">
+            <option value="LKR" selected>LKR — Sri Lanka</option>
+            <option value="USD">USD — US Dollar</option>
+            <option value="MYR">MYR — Malaysia</option>
+            <option value="THB">THB — Thailand</option>
+            <option value="SGD">SGD — Singapore</option>
+            <option value="IDR">IDR — Indonesia</option>
+            <option value="PHP">PHP — Philippines</option>
+            <option value="INR">INR — India</option>
+            <option value="AUD">AUD — Australia</option>
+            <option value="JPY">JPY — Japan</option>
+            <option value="CNY">CNY — China</option>
+            <option value="GBP">GBP — UK</option>
+            <option value="EUR">EUR — Europe</option>
+          </select>
+        </div>
+        <div class="opt-block">
+          <label>Cabin Class</label>
+          <select class="styled-sel" id="sel-cab" onchange="refrAll()">
+            <option value="economy" selected>Economy</option>
+            <option value="premium_economy">Premium Economy</option>
+            <option value="business">Business / Flatbed</option>
+            <option value="first">First Class</option>
+          </select>
+        </div>
+        <div class="opt-block">
+          <label>Promo Code</label>
+          <input class="styled-input" id="promo" placeholder="e.g. SAVE20" maxlength="20" oninput="refrAll()">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUICK ROUTES -->
+  <div class="card popular-section" id="quick-section">
+    <div class="card-title" style="justify-content:space-between;">
+      <span class="ct-bar red" style="display:inline-block;width:3px;height:12px;border-radius:2px;background:var(--red);margin-right:8px;"></span>
+      <span>Quick Routes <span style="font-size:.5rem;color:var(--text3);font-weight:400;letter-spacing:0;text-transform:none;font-family:'Syne',sans-serif;">— learns from your searches</span></span>
+      <button onclick="clearQuickRoutes()" style="margin-left:auto;background:none;border:none;color:var(--text3);font-family:'DM Mono',monospace;font-size:.53rem;cursor:pointer;transition:color .15s;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--text3)'">Clear all</button>
+    </div>
+    <div id="pop-grid"></div>
+  </div>
+
+  <!-- ROUTE STRIP -->
+  <div class="route-map-card">
+    <div class="card-title" style="margin-bottom:10px;"><span class="ct-bar red" style="display:inline-block;width:3px;height:12px;border-radius:2px;background:var(--red);margin-right:8px;"></span>Route Overview</div>
+    <div class="route-strip" id="route-strip"></div>
+  </div>
+
+  <!-- FLIGHT CARDS -->
+  <div class="flights-stack" id="flights-stack"></div>
+  <button class="add-btn" onclick="addFlight()">＋ Add Another Flight Leg</button>
+
+  <!-- ACTIONS -->
+  <div class="actions-row">
+    <button class="action-btn wa-btn" onclick="doWhatsApp()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      Share via WhatsApp
+    </button>
+    <button class="action-btn csv-btn" onclick="doCSV()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+      Export CSV
+    </button>
+    <button class="action-btn copy-all-btn" id="ca-btn" onclick="doCopyAll()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+      Copy All Links
+    </button>
+  </div>
+
+  <!-- SUMMARY -->
+  <div class="summary-card">
+    <div class="summary-head">
+      <div class="summary-title">Generated Links Summary</div>
+      <span style="font-size:.56rem;font-family:'DM Mono',monospace;color:var(--text3);" id="link-count"></span>
+    </div>
+    <div id="summary-body"></div>
+  </div>
+
+</div>
+<footer>© 2026 Sun Leisure World · Colombo, Sri Lanka · <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="daa9afb4b6bfb3a9afa8bfaea8bbacbfb6a99abdb7bbb3b6f4b9b5b7">[email&#160;protected]</a></footer>
+<div class="toast" id="toast"><span class="t-dot"></span><span id="toast-msg"></span></div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// ── AIRPORTS ──────────────────────────────────────────────────────────────────
+const AP=[
+  {c:'CMB',city:'Colombo',n:'Bandaranaike Intl',country:'Sri Lanka'},
+  {c:'BKK',city:'Bangkok',n:'Suvarnabhumi',country:'Thailand'},
+  {c:'DMK',city:'Bangkok',n:'Don Mueang',country:'Thailand'},
+  {c:'HKT',city:'Phuket',n:'Phuket Intl',country:'Thailand'},
+  {c:'CNX',city:'Chiang Mai',n:'Chiang Mai Intl',country:'Thailand'},
+  {c:'KBV',city:'Krabi',n:'Krabi Intl',country:'Thailand'},
+  {c:'HDY',city:'Hat Yai',n:'Hat Yai Intl',country:'Thailand'},
+  {c:'URT',city:'Surat Thani',n:'Surat Thani',country:'Thailand'},
+  {c:'HHQ',city:'Hua Hin',n:'Hua Hin',country:'Thailand'},
+  {c:'KUL',city:'Kuala Lumpur',n:'KLIA',country:'Malaysia'},
+  {c:'SZB',city:'Kuala Lumpur',n:'Subang / Sultan Abdul Aziz',country:'Malaysia'},
+  {c:'PEN',city:'Penang',n:'Penang Intl',country:'Malaysia'},
+  {c:'LGK',city:'Langkawi',n:'Langkawi Intl',country:'Malaysia'},
+  {c:'JHB',city:'Johor Bahru',n:'Senai Intl',country:'Malaysia'},
+  {c:'BKI',city:'Kota Kinabalu',n:'Kota Kinabalu Intl',country:'Malaysia'},
+  {c:'KCH',city:'Kuching',n:'Kuching Intl',country:'Malaysia'},
+  {c:'MYY',city:'Miri',n:'Miri Airport',country:'Malaysia'},
+  {c:'CGK',city:'Jakarta',n:'Soekarno-Hatta',country:'Indonesia'},
+  {c:'DPS',city:'Bali / Denpasar',n:'Ngurah Rai Intl',country:'Indonesia'},
+  {c:'SUB',city:'Surabaya',n:'Juanda Intl',country:'Indonesia'},
+  {c:'MNL',city:'Manila',n:'Ninoy Aquino Intl',country:'Philippines'},
+  {c:'CEB',city:'Cebu',n:'Mactan-Cebu Intl',country:'Philippines'},
+  {c:'SIN',city:'Singapore',n:'Changi Intl',country:'Singapore'},
+  {c:'DEL',city:'New Delhi',n:'Indira Gandhi Intl',country:'India'},
+  {c:'BOM',city:'Mumbai',n:'Chhatrapati Shivaji Intl',country:'India'},
+  {c:'MAA',city:'Chennai',n:'Chennai Intl',country:'India'},
+  {c:'BLR',city:'Bangalore',n:'Kempegowda Intl',country:'India'},
+  {c:'COK',city:'Kochi',n:'Cochin Intl',country:'India'},
+  {c:'HYD',city:'Hyderabad',n:'Rajiv Gandhi Intl',country:'India'},
+  {c:'PEK',city:'Beijing',n:'Capital Intl',country:'China'},
+  {c:'PVG',city:'Shanghai',n:'Pudong Intl',country:'China'},
+  {c:'CAN',city:'Guangzhou',n:'Baiyun Intl',country:'China'},
+  {c:'NRT',city:'Tokyo',n:'Narita Intl',country:'Japan'},
+  {c:'KIX',city:'Osaka',n:'Kansai Intl',country:'Japan'},
+  {c:'FUK',city:'Fukuoka',n:'Fukuoka Airport',country:'Japan'},
+  {c:'ICN',city:'Seoul',n:'Incheon Intl',country:'South Korea'},
+  {c:'TPE',city:'Taipei',n:'Taoyuan Intl',country:'Taiwan'},
+  {c:'HKG',city:'Hong Kong',n:'Hong Kong Intl',country:'Hong Kong'},
+  {c:'HAN',city:'Hanoi',n:'Noi Bai Intl',country:'Vietnam'},
+  {c:'SGN',city:'Ho Chi Minh City',n:'Tan Son Nhat Intl',country:'Vietnam'},
+  {c:'DAD',city:'Da Nang',n:'Da Nang Intl',country:'Vietnam'},
+  {c:'PNH',city:'Phnom Penh',n:'Phnom Penh Intl',country:'Cambodia'},
+  {c:'REP',city:'Siem Reap',n:'Siem Reap Intl',country:'Cambodia'},
+  {c:'RGN',city:'Yangon',n:'Yangon Intl',country:'Myanmar'},
+  {c:'KTM',city:'Kathmandu',n:'Tribhuvan Intl',country:'Nepal'},
+  {c:'DAC',city:'Dhaka',n:'Hazrat Shahjalal Intl',country:'Bangladesh'},
+  {c:'MLE',city:'Male',n:'Velana Intl',country:'Maldives'},
+  {c:'SYD',city:'Sydney',n:'Kingsford Smith',country:'Australia'},
+  {c:'MEL',city:'Melbourne',n:'Melbourne Airport',country:'Australia'},
+  {c:'PER',city:'Perth',n:'Perth Airport',country:'Australia'},
+  {c:'AUH',city:'Abu Dhabi',n:'Abu Dhabi Intl',country:'UAE'},
+  {c:'DXB',city:'Dubai',n:'Dubai Intl',country:'UAE'},
+  {c:'RUH',city:'Riyadh',n:'King Khalid Intl',country:'Saudi Arabia'},
+  {c:'JED',city:'Jeddah',n:'King Abdulaziz Intl',country:'Saudi Arabia'},
+  {c:'AKL',city:'Auckland',n:'Auckland Intl',country:'New Zealand'},
+  {c:'BWN',city:'Bandar Seri Begawan',n:'Brunei Intl',country:'Brunei'},
+  {c:'VTE',city:'Vientiane',n:'Wattay Intl',country:'Laos'},
+].sort((a,b)=>a.c.localeCompare(b.c));
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+const pax={adult:1,child:0,infant:0};
+let flights=[{from:'CMB',to:'DMK',date:'',type:'ow',ret:'',label:'Leg 1'}];
+let currentMode='consumer'; // 'consumer' | 'agent'
+
+const cur=()=>document.getElementById('sel-cur')?.value||'LKR';
+const cab=()=>document.getElementById('sel-cab')?.value||'economy';
+const promo=()=>document.getElementById('promo')?.value||'';
+const agentKey=()=>document.getElementById('agent-key')?.value.trim()||'';
+const agentZs=()=>document.getElementById('agent-zs')?.value.trim()||'';
+const agentConsumer=()=>document.getElementById('agent-consumer')?.value.trim()||'';
+const agentTaIds=()=>document.getElementById('agent-taids')?.value.trim()||'';
+const agentProfile=()=>document.getElementById('agent-profile')?.value||'dotrez';
+const agentUpsell=()=>document.getElementById('agent-upsell')?.value||'both';
+
+// ── MODE SWITCHER ─────────────────────────────────────────────────────────────
+function setMode(mode){
+  currentMode=mode;
+  document.getElementById('tab-consumer').className='mode-tab consumer'+(mode==='consumer'?' active':'');
+  document.getElementById('tab-agent').className='mode-tab agent'+(mode==='agent'?' active':'');
+  const ind=document.getElementById('mode-ind');
+  const indText=document.getElementById('mode-ind-text');
+  const agSec=document.getElementById('agent-section');
+  if(mode==='agent'){
+    ind.className='mode-indicator agent show';
+    indText.textContent='Travel Agent Portal mode — dotrez links with your agency credentials';
+    agSec.classList.add('show');
+  }else{
+    ind.className='mode-indicator consumer show';
+    indText.textContent='Public website mode — standard airasia.com links';
+    agSec.classList.remove('show');
+  }
+  refrAll();
+  toast(mode==='agent'?'✦ Agent Portal mode active':'Public website mode');
+}
+
+// ── AGENT HELPERS ─────────────────────────────────────────────────────────────
+function validateKey(){
+  const k=agentKey();
+  const dot=document.getElementById('key-dot');
+  const txt=document.getElementById('key-text');
+  if(!k){
+    dot.className='key-dot red';txt.className='key-text err';txt.textContent='No key — links will open without agent credentials';
+  }else if(k.length<20){
+    dot.className='key-dot amber';txt.className='key-text warn';txt.textContent='Key looks short — double check';
+  }else{
+    dot.className='key-dot green';txt.className='key-text ok';txt.textContent='Key set — ready';
+  }
+}
+function loadPreset(name){
+  if(name==='sun'){
+    document.getElementById('agent-key').value='39f6e0cda49aa9fdbc35ff4d5eaffe5f4c6bf8672f87656446b28e3210a71e1c';
+    document.getElementById('agent-zs').value='DOMARCOTVL';
+    document.getElementById('agent-consumer').value='LEMON';
+    document.getElementById('agent-taids').value='';
+    document.getElementById('agent-profile').value='dotrez';
+    document.getElementById('agent-upsell').value='both';
+    validateKey();refrAll();
+    toast('✦ Sun Leisure World preset loaded');
+  }
+}
+function clearAgentFields(){
+  ['agent-key','agent-zs','agent-consumer','agent-taids'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('agent-profile').value='dotrez';
+  document.getElementById('agent-upsell').value='both';
+  validateKey();refrAll();
+  toast('Agent fields cleared');
+}
+
+// ── AIRPORT HELPERS ───────────────────────────────────────────────────────────
+function apFind(code){return AP.find(a=>a.c===code);}
+function apLabel(code){const a=apFind(code);return a?`${code} — ${a.city}`:code;}
+function apCity(code){const a=apFind(code);return a?a.city:code;}
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function render(){
+  document.getElementById('flights-stack').innerHTML=flights.map((f,i)=>fcardHTML(f,i)).join('');
+  renderRouteStrip();renderSummary();
+}
+
+// ── FLIGHT CARD HTML ──────────────────────────────────────────────────────────
+function fcardHTML(f,i){
+  const rt=f.type==='rt';
+  const ready=rt?(f.date&&f.ret):f.date;
+  const link=buildLink(f);
+  const collapsed=f.collapsed||false;
+  const isAgent=currentMode==='agent';
+
+  let warnMsg='';
+  if(rt&&f.date&&f.ret&&f.ret<=f.date) warnMsg='⚠ Return date must be after depart date';
+  if(f.from===f.to) warnMsg='⚠ Origin and destination cannot be the same';
+  if(pax.infant>pax.adult) warnMsg='⚠ AirAsia requires 1 adult per infant';
+  if(isAgent&&!agentKey()) warnMsg='⚠ Agent key is empty — link will open without credentials';
+
+  const cslRoute=`${f.from} ${rt?'↔':'→'} ${f.to}`;
+  const cslDate=f.date?fmtD(f.date)+(rt&&f.ret?' → '+fmtD(f.ret):''):'No date set';
+
+  const btnClass=`open-btn${rt?' rt':''}${isAgent?' agent-mode':''}${(!ready||!link)?' off':''}`;
+
+  return `
+<div class="fcard ${collapsed?'collapsed':''}" id="fc-${i}">
+  <div class="fcard-top">
+    <div class="fcard-top-left">
+      <span class="leg-num"># ${i+1}</span>
+      <input class="leg-name" value="${f.label}" placeholder="Label"
+        onchange="flights[${i}].label=this.value;renderRouteStrip();renderSummary();" maxlength="22">
+      <div class="tt">
+        <button class="tt-btn sep ${!rt?'on-ow':''}" onclick="setType(${i},'ow')">✈ One Way</button>
+        <button class="tt-btn ${rt?'on-rt':''}" onclick="setType(${i},'rt')">⇄ Return</button>
+      </div>
+      ${isAgent?`<span style="background:rgba(232,160,32,.1);border:1px solid rgba(232,160,32,.2);color:var(--gold);border-radius:5px;padding:2px 8px;font-size:.5rem;font-family:'DM Mono',monospace;letter-spacing:.5px;">AGENT</span>`:''}
+    </div>
+    <div class="fcard-top-right">
+      <div class="card-summary-line">
+        <span class="csl-route ${rt?'rt':''}">${cslRoute}</span>
+        <span class="csl-date">${cslDate}</span>
+      </div>
+      <button class="icon-btn" onclick="dupFlight(${i})">⎘ Dup</button>
+      <button class="del-btn" onclick="delFlight(${i})">✕</button>
+      <button class="collapse-btn" onclick="toggleCollapse(${i})">${collapsed?'▾':'▴'}</button>
+    </div>
+  </div>
+  <div class="fcard-body">
+    <div>
+      <span class="flabel">From</span>
+      <div class="ap-wrap">
+        <button class="ap-btn" id="ap-from-${i}-btn" onclick="toggleDD('from',${i})">${apLabel(f.from)}</button>
+        <div class="ap-dropdown" id="ap-from-${i}">
+          <input class="ap-search" placeholder="Search airport…" oninput="filterDD(this,'from',${i})">
+          <div id="ap-from-${i}-list"></div>
+        </div>
+      </div>
+    </div>
+    <button class="swap-btn" onclick="swapAP(${i})" title="Swap">⇄</button>
+    <div>
+      <span class="flabel">To</span>
+      <div class="ap-wrap">
+        <button class="ap-btn" id="ap-to-${i}-btn" onclick="toggleDD('to',${i})">${apLabel(f.to)}</button>
+        <div class="ap-dropdown" id="ap-to-${i}">
+          <input class="ap-search" placeholder="Search airport…" oninput="filterDD(this,'to',${i})">
+          <div id="ap-to-${i}-list"></div>
+        </div>
+      </div>
+    </div>
+    <div class="fcard-dates">
+      <div class="date-grp">
+        <span class="flabel">Depart</span>
+        <input type="date" class="date-inp" id="dep-${i}" value="${f.date}"
+          onchange="flights[${i}].date=this.value;syncRetMonth(${i});refrCard(${i});">
+        <div class="quick-dates">
+          <button class="qd-btn" onclick="quickDep(${i},4)">+4d</button>
+          <button class="qd-btn" onclick="quickDep(${i},5)">+5d</button>
+          <button class="qd-btn" onclick="quickDep(${i},6)">+6d</button>
+          <button class="qd-btn" onclick="quickDep(${i},7)">+7d</button>
+        </div>
+      </div>
+      ${rt?`<span class="date-sep">→</span>
+      <div class="date-grp">
+        <span class="flabel">Return</span>
+        <input type="date" class="date-inp" id="ret-${i}" value="${f.ret||''}"
+          onchange="flights[${i}].ret=this.value;refrCard(${i});">
+        <div class="quick-dates">
+          <button class="qd-btn" onclick="quickRet(${i},4)">+4d</button>
+          <button class="qd-btn" onclick="quickRet(${i},5)">+5d</button>
+          <button class="qd-btn" onclick="quickRet(${i},6)">+6d</button>
+          <button class="qd-btn" onclick="quickRet(${i},7)">+7d</button>
+        </div>
+      </div>`:''}
+    </div>
+    <div class="fcard-actions">
+      <button class="${btnClass}" id="ob-${i}" ${ready&&link?`onclick="openLink(${i})"`:''} style="text-decoration:none;">${isAgent?'✦':''} ${rt?'Search Return':'Search Flight'} ↗</button>
+      <button class="copy-btn" id="cb-${i}" onclick="copyOne(${i})">Copy Link</button>
+    </div>
+  </div>
+  <div class="val-warn ${warnMsg?'show':''}" id="vw-${i}">${warnMsg}</div>
+</div>`;
+}
+
+// ── OPEN LINK (force new tab in Chrome) ──────────────────────────────────────
+function openLink(i){
+  const link=buildLink(flights[i]);
+  if(!link) return;
+  const a=document.createElement('a');
+  a.href=link;
+  a.target='_blank';
+  a.rel='noopener noreferrer';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  trackRoute(flights[i].from,flights[i].to,flights[i].type);
+}
+
+// ── LINK BUILDER ─────────────────────────────────────────────────────────────
+function buildLink(f){
+  const c=cur(),cb=cab(),pr=promo();
+  const isAgent=currentMode==='agent';
+
+  function fmtDate(str){
+    const [y,m,d]=str.split('-');
+    return encodeURIComponent(`${d}/${m}/${y}`);
+  }
+
+  if(isAgent){
+    // Agent portal — dotrez link
+    const key=agentKey();
+    const zs=agentZs();
+    const consumer=agentConsumer();
+    const taids=agentTaIds();
+    const profile=agentProfile();
+    const upsell=agentUpsell();
+
+    let upsellParams='';
+    if(upsell==='both') upsellParams='&upsellWidget=true&upsellPremiumFlatbedWidget=true';
+    else if(upsell==='widget-only') upsellParams='&upsellWidget=true';
+    else if(upsell==='flatbed-only') upsellParams='&upsellPremiumFlatbedWidget=true';
+
+    if(f.type==='rt'){
+      if(!f.date||!f.ret) return null;
+      return `https://www.airasia.com/b2b/flights/search/?origin=${f.from}&destination=${f.to}&departDate=${fmtDate(f.date)}&tripType=R&returnDate=${fmtDate(f.ret)}&adult=${pax.adult}&child=${pax.child}&infant=${pax.infant}&locale=en-gb&currency=${c}&airlineProfile=${encodeURIComponent(profile)}&type=paired&cabinClass=${cb}${key?'&key='+encodeURIComponent(key):''}${upsellParams}&uce=true&providers=&taIDs=${encodeURIComponent(taids)}${zs?'&zs='+encodeURIComponent(zs):''}${consumer?'&consumerId='+encodeURIComponent(consumer):''}${pr?'&promoCode='+pr:''}`;
+    }else{
+      if(!f.date) return null;
+      return `https://www.airasia.com/b2b/flights/search/?origin=${f.from}&destination=${f.to}&departDate=${fmtDate(f.date)}&tripType=O&adult=${pax.adult}&child=${pax.child}&infant=${pax.infant}&locale=en-gb&currency=${c}&airlineProfile=${encodeURIComponent(profile)}&type=paired&cabinClass=${cb}${key?'&key='+encodeURIComponent(key):''}${upsellParams}&uce=true&providers=&taIDs=${encodeURIComponent(taids)}${zs?'&zs='+encodeURIComponent(zs):''}${consumer?'&consumerId='+encodeURIComponent(consumer):''}${pr?'&promoCode='+pr:''}`;
+    }
+  }else{
+    // Public website
+    if(f.type==='rt'){
+      if(!f.date||!f.ret) return null;
+      return `https://www.airasia.com/flights/search/?origin=${f.from}&destination=${f.to}&departDate=${fmtDate(f.date)}&tripType=R&returnDate=${fmtDate(f.ret)}&adult=${pax.adult}&child=${pax.child}&infant=${pax.infant}&locale=en-gb&currency=${c}&ule=true&cabinClass=${cb}&uce=true&ancillaryAbTest=false&isOC=false&isDC=false${pr?'&promoCode='+pr:''}&type=paired&airlineProfile=k,d,g&upsellWidget=true`;
+    }else{
+      if(!f.date) return null;
+      return `https://www.airasia.com/flights/search/?origin=${f.from}&destination=${f.to}&departDate=${fmtDate(f.date)}&tripType=O&adult=${pax.adult}&child=${pax.child}&infant=${pax.infant}&locale=en-gb&currency=${c}&ule=true&cabinClass=${cb}&uce=true&ancillaryAbTest=false&isOC=false&isDC=false${pr?'&promoCode='+pr:''}&type=paired&airlineProfile=k,d,g&upsellWidget=true`;
+    }
+  }
+}
+
+// ── FORMAT HELPERS ────────────────────────────────────────────────────────────
+const MO=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function fmtD(s){if(!s)return null;const[y,m,d]=s.split('-');return `${parseInt(d)} ${MO[parseInt(m)-1]} ${y}`;}
+function paxStr(){
+  const p=[];
+  if(pax.adult) p.push(`${pax.adult} Adult${pax.adult>1?'s':''}`);
+  if(pax.child) p.push(`${pax.child} Child${pax.child>1?'ren':''}`);
+  if(pax.infant)p.push(`${pax.infant} Infant${pax.infant>1?'s':''}`);
+  return p.join(', ');
+}
+
+// ── AIRPORT DROPDOWN ──────────────────────────────────────────────────────────
+let openDD=null;
+function toggleDD(side,i){
+  const id=`ap-${side}-${i}`;
+  const btn=document.getElementById(`${id}-btn`);
+  if(openDD&&openDD!==id){closeDD(openDD);}
+  const dd=document.getElementById(id);
+  if(dd.classList.contains('open')){closeDD(id);return;}
+  dd.classList.add('open');btn.classList.add('open');
+  openDD=id;
+  const listEl=document.getElementById(`${id}-list`);
+  renderAPList(listEl,AP,i,side);
+  const srch=dd.querySelector('.ap-search');
+  srch.value='';srch.focus();
+}
+function closeDD(id){
+  const dd=document.getElementById(id);
+  if(dd){dd.classList.remove('open');}
+  const btn=document.getElementById(`${id}-btn`);
+  if(btn){btn.classList.remove('open');}
+  if(openDD===id)openDD=null;
+}
+document.addEventListener('click',e=>{
+  if(openDD&&!e.target.closest('.ap-wrap')) closeDD(openDD);
+});
+function renderAPList(el,list,i,side){
+  if(!list.length){el.innerHTML=`<div class="ap-empty">No airports found</div>`;return;}
+  const recent=getRecent();
+  let html='';
+  const recents=recent.filter(c=>list.find(a=>a.c===c));
+  if(recents.length){
+    html+=`<div class="recent-label">Recent</div>`;
+    recents.forEach(c=>{
+      const a=list.find(x=>x.c===c);
+      if(a) html+=apOptHTML(a,i,side,'recent-opt');
+    });
+  }
+  list.forEach(a=>{
+    html+=apOptHTML(a,i,side,'');
+  });
+  el.innerHTML=html;
+}
+function apOptHTML(a,i,side,cls){
+  return `<div class="ap-opt ${cls}" onclick="pickAP('${a.c}','${side}',${i})">
+    <span class="ap-code">${a.c}</span>
+    <span class="ap-city">${a.city} — ${a.n}</span>
+    <span class="ap-ctry">${a.country}</span>
+  </div>`;
+}
+function filterDD(inp,side,i){
+  const q=inp.value.toLowerCase();
+  const id=`ap-${side}-${i}`;
+  const listEl=document.getElementById(`${id}-list`);
+  const filtered=AP.filter(a=>
+    a.c.toLowerCase().includes(q)||
+    a.city.toLowerCase().includes(q)||
+    a.n.toLowerCase().includes(q)||
+    a.country.toLowerCase().includes(q)
+  );
+  renderAPList(listEl,filtered,i,side);
+}
+function pickAP(code,side,i){
+  if(side==='from') flights[i].from=code;
+  else flights[i].to=code;
+  addRecent(code);
+  const id=`ap-${side}-${i}`;
+  closeDD(id);
+  render();
+}
+
+// ── DATE QUICK PICKS ──────────────────────────────────────────────────────────
+function quickDep(i,days){
+  const d=new Date();d.setDate(d.getDate()+days);
+  const val=d.toISOString().split('T')[0];
+  flights[i].date=val;
+  const el=document.getElementById(`dep-${i}`);
+  if(el) el.value=val;
+  refrCard(i);
+}
+function quickRet(i,days){
+  const base=flights[i].date||new Date().toISOString().split('T')[0];
+  const d=new Date(base);d.setDate(d.getDate()+days);
+  const val=d.toISOString().split('T')[0];
+  flights[i].ret=val;
+  const el=document.getElementById(`ret-${i}`);
+  if(el) el.value=val;
+  refrCard(i);
+}
+
+// ── FLIGHT OPS ────────────────────────────────────────────────────────────────
+function setType(i,t){flights[i].type=t;if(t==='ow')flights[i].ret='';render();}
+function swapAP(i){const tmp=flights[i].from;flights[i].from=flights[i].to;flights[i].to=tmp;render();}
+function refrCard(i){
+  const f=flights[i];
+  const btn=document.getElementById(`ob-${i}`);
+  if(btn){
+    const ready=f.type==='rt'?(f.date&&f.ret):f.date;
+    const link=buildLink(f);
+    const wasOff=btn.classList.contains('off');
+    const isAgent=currentMode==='agent';
+    btn.className=`open-btn${f.type==='rt'?' rt':''}${isAgent?' agent-mode':''}${(!ready||!link)?' off':''}`;
+    if(ready&&link){
+      btn.onclick=()=>openLink(i);
+      if(wasOff) trackRoute(f.from,f.to,f.type);
+    }else{btn.onclick=null;}
+    // update warning
+    const vw=document.getElementById(`vw-${i}`);
+    if(vw){
+      let w='';
+      if(f.type==='rt'&&f.date&&f.ret&&f.ret<=f.date) w='⚠ Return date must be after depart date';
+      if(f.from===f.to) w='⚠ Origin and destination cannot be the same';
+      if(pax.infant>pax.adult) w='⚠ AirAsia requires 1 adult per infant';
+      if(isAgent&&!agentKey()) w='⚠ Agent key is empty';
+      vw.textContent=w;vw.className='val-warn'+(w?' show':'');
+    }
+  }
+  renderSummary();
+}
+function refrAll(){flights.forEach((_,i)=>refrCard(i));}
+function addFlight(){flights.push({from:'CMB',to:'DMK',date:'',type:'ow',ret:'',label:`Leg ${flights.length+1}`});render();}
+function dupFlight(i){flights.splice(i+1,0,{...flights[i],label:`${flights[i].label} ✱`});render();toast('Flight leg duplicated');}
+function delFlight(i){flights.splice(i,1);render();}
+function toggleCollapse(i){flights[i].collapsed=!flights[i].collapsed;render();}
+function syncRetMonth(i){
+  const dep=flights[i].date,ret=flights[i].ret;
+  if(!dep||!ret)return;
+  if(ret<=dep){flights[i].ret='';return;}
+  const dp=dep.split('-'),rp=ret.split('-');
+  const nr=dp[0]+'-'+dp[1]+'-'+rp[2];
+  const nd=new Date(nr);
+  if(!isNaN(nd)&&nr>dep) flights[i].ret=nr;
+}
+
+// ── PAX ───────────────────────────────────────────────────────────────────────
+function chPax(t,d){
+  const total=pax.adult+pax.child+pax.infant;
+  if(d>0&&total>=9){toast('Maximum 9 passengers (AirAsia limit)');return;}
+  pax[t]=Math.max(0,pax[t]+d);
+  if(t==='adult'&&pax[t]<1)pax[t]=1;
+  document.getElementById(`v-${t}`).textContent=pax[t];
+  updatePaxBtns();refrAll();
+}
+function updatePaxBtns(){
+  const total=pax.adult+pax.child+pax.infant;
+  const atMax=total>=9;
+  ['adult','child','infant'].forEach(t=>{
+    const b=document.querySelector(`[onclick="chPax('${t}',1)"]`);
+    if(b) b.disabled=atMax;
+  });
+  const counter=document.getElementById('pax-total');
+  if(counter){counter.textContent=`${total} / 9`;counter.style.color=atMax?'var(--red)':'var(--text3)';}
+}
+
+// ── ROUTE STRIP ───────────────────────────────────────────────────────────────
+function renderRouteStrip(){
+  const el=document.getElementById('route-strip');
+  let html='';
+  flights.forEach((f,i)=>{
+    if(i===0)html+=rnode(f.from);
+    const rt=f.type==='rt';
+    html+=`<div class="rarrow"><span class="rarrow-line ${rt?'rt':''}">${rt?'↔':'→'}</span><span class="rarrow-tag ${rt?'rt':'ow'}">${rt?'RT':'OW'}</span></div>`;
+    html+=rnode(f.to);
+  });
+  el.innerHTML=html;
+}
+function rnode(code){
+  return `<div class="rnode"><div class="rnode-code">${code}</div><div class="rnode-city">${apCity(code)}</div></div>`;
+}
+
+// ── SUMMARY ───────────────────────────────────────────────────────────────────
+function renderSummary(){
+  const body=document.getElementById('summary-body');
+  const cnt=document.getElementById('link-count');
+  const links=flights.filter(f=>buildLink(f));
+  cnt.textContent=`${links.length} / ${flights.length} links ready`;
+  if(!flights.length){body.innerHTML=`<div class="empty-msg">No flights added yet.</div>`;return;}
+  const isAgent=currentMode==='agent';
+  const rows=flights.map((f,i)=>{
+    const rt=f.type==='rt';
+    const link=buildLink(f);
+    const ready=rt?(f.date&&f.ret):f.date;
+    const dateStr=rt&&f.date&&f.ret?`${fmtD(f.date)} → ${fmtD(f.ret)}`:(f.date?fmtD(f.date):'');
+    return `<tr>
+      <td class="td-n">${i+1}</td>
+      <td class="td-label">${f.label}</td>
+      <td class="td-route ${rt?'rt':''}">${rt?`${f.from} ↔ ${f.to}`:`${f.from} → ${f.to}`}</td>
+      <td>
+        <span class="badge ${rt?'rt':'ow'}">${rt?'↔ Return':'✈ One Way'}</span>
+        ${isAgent?`<span class="badge agent" style="margin-left:3px;">✦ Agent</span>`:''}
+      </td>
+      <td class="td-date">${dateStr||'<span class="nd">—</span>'}</td>
+      <td class="td-pax">${ready?paxStr():'—'}</td>
+      <td class="td-link">${link?`<button onclick="openLink(${i})" style="background:none;border:none;color:var(--green);font-size:.63rem;cursor:pointer;padding:0;font-family:'DM Mono',monospace;">Open ↗</button>`:'<span class="nd">—</span>'}</td>
+      <td class="td-act">${link?`<button id="sc-${i}" onclick="copyOne(${i})">Copy</button>`:'—'}</td>
+    </tr>`;
+  }).join('');
+  const allDates=flights.filter(f=>f.date).map(f=>new Date(f.date));
+  const allRet=flights.filter(f=>f.ret).map(f=>new Date(f.ret));
+  const firstDep=allDates.length?new Date(Math.min(...allDates)):null;
+  const lastDate=allRet.length?new Date(Math.max(...allRet,...allDates)):allDates.length?new Date(Math.max(...allDates)):null;
+  const totalDays=firstDep&&lastDate?Math.round((lastDate-firstDep)/(1000*60*60*24)):null;
+  const readyCount=flights.filter(f=>buildLink(f)).length;
+  let statsHtml='';
+  if(firstDep){
+    statsHtml=`<div class="trip-stats">
+      <div class="trip-stat"><span class="ts-label">First Departure</span><span class="ts-val">${fmtD(firstDep.toISOString().split('T')[0])}</span></div>
+      ${lastDate&&totalDays>0?`<div class="trip-stat"><span class="ts-label">Trip Duration</span><span class="ts-val">${totalDays} day${totalDays!==1?'s':''}</span></div>`:''}
+      <div class="trip-stat"><span class="ts-label">Total Legs</span><span class="ts-val">${flights.length}</span></div>
+      <div class="trip-stat"><span class="ts-label">Links Ready</span><span class="ts-val" style="color:${readyCount===flights.length?'var(--green)':'var(--amber)'}">${readyCount} / ${flights.length}</span></div>
+      <div class="trip-stat"><span class="ts-label">Passengers</span><span class="ts-val">${pax.adult+pax.child+pax.infant} total</span></div>
+      ${isAgent?`<div class="trip-stat"><span class="ts-label">Mode</span><span class="ts-val" style="color:var(--gold)">✦ Agent</span></div>`:`<div class="trip-stat"><span class="ts-label">Mode</span><span class="ts-val" style="color:var(--red)">Public</span></div>`}
+    </div>`;
+  }
+  body.innerHTML=`<table class="sumtable">${rows}</table>${statsHtml}`;
+}
+
+// ── COPY ──────────────────────────────────────────────────────────────────────
+function copyOne(i){
+  const link=buildLink(flights[i]);
+  if(!link){toast('No link to copy');return;}
+  navigator.clipboard.writeText(link).then(()=>{
+    const b=document.getElementById(`sc-${i}`)||document.getElementById(`cb-${i}`);
+    if(b){b.textContent='✓ Copied';b.classList.add('ok');setTimeout(()=>{b.textContent='Copy';b.classList.remove('ok');},2200);}
+    toast('Link copied!');
+  });
+}
+function doCopyAll(){
+  const lines=flights.map(f=>buildLink(f)).filter(Boolean);
+  if(!lines.length){toast('No links ready yet');return;}
+  navigator.clipboard.writeText(lines.join('\n')).then(()=>{
+    const b=document.getElementById('ca-btn');
+    if(b){b.classList.add('ok');const old=b.innerHTML;b.innerHTML=b.innerHTML.replace('Copy All Links','✓ Copied!');setTimeout(()=>{b.classList.remove('ok');b.innerHTML=old;},2500);}
+    toast(`${lines.length} link${lines.length>1?'s':''} copied!`);
+  });
+}
+
+// ── WHATSAPP ──────────────────────────────────────────────────────────────────
+function doWhatsApp(){
+  const isAgent=currentMode==='agent';
+  const lines=['✈ *AirAsia Flight Search Links*',isAgent?'_(Travel Agent Portal — Sun Leisure World)_':'',''];
+  flights.forEach((f,i)=>{
+    const link=buildLink(f);
+    const rt=f.type==='rt';
+    lines.push(`*${i+1}. ${f.label}* — ${f.from} ${rt?'↔':'→'} ${f.to}`);
+    if(f.date) lines.push(`📅 Depart: ${fmtD(f.date)}`);
+    if(rt&&f.ret) lines.push(`📅 Return: ${fmtD(f.ret)}`);
+    lines.push(`👥 ${paxStr()} · ${cur()} · ${cab()}`);
+    if(link) lines.push(`🔗 ${link}`);
+    else lines.push('⚠️ Date not set');
+    lines.push('');
+  });
+  window.open(`https://wa.me/?text=${encodeURIComponent(lines.join('\n'))}`,'_blank');
+}
+
+// ── CSV ───────────────────────────────────────────────────────────────────────
+function doCSV(){
+  const isAgent=currentMode==='agent';
+  const hdr=['#','Label','From','To','Type','Depart','Return','Passengers','Currency','Cabin','Promo','Mode','Link'];
+  const rows=flights.map((f,i)=>{
+    const rt=f.type==='rt';
+    const link=buildLink(f)||'';
+    return [i+1,`"${f.label}"`,f.from,f.to,rt?'Return':'One Way',
+      f.date?fmtD(f.date):'',rt&&f.ret?fmtD(f.ret):'',
+      `"${paxStr()}"`,cur(),cab(),promo()||'',isAgent?'Agent':'Public',`"${link}"`].join(',');
+  });
+  const csv=[hdr.join(','),...rows].join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download='airasia-flights.csv';a.click();
+  toast('CSV exported!');
+}
+
+// ── QUICK ROUTES ──────────────────────────────────────────────────────────────
+function getQuickRoutes(){try{return JSON.parse(localStorage.getItem('aa_quick')||'[]');}catch{return[];}}
+function saveQuickRoutes(r){try{localStorage.setItem('aa_quick',JSON.stringify(r));}catch{}}
+function trackRoute(from,to,type){
+  let routes=getQuickRoutes();
+  const key=`${from}-${to}-${type}`;
+  const idx=routes.findIndex(r=>r.key===key);
+  if(idx>=0){routes[idx].count++;routes[idx].last=Date.now();}
+  else routes.push({key,from,to,type,count:1,last:Date.now()});
+  routes.sort((a,b)=>b.count-a.count||b.last-a.last);
+  routes=routes.slice(0,20);
+  saveQuickRoutes(routes);renderPopular();
+}
+function renderPopular(){
+  const grid=document.getElementById('pop-grid');
+  if(!grid)return;
+  const routes=getQuickRoutes();
+  if(!routes.length){grid.innerHTML=`<div class="quick-empty">No quick routes yet — start searching and they'll appear here automatically ✦</div>`;return;}
+  grid.innerHTML=`<div class="pop-routes-wrap">${routes.map(r=>`
+    <button class="pop-btn" onclick="addQuickRoute('${r.from}','${r.to}','${r.type}')">
+      <span>${r.from} ${r.type==='rt'?'↔':'→'} ${r.to}</span>
+      <span class="pop-count">${r.count}×</span>
+      <span class="pop-type">${r.type==='rt'?'RT':'OW'}</span>
+      <button class="pop-del" onclick="event.stopPropagation();removeQuickRoute('${r.key}')" title="Remove">✕</button>
+    </button>`).join('')}
+  </div>`;
+}
+function addQuickRoute(from,to,type){
+  if(flights.length===1&&!flights[0].date){flights[0]={...flights[0],from,to,type};}
+  else flights.push({from,to,date:'',type,ret:'',label:`Leg ${flights.length+1}`});
+  render();toast(`Added ${from} ${type==='rt'?'↔':'→'} ${to}`);
+}
+function removeQuickRoute(key){saveQuickRoutes(getQuickRoutes().filter(r=>r.key!==key));renderPopular();}
+function clearQuickRoutes(){saveQuickRoutes([]);renderPopular();toast('Quick routes cleared');}
+
+// ── RECENT AIRPORTS ───────────────────────────────────────────────────────────
+function getRecent(){try{return JSON.parse(localStorage.getItem('aa_recent')||'[]');}catch{return[];}}
+function addRecent(code){let r=getRecent().filter(c=>c!==code);r.unshift(code);r=r.slice(0,6);try{localStorage.setItem('aa_recent',JSON.stringify(r));}catch{}}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+let tt;
+function toast(msg){
+  document.getElementById('toast-msg').textContent=msg;
+  const el=document.getElementById('toast');
+  el.classList.add('show');
+  clearTimeout(tt);tt=setTimeout(()=>el.classList.remove('show'),2600);
+}
+
+// ── THEME ─────────────────────────────────────────────────────────────────────
+function applyTheme(isLight){
+  document.body.classList.toggle('light',isLight);
+  document.getElementById('theme-icon').textContent=isLight?'🌙':'☀️';
+  document.getElementById('theme-label').textContent=isLight?'Dark':'Light';
+  try{localStorage.setItem('aa_theme',isLight?'light':'dark');}catch{}
+}
+function toggleTheme(){applyTheme(!document.body.classList.contains('light'));}
+(function(){try{if(localStorage.getItem('aa_theme')==='light')applyTheme(true);}catch{}})();
+
+function init(){
+  render();
+  renderPopular();
+  validateKey();
+  setMode('consumer');
+}
+init();
+</script>
+</body>
+</html>
