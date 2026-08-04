@@ -101,6 +101,15 @@
     .activity-item { padding: 12px; background: var(--surface); border-left: 3px solid var(--primary); border-radius: 4px; border-top: 1px solid var(--border); border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); font-size: 0.9rem; line-height: 1.4; }
     .activity-time { font-size: 0.75rem; color: var(--text2); margin-top: 5px; display: block; }
     
+    .activity-date-header {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      margin-top: 10px;
+      margin-bottom: 5px;
+      border-bottom: 1px dashed var(--border);
+      padding-bottom: 3px;
+    }
     @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
   </style>
 </head>
@@ -127,7 +136,10 @@
         </div>
       </div>
       <div class="admin-card">
-        <h3>Live Activity Feed</h3>
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:10px; margin-bottom:15px;">
+          <h3 style="margin:0; border:none; padding:0;">Live Activity Feed</h3>
+          <button onclick="clearLogs()" style="background:#ef4444; color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:0.8rem; font-weight:600;"><i class="fas fa-trash"></i> Clear</button>
+        </div>
         <div class="activity-feed" id="admin-activity-feed">
           <!-- Populated by JS -->
         </div>
@@ -137,7 +149,7 @@
 
   <script>
     // Security check: Only allow admin
-    const currentUser = localStorage.getItem('slw_user_v3');
+    const currentUser = sessionStorage.getItem('slw_user_v3') || localStorage.getItem('slw_user_v3');
     if (currentUser !== 'admin') {
       document.body.innerHTML = '<div style="text-align:center; padding:50px; color:var(--text);"><h2>Access Denied</h2><p>You must be logged in as admin to view this page.</p><a href="index.html">Back to Home</a></div>';
     }
@@ -193,17 +205,49 @@
       if (logs.length === 0) {
         feedContainer.innerHTML = '<div style="color:var(--text2); padding:20px; text-align:center;">No recent activity to display.</div>';
       } else {
+        // Group logs by date
+        const groupedLogs = {};
         logs.forEach(log => {
-          const div = document.createElement('div');
-          div.className = 'activity-item';
-          const logTime = new Date(log.time);
-          const timeStr = logTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) + ' on ' + logTime.toLocaleDateString();
-          div.innerHTML = `
-            <strong>${(USERS[log.user] ? USERS[log.user].name : log.user)}</strong> ${log.action}
-            <span class="activity-time">${timeStr}</span>
-          `;
-          feedContainer.appendChild(div);
+          const logDate = new Date(log.time).toLocaleDateString();
+          if (!groupedLogs[logDate]) groupedLogs[logDate] = [];
+          groupedLogs[logDate].push(log);
         });
+        
+        for (const [date, dateLogs] of Object.entries(groupedLogs)) {
+          const dateHeader = document.createElement('div');
+          dateHeader.className = 'activity-date-header';
+          dateHeader.textContent = date === new Date().toLocaleDateString() ? 'Today' : date;
+          feedContainer.appendChild(dateHeader);
+          
+          dateLogs.forEach(log => {
+            const div = document.createElement('div');
+            div.className = 'activity-item';
+            const logTime = new Date(log.time);
+            const timeStr = logTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            div.innerHTML = `
+              <strong>${(USERS[log.user] ? USERS[log.user].name : log.user)}</strong> ${log.action}
+              <span class="activity-time">${timeStr}</span>
+            `;
+            feedContainer.appendChild(div);
+          });
+        }
+      }
+    }
+
+    function clearLogs() {
+      localStorage.removeItem('slw_activity_logs');
+      renderAdminDashboard();
+      
+      // Show temporary inline feedback
+      const btn = document.querySelector('button[onclick="clearLogs()"]');
+      if (btn) {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check"></i> Cleared!';
+        btn.style.background = '#10b981';
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          btn.style.background = '#ef4444';
+        }, 2000);
       }
     }
 
