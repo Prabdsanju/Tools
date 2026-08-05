@@ -1,0 +1,1749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>Sun Leisure World — Travel Agent Portal</title>
+<meta name="description" content="Sun Leisure World Travel Agent Portal — Access flight checks, airfare quotations, and itinerary builder tools.">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+/* ═══════════════════════════════════════════
+   CSS VARIABLES & RESET
+   ═══════════════════════════════════════════ */
+:root {
+  --bg-primary: #f4fcf6;
+  --bg-secondary: #ffffff;
+  --bg-card: #ffffff;
+  --bg-glass: rgba(255, 255, 255, 0.9);
+  --border: rgba(30, 120, 41, 0.15);
+  --border-hover: rgba(30, 120, 41, 0.3);
+  --text-primary: #0a1f12;
+  --text-secondary: #2f5439;
+  --text-muted: #64866f;
+  --accent-gold: #ffb800;
+  --accent-gold-dim: rgba(255, 184, 0, 0.15);
+  --accent-blue: #54b732;
+  --accent-blue-dim: rgba(84, 183, 50, 0.15);
+  --accent-teal: #1e7829;
+  --accent-teal-dim: rgba(30, 120, 41, 0.15);
+  --accent-rose: #ff9900;
+  --accent-rose-dim: rgba(255, 153, 0, 0.15);
+  --accent-purple: #fdb800;
+  --accent-purple-dim: rgba(253, 184, 0, 0.15);
+  --gradient-hero: linear-gradient(135deg, #f4fcf6 0%, #e0f5e5 50%, #f4fcf6 100%);
+  --gradient-gold: linear-gradient(135deg, #ffde00, #ffb800);
+  --gradient-blue: linear-gradient(135deg, #74d852, #54b732);
+  --gradient-teal: linear-gradient(135deg, #279e36, #1e7829);
+  --shadow-lg: 0 24px 80px rgba(0, 0, 0, 0.08);
+  --shadow-card: 0 8px 32px rgba(30, 120, 41, 0.08);
+  --shadow-glow-gold: 0 0 60px rgba(255, 184, 0, 0.2);
+  --shadow-glow-blue: 0 0 60px rgba(84, 183, 50, 0.2);
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ═══════════════════════════════════════════
+   ANIMATED BACKGROUND
+   ═══════════════════════════════════════════ */
+.bg-animation {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.bg-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.3;
+  animation: orbFloat 20s ease-in-out infinite;
+}
+
+.bg-orb:nth-child(1) {
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(255, 222, 0, 0.15), transparent);
+  top: -200px;
+  right: -100px;
+  animation-delay: 0s;
+}
+
+.bg-orb:nth-child(2) {
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(84, 183, 50, 0.12), transparent);
+  bottom: -150px;
+  left: -100px;
+  animation-delay: -7s;
+}
+
+.bg-orb:nth-child(3) {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(30, 120, 41, 0.15), transparent);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation-delay: -14s;
+}
+
+@keyframes orbFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(40px, -30px) scale(1.05); }
+  50% { transform: translate(-20px, 20px) scale(0.95); }
+  75% { transform: translate(30px, 10px) scale(1.02); }
+}
+
+/* Particle stars */
+.stars {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 50%;
+  animation: twinkle 3s ease-in-out infinite;
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.2; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.5); }
+}
+
+/* ═══════════════════════════════════════════
+   LOGIN OVERLAY
+   ═══════════════════════════════════════════ */
+#login-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gradient-hero);
+  transition: opacity 0.6s ease, visibility 0.6s ease;
+}
+
+#login-overlay.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.login-container {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 440px;
+  padding: 0 20px;
+}
+
+.login-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 48px 40px;
+  box-shadow: var(--shadow-lg), var(--shadow-glow-gold);
+  animation: cardAppear 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes cardAppear {
+  from { opacity: 0; transform: translateY(30px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.login-logo {
+  text-align: center;
+  margin-bottom: 36px;
+}
+
+.login-logo .logo-icon {
+  width: 160px;
+  height: auto;
+  margin: 0 auto 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: logoPulse 3s ease-in-out infinite;
+  filter: drop-shadow(0 4px 20px rgba(240, 180, 41, 0.3));
+}
+
+.login-logo .logo-icon img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+@keyframes logoPulse {
+  0%, 100% { box-shadow: 0 8px 32px rgba(240, 180, 41, 0.3); }
+  50% { box-shadow: 0 8px 48px rgba(240, 180, 41, 0.5); }
+}
+
+.login-logo h1 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  background: var(--gradient-gold);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.login-logo p {
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin-top: 6px;
+  letter-spacing: 0.5px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.form-group label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-wrapper i {
+  position: absolute;
+  left: 16px;
+  color: var(--text-muted);
+  font-size: 16px;
+  transition: color 0.3s ease;
+  z-index: 1;
+}
+
+.input-wrapper input {
+  width: 100%;
+  padding: 14px 16px 14px 48px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 15px;
+  font-family: 'Inter', sans-serif;
+  outline: none;
+  transition: var(--transition);
+}
+
+.input-wrapper input:focus {
+  border-color: var(--accent-gold);
+  background: rgba(240, 180, 41, 0.04);
+  box-shadow: 0 0 0 3px rgba(240, 180, 41, 0.08);
+}
+
+.input-wrapper input:focus + i,
+.input-wrapper input:focus ~ i {
+  color: var(--accent-gold);
+}
+
+.input-wrapper .toggle-password {
+  position: absolute;
+  right: 14px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px;
+  transition: color 0.3s ease;
+  z-index: 1;
+}
+
+.input-wrapper .toggle-password:hover {
+  color: var(--text-secondary);
+}
+
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
+}
+
+.remember-me {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.remember-me input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--border-hover);
+  border-radius: 5px;
+  background: var(--bg-secondary);
+  cursor: pointer;
+  transition: var(--transition);
+  position: relative;
+}
+
+.remember-me input[type="checkbox"]:checked {
+  background: var(--gradient-gold);
+  border-color: var(--accent-gold);
+}
+
+.remember-me input[type="checkbox"]:checked::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #000;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.forgot-link {
+  font-size: 13px;
+  color: var(--accent-gold);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.forgot-link:hover {
+  color: #ffd97d;
+  text-decoration: underline;
+}
+
+.login-btn {
+  width: 100%;
+  padding: 16px;
+  background: var(--gradient-gold);
+  border: none;
+  border-radius: var(--radius-md);
+  color: #0a0e1a;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: 'Outfit', sans-serif;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+  text-transform: uppercase;
+}
+
+.login-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s ease;
+}
+
+.login-btn:hover::before {
+  left: 100%;
+}
+
+.login-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(240, 180, 41, 0.35);
+}
+
+.login-btn:active {
+  transform: translateY(0);
+}
+
+.login-error {
+  display: none;
+  background: rgba(244, 63, 94, 0.1);
+  border: 1px solid rgba(244, 63, 94, 0.2);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  font-size: 13px;
+  color: #fca5a5;
+  text-align: center;
+  animation: shake 0.5s ease;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+.login-error.show {
+  display: block;
+}
+
+/* ═══════════════════════════════════════════
+   RECOVERY MODAL
+   ═══════════════════════════════════════════ */
+#recovery-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+}
+
+#recovery-modal.show {
+  display: flex;
+}
+
+.recovery-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(40px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 40px;
+  max-width: 420px;
+  width: 90%;
+  box-shadow: var(--shadow-lg);
+  animation: cardAppear 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.recovery-card h2 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+}
+
+.recovery-card p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+
+.recovery-card .form-group {
+  margin-bottom: 20px;
+}
+
+.recovery-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.recovery-actions .login-btn {
+  flex: 1;
+}
+
+.btn-cancel {
+  flex: 1;
+  padding: 14px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'Outfit', sans-serif;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-cancel:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}
+
+.recovery-success {
+  display: none;
+  text-align: center;
+  padding: 20px 0;
+}
+
+.recovery-success.show {
+  display: block;
+}
+
+.recovery-success i {
+  font-size: 52px;
+  color: var(--accent-teal);
+  margin-bottom: 16px;
+  animation: successPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes successPop {
+  from { opacity: 0; transform: scale(0.5); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.recovery-success h3 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 20px;
+  margin-bottom: 8px;
+}
+
+.recovery-success p {
+  margin-bottom: 20px;
+}
+
+/* ═══════════════════════════════════════════
+   MAIN APP — NAVBAR
+   ═══════════════════════════════════════════ */
+#main-app {
+  display: none;
+  position: relative;
+  z-index: 1;
+}
+
+#main-app.show {
+  display: block;
+  animation: fadeIn 0.8s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  padding: 16px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  transition: var(--transition);
+}
+
+.navbar.scrolled {
+  padding: 10px 40px;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.nav-brand .brand-icon {
+  width: 46px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 2px 8px rgba(240, 180, 41, 0.25));
+}
+
+.nav-brand .brand-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.nav-brand span {
+  font-family: 'Outfit', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  background: linear-gradient(135deg, #f0b429, #ffd97d);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.nav-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  border-radius: 40px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.nav-user .user-avatar {
+  width: 30px;
+  height: 30px;
+  background: var(--gradient-blue);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.nav-clock {
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+
+.btn-logout {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: rgba(244, 63, 94, 0.08);
+  border: 1px solid rgba(244, 63, 94, 0.15);
+  border-radius: var(--radius-sm);
+  color: #fca5a5;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-logout:hover {
+  background: rgba(244, 63, 94, 0.15);
+  border-color: rgba(244, 63, 94, 0.3);
+  color: #fecdd3;
+  transform: translateY(-1px);
+}
+
+.btn-settings {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: rgba(167, 139, 250, 0.08);
+  border: 1px solid rgba(167, 139, 250, 0.15);
+  border-radius: var(--radius-sm);
+  color: #c4b5fd;
+  font-size: 16px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-settings:hover {
+  background: var(--accent-purple-dim);
+  border-color: var(--border-hover);
+  color: var(--accent-purple);
+  transform: translateY(-1px) rotate(90deg);
+}
+
+#change-password-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+}
+
+#change-password-modal.show {
+  display: flex;
+}
+
+/* ═══════════════════════════════════════════
+   HERO SECTION
+   ═══════════════════════════════════════════ */
+.hero {
+  padding: 160px 40px 80px;
+  text-align: center;
+  position: relative;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  background: var(--accent-gold-dim);
+  border: 1px solid var(--border-hover);
+  border-radius: 50px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent-gold);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 24px;
+  animation: fadeInUp 0.8s ease;
+}
+
+.hero h2 {
+  font-family: 'Outfit', sans-serif;
+  font-size: clamp(36px, 5vw, 56px);
+  font-weight: 900;
+  line-height: 1.15;
+  margin-bottom: 20px;
+  animation: fadeInUp 0.8s ease 0.15s both;
+}
+
+.hero h2 .highlight {
+  background: var(--gradient-gold);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero p {
+  font-size: 18px;
+  color: var(--text-secondary);
+  max-width: 580px;
+  margin: 0 auto;
+  line-height: 1.7;
+  animation: fadeInUp 0.8s ease 0.3s both;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(25px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══════════════════════════════════════════
+   TOOLS GRID
+   ═══════════════════════════════════════════ */
+.tools-section {
+  padding: 40px 40px 100px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 28px;
+}
+
+.tool-card {
+  position: relative;
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 40px 36px;
+  cursor: pointer;
+  transition: var(--transition);
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.tool-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.tool-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-card);
+}
+
+.tool-card:hover::before {
+  opacity: 1;
+}
+
+/* Card accent colors */
+.tool-card.card-gold::before { background: var(--gradient-gold); }
+.tool-card.card-gold:hover { box-shadow: var(--shadow-card), var(--shadow-glow-gold); }
+
+.tool-card.card-blue::before { background: var(--gradient-blue); }
+.tool-card.card-blue:hover { box-shadow: var(--shadow-card), var(--shadow-glow-blue); }
+
+.tool-card.card-teal::before { background: var(--gradient-teal); }
+.tool-card.card-teal:hover { box-shadow: var(--shadow-card), var(--shadow-glow-blue); }
+
+.tool-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  margin-bottom: 24px;
+  transition: var(--transition);
+}
+
+.card-gold .tool-icon {
+  background: var(--accent-gold-dim);
+  color: var(--accent-gold);
+  border: 1px solid rgba(240, 180, 41, 0.15);
+}
+
+.card-blue .tool-icon {
+  background: var(--accent-blue-dim);
+  color: var(--accent-blue);
+  border: 1px solid rgba(59, 130, 246, 0.15);
+}
+
+.card-teal .tool-icon {
+  background: var(--accent-teal-dim);
+  color: var(--accent-teal);
+  border: 1px solid rgba(20, 184, 166, 0.15);
+}
+
+.tool-card:hover .tool-icon {
+  transform: scale(1.08);
+}
+
+.tool-card h3 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  transition: color 0.3s ease;
+}
+
+.card-gold:hover h3 { color: var(--accent-gold); }
+.card-blue:hover h3 { color: var(--accent-blue); }
+.card-teal:hover h3 { color: var(--accent-teal); }
+
+.tool-card p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-bottom: 24px;
+}
+
+.tool-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 28px;
+}
+
+.feature-tag {
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.card-gold .feature-tag {
+  background: var(--accent-gold-dim);
+  color: var(--accent-gold);
+  border: 1px solid rgba(240, 180, 41, 0.1);
+}
+
+.card-blue .feature-tag {
+  background: var(--accent-blue-dim);
+  color: var(--accent-blue);
+  border: 1px solid rgba(59, 130, 246, 0.1);
+}
+
+.card-teal .feature-tag {
+  background: var(--accent-teal-dim);
+  color: var(--accent-teal);
+  border: 1px solid rgba(20, 184, 166, 0.1);
+}
+
+.tool-action {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: var(--transition);
+}
+
+.card-gold .tool-action { color: var(--accent-gold); }
+.card-blue .tool-action { color: var(--accent-blue); }
+.card-teal .tool-action { color: var(--accent-teal); }
+
+.tool-action i {
+  transition: transform 0.3s ease;
+}
+
+.tool-card:hover .tool-action i {
+  transform: translateX(6px);
+}
+
+/* ═══════════════════════════════════════════
+   FOOTER
+   ═══════════════════════════════════════════ */
+.footer {
+  padding: 40px;
+  text-align: center;
+  border-top: 1px solid var(--border);
+  background: rgba(10, 14, 26, 0.5);
+}
+
+.footer p {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.footer .footer-brand {
+  color: var(--accent-gold);
+  font-weight: 600;
+}
+
+/* ═══════════════════════════════════════════
+   TOAST NOTIFICATION
+   ═══════════════════════════════════════════ */
+.toast {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  z-index: 11000;
+  padding: 16px 24px;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transform: translateY(100px);
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  max-width: 380px;
+}
+
+.toast.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.toast.success {
+  background: rgba(20, 184, 166, 0.12);
+  border: 1px solid rgba(20, 184, 166, 0.25);
+  color: #5eead4;
+}
+
+.toast.error {
+  background: rgba(244, 63, 94, 0.12);
+  border: 1px solid rgba(244, 63, 94, 0.25);
+  color: #fca5a5;
+}
+
+.toast.info {
+  background: rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  color: #93c5fd;
+}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 12px 20px;
+  }
+
+  .nav-brand span {
+    font-size: 16px;
+  }
+
+  .nav-clock {
+    display: none;
+  }
+
+  .nav-user span:not(.user-avatar) {
+    display: none;
+  }
+
+  .hero {
+    padding: 130px 20px 60px;
+  }
+
+  .hero h2 {
+    font-size: 32px;
+  }
+
+  .hero p {
+    font-size: 15px;
+  }
+
+  .tools-section {
+    padding: 20px 20px 80px;
+  }
+
+  .tools-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .tool-card {
+    padding: 30px 28px;
+  }
+
+  .login-card {
+    padding: 36px 28px;
+  }
+
+  .btn-logout span {
+    display: none;
+  }
+
+  .recovery-actions {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-user {
+    display: none;
+  }
+
+  .navbar {
+    .copyright-bar{display:none !important}
+}
+
+
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     ANIMATED BACKGROUND
+     ═══════════════════════════════════════════ -->
+<div class="bg-animation">
+  <div class="bg-orb"></div>
+  <div class="bg-orb"></div>
+  <div class="bg-orb"></div>
+</div>
+<div class="stars" id="stars-container"></div>
+
+<!-- ═══════════════════════════════════════════
+     LOGIN OVERLAY
+     ═══════════════════════════════════════════ -->
+<div id="login-overlay">
+  <div class="login-container">
+    <div class="login-card">
+      <div class="login-logo">
+        <div class="logo-icon"><img src="Image/LOGO.png" alt="Sun Leisure World Logo"></div>
+        <h1>SUN LEISURE WORLD</h1>
+        <p>Travel Agent Portal</p>
+      </div>
+
+      <div id="login-error" class="login-error">
+        <i class="fas fa-exclamation-circle"></i> Invalid username or password
+      </div>
+
+      <form id="login-form" autocomplete="off">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <div class="input-wrapper">
+            <i class="fas fa-user"></i>
+            <input type="text" id="username" placeholder="Enter your username" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="input-wrapper">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="password" placeholder="Enter your password" required>
+            <button type="button" class="toggle-password" onclick="togglePasswordVisibility()" aria-label="Toggle password visibility">
+              <i class="fas fa-eye" id="eye-icon"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-options">
+          <label class="remember-me">
+            <input type="checkbox" id="remember-me">
+            Remember me
+          </label>
+          <a href="#" class="forgot-link" id="forgot-link">Forgot Password?</a>
+        </div>
+
+        <button type="submit" class="login-btn" id="login-btn">
+          <i class="fas fa-sign-in-alt"></i> &nbsp;Sign In
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PASSWORD RECOVERY MODAL (PIN-based)
+     ═══════════════════════════════════════════ -->
+<div id="recovery-modal">
+  <div class="recovery-card">
+    <div id="recovery-form-section">
+      <h2><i class="fas fa-key"></i> &nbsp;Reset Password</h2>
+      <p>Enter your username and the recovery PIN to set a new password.</p>
+
+      <div class="form-group">
+        <label for="recovery-username">Username</label>
+        <div class="input-wrapper">
+          <i class="fas fa-user"></i>
+          <input type="text" id="recovery-username" placeholder="Enter your username">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="recovery-pin">Recovery PIN</label>
+        <div class="input-wrapper">
+          <i class="fas fa-shield-alt"></i>
+          <input type="password" id="recovery-pin" placeholder="Enter 5-digit PIN" maxlength="5">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="recovery-new-password">New Password</label>
+        <div class="input-wrapper">
+          <i class="fas fa-lock"></i>
+          <input type="password" id="recovery-new-password" placeholder="Enter new password">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="recovery-confirm-password">Confirm New Password</label>
+        <div class="input-wrapper">
+          <i class="fas fa-lock"></i>
+          <input type="password" id="recovery-confirm-password" placeholder="Confirm new password">
+        </div>
+      </div>
+
+      <div id="recovery-error" class="login-error" style="margin-bottom:16px">
+        <i class="fas fa-exclamation-circle"></i> <span id="recovery-error-text">Invalid PIN or username</span>
+      </div>
+
+      <div class="recovery-actions">
+        <button class="btn-cancel" onclick="closeRecovery()">Cancel</button>
+        <button class="login-btn" onclick="handleRecovery()">
+          <i class="fas fa-save"></i> &nbsp;Reset Password
+        </button>
+      </div>
+    </div>
+
+    <div id="recovery-success" class="recovery-success">
+      <i class="fas fa-check-circle"></i>
+      <h3>Password Reset Successfully!</h3>
+      <p>Your password has been changed. You can now sign in with your new password.</p>
+      <button class="login-btn" onclick="closeRecovery()">Back to Login</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     CHANGE PASSWORD MODAL (for logged-in users)
+     ═══════════════════════════════════════════ -->
+<div id="change-password-modal">
+  <div class="recovery-card">
+    <div id="change-pw-form-section">
+      <h2><i class="fas fa-user-cog"></i> &nbsp;Change Password</h2>
+      <p>Enter your current password and choose a new one.</p>
+
+      <div class="form-group">
+        <label for="change-current-password">Current Password</label>
+        <div class="input-wrapper">
+          <i class="fas fa-lock"></i>
+          <input type="password" id="change-current-password" placeholder="Your current password">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="change-new-password">New Password</label>
+        <div class="input-wrapper">
+          <i class="fas fa-key"></i>
+          <input type="password" id="change-new-password" placeholder="Enter new password">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="change-confirm-password">Confirm New Password</label>
+        <div class="input-wrapper">
+          <i class="fas fa-key"></i>
+          <input type="password" id="change-confirm-password" placeholder="Confirm new password">
+        </div>
+      </div>
+
+      <div id="change-pw-error" class="login-error" style="margin-bottom:16px">
+        <i class="fas fa-exclamation-circle"></i> <span id="change-pw-error-text">Error</span>
+      </div>
+
+      <div class="recovery-actions">
+        <button class="btn-cancel" onclick="closeChangePw()">Cancel</button>
+        <button class="login-btn" onclick="handleChangePassword()">
+          <i class="fas fa-save"></i> &nbsp;Update Password
+        </button>
+      </div>
+    </div>
+
+    <div id="change-pw-success" class="recovery-success">
+      <i class="fas fa-check-circle"></i>
+      <h3>Password Updated!</h3>
+      <p>Your password has been changed successfully.</p>
+      <button class="login-btn" onclick="closeChangePw()">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     MAIN APP
+     ═══════════════════════════════════════════ -->
+<div id="main-app">
+  <!-- Navbar -->
+  <nav class="navbar" id="navbar">
+    <a class="nav-brand" href="#" onclick="scrollToTop(); return false;">
+      <div class="brand-icon"><img src="Image/LOGO.png" alt="Sun Leisure World"></div>
+      <span>SUN LEISURE WORLD</span>
+    </a>
+
+    <div class="nav-right">
+      <div class="nav-clock" id="nav-clock"></div>
+      <div class="nav-user">
+        <div class="user-avatar" id="user-avatar">A</div>
+        <span id="display-username">Admin</span>
+      </div>
+      <a href="admin_dashboard.html" class="btn-settings" id="btn-admin" title="Admin Panel" style="display: none; background: #e0f5e5; color: var(--accent-teal); margin-right: 10px; border: 1px solid var(--border); text-decoration: none; align-items: center; gap: 6px; padding: 0 15px; border-radius: 20px; font-weight: 600;">
+        <i class="fas fa-user-shield"></i> <span style="font-size: 14px;">Admin Panel</span>
+      </a>
+      <button class="btn-settings" onclick="openChangePw()" id="btn-settings" title="Change Password">
+        <i class="fas fa-cog"></i>
+      </button>
+      <button class="btn-logout" onclick="handleLogout()" id="btn-logout">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Sign Out</span>
+      </button>
+    </div>
+  </nav>
+
+
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-badge">
+      <i class="fas fa-star"></i>
+      Agent Workspace
+    </div>
+    <h2>Your <span class="highlight">Travel Tools</span>,<br>All in One Place</h2>
+    <p>Access flight checks, create airfare quotations, and build stunning tour itineraries — everything you need to serve your clients.</p>
+  </section>
+
+  <!-- Tools Grid -->
+  <section class="tools-section">
+    <div class="tools-grid">
+
+      <!-- Tool 1: AirAsia Link Builder -->
+      <a class="tool-card card-red" href="Air Asia.html" target="_blank" id="tool-airasia" onclick="window.slwLogActivity('Opened AirAsia Link Builder')">
+        <div class="tool-icon">
+          <i class="fas fa-plane-departure"></i>
+        </div>
+        <h3>AirAsia Flight Check</h3>
+        <p>Search and verify AirAsia flights with the agent link builder. Get real-time availability and booking links instantly.</p>
+        <div class="tool-features">
+          <span class="feature-tag">Flight Search</span>
+          <span class="feature-tag">Agent Links</span>
+          <span class="feature-tag">Real-time</span>
+        </div>
+        <div class="tool-action">
+          Open Tool <i class="fas fa-arrow-right"></i>
+        </div>
+      </a>
+
+      <!-- Tool 2: Airfare Quotation -->
+      <a class="tool-card card-blue" href="airfare_quotation_template Final.html" target="_blank" id="tool-quotation" onclick="window.slwLogActivity('Opened Airfare Quotation Tool')">
+        <div class="tool-icon">
+          <i class="fas fa-file-invoice-dollar"></i>
+        </div>
+        <h3>Airfare Quotation</h3>
+        <p>Create professional airfare quotations with flight details, pricing breakdowns, and branded templates for your clients.</p>
+        <div class="tool-features">
+          <span class="feature-tag">Quotations</span>
+          <span class="feature-tag">PDF Export</span>
+          <span class="feature-tag">Branded</span>
+        </div>
+        <div class="tool-action">
+          Open Tool <i class="fas fa-arrow-right"></i>
+        </div>
+      </a>
+
+      <!-- Tool 3: Itinerary Builder -->
+      <a class="tool-card card-teal" href="Itinerary_Builder_App New.html" target="_blank" id="tool-itinerary" onclick="window.slwLogActivity('Opened Tour Itinerary Builder')">
+        <div class="tool-icon">
+          <i class="fas fa-route"></i>
+        </div>
+        <h3>Tour Itinerary Builder</h3>
+        <p>Design beautiful, detailed tour itineraries with day-by-day plans, images, maps, and exportable documents.</p>
+        <div class="tool-features">
+          <span class="feature-tag">Itineraries</span>
+          <span class="feature-tag">Day Plans</span>
+          <span class="feature-tag">Export</span>
+        </div>
+        <div class="tool-action">
+          Open Tool <i class="fas fa-arrow-right"></i>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>&copy; 2025 <span class="footer-brand">Sun Leisure World</span>. All rights reserved. | Travel Agent Portal v2.0</p>
+  </footer>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     TOAST NOTIFICATION
+     ═══════════════════════════════════════════ -->
+<div id="toast" class="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase_init.js"></script>
+
+<script>
+/* ═══════════════════════════════════════════
+   USER CREDENTIALS — stored in localStorage
+   Default credentials (first-time only)
+   ═══════════════════════════════════════════ */
+const DEFAULT_USERS = {
+  'admin': { password: 'admin123', name: 'Admin' },
+  'ruvini': { password: 'agent123', name: 'Ruvini' },
+  'chatura': { password: 'slw2025', name: 'Chatura' }
+};
+
+// Recovery PIN
+const RECOVERY_PIN = '96513';
+
+
+let USERS = JSON.parse(JSON.stringify(DEFAULT_USERS));
+let currentUser = null;
+
+// Real-time user sync with Firebase
+if (typeof db !== 'undefined') {
+  db.collection('slw_credentials').onSnapshot(snapshot => {
+    if (snapshot.empty) {
+      // First time, write defaults to Firestore
+      Object.keys(DEFAULT_USERS).forEach(username => {
+        db.collection('slw_credentials').doc(username).set(DEFAULT_USERS[username])
+          .catch(e => console.error("Error writing default user", e));
+      });
+    } else {
+      snapshot.forEach(doc => {
+        USERS[doc.id] = doc.data();
+      });
+    }
+  });
+}
+
+/* ═══════════════════════════════════════════
+   STARS BACKGROUND
+   ═══════════════════════════════════════════ */
+function createStars() {
+  const container = document.getElementById('stars-container');
+  const count = 80;
+  for (let i = 0; i < count; i++) {
+    const star = document.createElement('div');
+    star.className = 'star';
+    star.style.left = Math.random() * 100 + '%';
+    star.style.top = Math.random() * 100 + '%';
+    star.style.animationDelay = Math.random() * 3 + 's';
+    star.style.animationDuration = (2 + Math.random() * 3) + 's';
+    star.style.width = (1 + Math.random() * 2) + 'px';
+    star.style.height = star.style.width;
+    container.appendChild(star);
+  }
+}
+createStars();
+
+/* ═══════════════════════════════════════════
+   LOGIN LOGIC
+   ═══════════════════════════════════════════ */
+const loginForm = document.getElementById('login-form');
+const loginOverlay = document.getElementById('login-overlay');
+const mainApp = document.getElementById('main-app');
+const loginError = document.getElementById('login-error');
+const usernameInput = document.getElementById('username');
+const passwordInput = document.getElementById('password');
+
+// Check if user was previously logged in
+window.addEventListener('DOMContentLoaded', () => {
+  const savedUser = sessionStorage.getItem('slw_user_v3') || localStorage.getItem('slw_user_v3');
+  if (savedUser) {
+    showMainApp(savedUser);
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+});
+
+loginForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const user = usernameInput.value.trim().toLowerCase();
+  const pass = passwordInput.value;
+
+  if (USERS[user] && USERS[user].password === pass) {
+    loginError.classList.remove('show');
+
+    sessionStorage.setItem('slw_user_v3', user);
+    if (document.getElementById('remember-me').checked) {
+      localStorage.setItem('slw_user_v3', user);
+    } else {
+      localStorage.removeItem('slw_user_v3');
+    }
+
+    showMainApp(user);
+    showToast('Welcome back, ' + USERS[user].name + '!', 'success');
+    window.slwLogActivity('Logged In');
+  } else {
+    loginError.classList.add('show');
+    passwordInput.value = '';
+    passwordInput.focus();
+  }
+});
+
+function showMainApp(user) {
+  currentUser = user;
+  loginOverlay.classList.add('hidden');
+  mainApp.classList.add('show');
+
+  const userData = USERS[user];
+  document.getElementById('display-username').textContent = userData.name;
+  document.getElementById('user-avatar').textContent = userData.name.charAt(0).toUpperCase();
+
+  if (user === 'admin') {
+    document.getElementById('btn-admin').style.display = 'inline-flex';
+  } else {
+    document.getElementById('btn-admin').style.display = 'none';
+  }
+}
+
+
+
+function handleLogout() {
+  window.slwLogActivity('Logged Out');
+  currentUser = null;
+  sessionStorage.removeItem('slw_user_v3');
+  localStorage.removeItem('slw_user_v3');
+  mainApp.classList.remove('show');
+  loginOverlay.classList.remove('hidden');
+  usernameInput.value = '';
+  passwordInput.value = '';
+  loginError.classList.remove('show');
+  showToast('You have been signed out', 'info');
+}
+
+/* ═══════════════════════════════════════════
+   PASSWORD VISIBILITY TOGGLE
+   ═══════════════════════════════════════════ */
+function togglePasswordVisibility() {
+  const input = document.getElementById('password');
+  const icon = document.getElementById('eye-icon');
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.classList.remove('fa-eye');
+    icon.classList.add('fa-eye-slash');
+  } else {
+    input.type = 'password';
+    icon.classList.remove('fa-eye-slash');
+    icon.classList.add('fa-eye');
+  }
+}
+
+/* ═══════════════════════════════════════════
+   PASSWORD RECOVERY (PIN-based)
+   ═══════════════════════════════════════════ */
+const recoveryModal = document.getElementById('recovery-modal');
+const recoveryFormSection = document.getElementById('recovery-form-section');
+const recoverySuccess = document.getElementById('recovery-success');
+const recoveryError = document.getElementById('recovery-error');
+
+document.getElementById('forgot-link').addEventListener('click', (e) => {
+  e.preventDefault();
+  recoveryModal.classList.add('show');
+  recoveryFormSection.style.display = 'block';
+  recoverySuccess.classList.remove('show');
+  recoveryError.classList.remove('show');
+  document.getElementById('recovery-username').value = '';
+  document.getElementById('recovery-pin').value = '';
+  document.getElementById('recovery-new-password').value = '';
+  document.getElementById('recovery-confirm-password').value = '';
+});
+
+function closeRecovery() {
+  recoveryModal.classList.remove('show');
+}
+
+function handleRecovery() {
+  const user = document.getElementById('recovery-username').value.trim().toLowerCase();
+  const pin = document.getElementById('recovery-pin').value.trim();
+  const newPw = document.getElementById('recovery-new-password').value;
+  const confirmPw = document.getElementById('recovery-confirm-password').value;
+
+  if (!user || !pin || !newPw || !confirmPw) {
+    document.getElementById('recovery-error-text').textContent = 'Please fill in all fields';
+    recoveryError.classList.add('show');
+    return;
+  }
+
+  if (!USERS[user]) {
+    document.getElementById('recovery-error-text').textContent = 'Username not found';
+    recoveryError.classList.add('show');
+    return;
+  }
+
+  if (pin !== RECOVERY_PIN) {
+    document.getElementById('recovery-error-text').textContent = 'Invalid recovery PIN';
+    recoveryError.classList.add('show');
+    return;
+  }
+
+  if (newPw.length < 4) {
+    document.getElementById('recovery-error-text').textContent = 'Password must be at least 4 characters';
+    recoveryError.classList.add('show');
+    return;
+  }
+
+  if (newPw !== confirmPw) {
+    document.getElementById('recovery-error-text').textContent = 'Passwords do not match';
+    recoveryError.classList.add('show');
+    return;
+  }
+
+  // Update the password in Firestore
+  if (typeof db !== 'undefined') {
+    db.collection('slw_credentials').doc(user).update({
+      password: newPw
+    }).catch(e => {
+       console.error("Error updating password in cloud", e);
+    });
+  } else {
+    USERS[user].password = newPw;
+  }
+
+  recoveryError.classList.remove('show');
+  recoveryFormSection.style.display = 'none';
+  recoverySuccess.classList.add('show');
+  showToast('Password reset successfully for ' + USERS[user].name, 'success');
+}
+
+// Close recovery modal on outside click
+recoveryModal.addEventListener('click', (e) => {
+  if (e.target === recoveryModal) {
+    closeRecovery();
+  }
+});
+
+/* ═══════════════════════════════════════════
+   CHANGE PASSWORD (logged-in users)
+   ═══════════════════════════════════════════ */
+const changePwModal = document.getElementById('change-password-modal');
+const changePwFormSection = document.getElementById('change-pw-form-section');
+const changePwSuccess = document.getElementById('change-pw-success');
+const changePwError = document.getElementById('change-pw-error');
+
+function openChangePw() {
+  changePwModal.classList.add('show');
+  changePwFormSection.style.display = 'block';
+  changePwSuccess.classList.remove('show');
+  changePwError.classList.remove('show');
+  document.getElementById('change-current-password').value = '';
+  document.getElementById('change-new-password').value = '';
+  document.getElementById('change-confirm-password').value = '';
+}
+
+function closeChangePw() {
+  changePwModal.classList.remove('show');
+}
+
+function handleChangePassword() {
+  const currentPw = document.getElementById('change-current-password').value;
+  const newPw = document.getElementById('change-new-password').value;
+  const confirmPw = document.getElementById('change-confirm-password').value;
+
+  if (!currentPw || !newPw || !confirmPw) {
+    document.getElementById('change-pw-error-text').textContent = 'Please fill in all fields';
+    changePwError.classList.add('show');
+    return;
+  }
+
+  if (USERS[currentUser].password !== currentPw) {
+    document.getElementById('change-pw-error-text').textContent = 'Current password is incorrect';
+    changePwError.classList.add('show');
+    return;
+  }
+
+  if (newPw.length < 4) {
+    document.getElementById('change-pw-error-text').textContent = 'New password must be at least 4 characters';
+    changePwError.classList.add('show');
+    return;
+  }
+
+  if (newPw !== confirmPw) {
+    document.getElementById('change-pw-error-text').textContent = 'New passwords do not match';
+    changePwError.classList.add('show');
+    return;
+  }
+
+  // Update password
+  USERS[currentUser].password = newPw;
+  saveUsers();
+
+  changePwError.classList.remove('show');
+  changePwFormSection.style.display = 'none';
+  changePwSuccess.classList.add('show');
+  showToast('Password updated successfully!', 'success');
+}
+
+// Close change password modal on outside click
+changePwModal.addEventListener('click', (e) => {
+  if (e.target === changePwModal) {
+    closeChangePw();
+  }
+});
+
+/* ═══════════════════════════════════════════
+   NAVBAR SCROLL EFFECT
+   ═══════════════════════════════════════════ */
+window.addEventListener('scroll', () => {
+  const navbar = document.getElementById('navbar');
+  if (window.scrollY > 40) {
+    navbar.classList.add('scrolled');
+  } else {
+    navbar.classList.remove('scrolled');
+  }
+});
+
+function scrollToTop() {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ═══════════════════════════════════════════
+   CLOCK
+   ═══════════════════════════════════════════ */
+function updateClock() {
+  const now = new Date();
+  const options = { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+  const el = document.getElementById('nav-clock');
+  if (el) el.textContent = now.toLocaleDateString('en-US', options);
+}
+
+/* ═══════════════════════════════════════════
+   TOAST NOTIFICATIONS
+   ═══════════════════════════════════════════ */
+function showToast(message, type = 'info') {
+  const toast = document.getElementById('toast');
+  const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', info: 'fa-info-circle' };
+  toast.className = 'toast ' + type;
+  toast.innerHTML = '<i class="fas ' + icons[type] + '"></i> ' + message;
+  
+  setTimeout(() => toast.classList.add('show'), 50);
+  setTimeout(() => toast.classList.remove('show'), 3500);
+}
+
+/* ═══════════════════════════════════════════
+   TOOL CARD ANIMATIONS (Intersection Observer)
+   ═══════════════════════════════════════════ */
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry, index) => {
+    if (entry.isIntersecting) {
+      entry.target.style.animation = `fadeInUp 0.6s ease ${index * 0.1}s both`;
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.tool-card').forEach(card => observer.observe(card));
+
+/* ═══════════════════════════════════════════
+   KEYBOARD SHORTCUTS
+   ═══════════════════════════════════════════ */
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    if (recoveryModal.classList.contains('show')) closeRecovery();
+    if (changePwModal.classList.contains('show')) closeChangePw();
+  }
+});
+</script>
+</body>
+</html>

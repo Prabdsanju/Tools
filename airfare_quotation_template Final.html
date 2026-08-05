@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Airfare Quotation - Sun Leisure World</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Roboto',Arial,sans-serif;background:#f0f2f5;color:#333;font-size:13px}
+*{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+#toolbar{background:#1a1a2e;color:#fff;padding:10px 20px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,0.3)}
+#toolbar span{font-size:13px;font-weight:600;margin-right:6px;color:#aad4ff}
+.btn{background:#2563eb;color:#fff;border:none;padding:7px 14px;border-radius:5px;cursor:pointer;font-size:12px;font-weight:600;transition:background 0.2s}
+.btn:hover{background:#1d4ed8}
+.btn.success{background:#16a34a}.btn.success:hover{background:#15803d}
+.btn.secondary{background:#4b5563}.btn.secondary:hover{background:#374151}
+.btn.whatsapp{background:#25d366}.btn.whatsapp:hover{background:#1ebe5d}
+#page{width:800px;margin:24px auto;background:#fff;box-shadow:0 4px 24px rgba(0,0,0,0.12);border-radius:4px;overflow:hidden}
+.doc-header{position:relative;text-align:center;padding:22px 32px 18px;border-bottom:2px solid #e5e7eb}
+.doc-title{font-size:30px;font-weight:900;letter-spacing:3px;color:#1a1a1a;display:inline-block}
+#logo-wrap{position:absolute;top:16px;right:28px}
+.logo-placeholder{width:130px;height:60px;border:2px dashed #d1d5db;display:flex;align-items:center;justify-content:center;color:#9ca3af;font-size:11px;border-radius:4px;cursor:pointer;background:#f9fafb;text-align:center}
+.logo-placeholder:hover{border-color:#2563eb;color:#2563eb}
+.quoted-for{background:#fff;border:1px solid #d1d5db;margin:16px 32px 0;border-radius:4px;overflow:hidden}
+.section-title{background:#2d3748;color:#fff;padding:8px 16px;font-weight:700;font-size:12px;letter-spacing:0.8px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.quoted-for-body{display:grid;grid-template-columns:1fr 1fr;padding:14px 16px;gap:0}
+.qf-left{padding:0 8px 0 4px;border-right:1px solid #e5e7eb}
+.qf-right{padding:0 4px 0 16px}
+.qf-row{margin-bottom:5px;font-size:12px;color:#374151;display:flex;align-items:baseline;gap:2px}
+.qf-label{font-weight:700;white-space:nowrap;color:#1a1a1a}
+.editable{border:none;background:transparent;font-family:inherit;font-size:inherit;color:inherit;width:100%;padding:1px 3px;border-radius:3px;outline:none}
+.editable:focus{background:#eff6ff;outline:1px solid #2563eb}
+.editable:hover{background:#f0f9ff}
+.flight-section{margin:16px 32px 0;border:1px solid #e5e7eb;border-radius:4px;overflow:hidden}
+.flight-header{background:#2d3748;color:#fff;padding:8px 14px;display:flex;justify-content:space-between;align-items:center;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.flight-name-input,.airline-input{background:transparent;border:none;color:#fff;font-family:inherit;font-size:12px;font-weight:700;outline:none;border-bottom:1px dashed rgba(255,255,255,0.4)}
+.airline-input{text-align:right;width:120px}
+.flight-name-input{width:110px}
+.flight-del-btn{background:rgba(220,38,38,0.2);color:#fca5a5;border:1px solid rgba(220,38,38,0.3);padding:3px 10px;border-radius:4px;cursor:pointer;font-size:11px;font-weight:600}
+.flight-del-btn:hover{background:rgba(220,38,38,0.4)}
+.flight-img-area{min-height:120px;display:flex;align-items:center;justify-content:center;position:relative;background:#fafafa}
+.flight-img-area img{width:100%;height:auto;display:block}
+.upload-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#9ca3af;cursor:pointer;padding:28px;width:calc(100% - 24px);margin:12px;border:2px dashed #e5e7eb;border-radius:6px;transition:all 0.2s;background:#fff}
+.upload-placeholder:hover,.upload-placeholder.drag-over{border-color:#2563eb;color:#2563eb;background:#eff6ff}
+.upload-placeholder .ico{font-size:30px}
+.upload-placeholder .txt{font-size:13px;font-weight:600}
+.upload-placeholder .sub{font-size:11px;text-align:center}
+.img-overlay{position:absolute;top:8px;right:8px;display:flex;gap:6px;opacity:0;transition:opacity 0.2s}
+.flight-img-area:hover .img-overlay{opacity:1}
+.img-btn{background:rgba(0,0,0,0.65);color:#fff;border:none;padding:5px 10px;border-radius:4px;cursor:pointer;font-size:11px;font-weight:600}
+.img-btn:hover{background:rgba(0,0,0,0.85)}
+.img-btn.del{background:rgba(220,38,38,0.8)}.img-btn.del:hover{background:rgba(185,28,28,0.9)}
+.paste-ready{outline:3px solid #2563eb !important}
+
+.paste-flash{animation:pf 0.5s ease}
+.calc-panel{margin:16px 32px 0;border:1px solid #e5e7eb;border-radius:4px;overflow:hidden}
+.calc-toggle{background:#1e40af;color:#fff;padding:9px 16px;font-weight:700;font-size:12px;letter-spacing:0.5px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.calc-toggle:hover{background:#1d3fa5}
+.calc-body{display:none;padding:16px;background:#f8faff}
+.calc-body.open{display:block}
+.calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 24px;margin-bottom:14px}
+.calc-section-label{grid-column:1/-1;font-weight:700;font-size:11px;color:#1e40af;text-transform:uppercase;letter-spacing:0.8px;border-bottom:2px solid #bfdbfe;padding-bottom:4px;margin-top:8px}
+.calc-row{display:flex;align-items:center;gap:8px}
+.calc-row label{font-size:12px;color:#374151;min-width:130px;font-weight:500}
+.calc-input{border:1px solid #d1d5db;border-radius:4px;padding:5px 8px;font-size:12px;font-family:inherit;width:110px;text-align:right;color:#1f2937}
+.calc-input:focus{outline:none;border-color:#2563eb;background:#eff6ff}
+.calc-lkr{font-size:11px;color:#6b7280}
+.calc-results{background:#fff;border:1px solid #bfdbfe;border-radius:6px;padding:12px 16px;margin-top:8px}
+.calc-results-title{font-weight:700;font-size:12px;color:#1e40af;margin-bottom:10px}
+.calc-result-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #f0f4ff;font-size:12px}
+.calc-result-row:last-child{border-bottom:none;font-weight:700;color:#166534;font-size:13px}
+.calc-result-label{color:#374151}
+.calc-result-val{font-weight:600;color:#1f2937}
+.calc-apply-btn{display:block;width:100%;margin-top:12px;background:#16a34a;color:#fff;border:none;padding:9px;border-radius:5px;cursor:pointer;font-size:13px;font-weight:700;transition:background 0.2s}
+.calc-apply-btn:hover{background:#15803d}
+.calc-card{background:#fff;border:1px solid #dbeafe;border-radius:6px;padding:14px}
+.calc-card-title{font-weight:800;font-size:13px;color:#1e40af;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #bfdbfe}
+@media print{.calc-panel{display:none !important}}
+@keyframes pf{0%{background:#d1fae5}100%{background:#fafafa}}
+.included-section{margin:16px 32px 0;border:1px solid #e5e7eb;border-radius:4px;overflow:hidden}
+.included-body{padding:10px 16px 4px}
+.inc-item{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.inc-item input{border:none;background:transparent;font-family:inherit;font-size:13px;flex:1;padding:2px 4px;border-radius:3px;outline:none}
+.inc-item input:focus{background:#eff6ff;outline:1px solid #2563eb}
+.inc-item input:hover{background:#f0f9ff}
+.rm-btn{background:none;border:none;color:#dc2626;cursor:pointer;font-size:18px;line-height:1;opacity:0.4;transition:opacity 0.2s}
+.rm-btn:hover{opacity:1}
+.add-inc-btn{background:none;border:1px dashed #9ca3af;color:#6b7280;padding:4px 12px;border-radius:4px;cursor:pointer;font-size:11px;margin:0 16px 10px;transition:all 0.2s;display:block}
+.add-inc-btn:hover{border-color:#2563eb;color:#2563eb}
+.price-section{margin:16px 32px 0;border:1px solid #e5e7eb;border-radius:4px;overflow:hidden}
+.price-table{width:100%;border-collapse:collapse}
+.price-table th{background:#e5e7eb;padding:8px 14px;text-align:left;font-size:12px;font-weight:700;color:#374151;border-bottom:1px solid #d1d5db}
+.price-table th:nth-child(2){text-align:right}
+.price-table td{padding:8px 14px;border-bottom:1px solid #f3f4f6;font-size:13px}
+.price-table tr:last-child td{border-bottom:none}
+.price-table td:nth-child(2){text-align:right;font-weight:600}
+.price-table td input{border:none;background:transparent;font-family:inherit;font-size:13px;color:inherit;padding:1px 3px;border-radius:3px;outline:none;width:100%}
+.price-table td:nth-child(2) input{text-align:right;font-weight:600}
+.price-table td input:focus{background:#eff6ff;outline:1px solid #2563eb}
+.price-table td input:hover{background:#f0f9ff}
+.price-table tfoot td{padding:8px 14px;font-size:11px;color:#6b7280;font-style:italic;background:#fafafa;border-top:1px solid #e5e7eb}
+.note-input{border:none;background:transparent;font-family:inherit;font-size:11px;color:#6b7280;font-style:italic;width:100%;outline:none;padding:1px 3px;border-radius:3px}
+.note-input:focus{background:#eff6ff;outline:1px solid #2563eb;font-style:normal}
+.add-price-btn{display:block;width:calc(100% - 28px);margin:6px 14px;background:none;border:1px dashed #9ca3af;color:#6b7280;padding:5px;border-radius:4px;cursor:pointer;font-size:11px;transition:all 0.2s}
+.add-price-btn:hover{border-color:#2563eb;color:#2563eb}
+.doc-footer{margin:20px 32px 8px;font-size:11px;color:#9ca3af;text-align:center;padding-top:12px;border-top:1px solid #f3f4f6}
+.copyright-bar{text-align:center;font-size:11px;color:#9ca3af;padding:6px 0 20px;letter-spacing:0.3px}
+@page{margin:0}
+@media print{
+  body{background:#fff;margin:1.5cm}
+  #toolbar{display:none}
+  #page{margin:0;box-shadow:none;width:100%}
+  .flight-del-btn,.img-overlay,.rm-btn,.add-inc-btn,.add-price-btn,.upload-placeholder{display:none !important}
+  .copyright-bar{display:none !important}
+}
+</style>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase_init.js"></script>
+function doPrint() {
+  window.slwLogActivity && window.slwLogActivity('Printed Airfare Quotation PDF');
+  window.print();
+}
+</script>
+</head>
+<body>
+<a href="index.html" class="no-print" style="position: fixed; top: 20px; left: 20px; z-index: 99999; background: #0055a5; color: white; padding: 10px 20px; border-radius: 8px; font-family: sans-serif; text-decoration: none; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">&larr; Back to Home</a>
+
+<div id="toolbar">
+  <span>&#9992; Quotation Editor</span>
+  <button class="btn" onclick="addFlight()">+ Add Flight</button>
+  <button class="btn secondary" onclick="addPriceRow()">+ Price Row</button>
+  <button class="btn success" onclick="doPrint()">&#128424; Print / Save PDF</button>
+  <button class="btn secondary" onclick="saveDraft()">&#128190; Save Draft</button>
+  <button class="btn secondary" onclick="loadDraft()">&#128194; Load Draft</button>
+  <button class="btn whatsapp" onclick="shareWhatsApp()">&#128262; WhatsApp Share</button>
+</div>
+
+<div id="page">
+  <div class="doc-header">
+    <div class="doc-title">QUOTATION</div>
+    <div id="logo-wrap">
+      <img src="data:image/png;base64,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" id="logo-img" style="max-height:70px;max-width:150px;object-fit:contain;cursor:pointer" onclick="document.getElementById('logo-file').click()" title="Click to replace logo">
+      <input type="file" id="logo-file" accept="image/*" style="display:none" onchange="uploadLogo(event)">
+    </div>
+  </div>
+
+  <div class="quoted-for">
+    <div class="section-title">Quoted For</div>
+    <div class="quoted-for-body">
+      <div class="qf-left">
+        <div class="qf-row"><input class="editable" id="f-company" value="Sun Leisure World Pvt Ltd"></div>
+        <div class="qf-row"><input class="editable" id="f-addr1" value="70/16 Lucky Plaza, St Anthony's Mawatha, Colombo 03,"></div>
+        <div class="qf-row"><input class="editable" id="f-addr2" value="Western Province"></div>
+        <div class="qf-row">Email: <input class="editable" id="f-email" value="sales@sunleisureworld.lk" style="width:auto;min-width:160px"></div>
+        <div class="qf-row">Phone: <input class="editable" id="f-phone" value="+94778877054" style="width:140px"></div>
+      </div>
+      <div class="qf-right">
+        <div class="qf-row"><span class="qf-label">Quotation Ref:&nbsp;</span><input class="editable" id="f-ref" value="INQ-" style="flex:1"></div>
+        <div class="qf-row"><span class="qf-label">Quotation Prepared For:&nbsp;</span><input class="editable" id="f-prepfor" value="" style="flex:1"></div>
+        <div class="qf-row"><span class="qf-label">Quotation Prepared By:&nbsp;</span><input class="editable" id="f-prepby" value="Buddhika" style="flex:1"></div>
+        <div class="qf-row"><span class="qf-label">Quotation Date:&nbsp;</span><input class="editable" id="f-date" value="" style="flex:1"></div>
+        <div class="qf-row"><span class="qf-label">Valid Till:&nbsp;</span><input class="editable" id="f-valid" value="" style="flex:1"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FARE CALCULATOR -->
+  <div class="calc-panel">
+    <div class="calc-toggle" onclick="toggleCalc()">
+      <span>&#129518; Fare Calculator</span>
+      <span id="calc-arrow">&#9660; Open</span>
+    </div>
+    <div class="calc-body" id="calc-body">
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+
+        <!-- ── 3 FLIGHT CALCULATOR ── -->
+        <div class="calc-card">
+          <div class="calc-card-title">&#9992; 3 Flights (Via Stopover)</div>
+          <div class="calc-section-label">Flight Fares (Per Person)</div>
+          <div class="calc-row"><label>CMB-HKT</label><input class="calc-input" id="a-f1" value="" oninput="calcA()"><span class="calc-lkr">LKR</span></div>
+          <div class="calc-row"><label>CMB-HKT +20KG</label><input class="calc-input" id="a-f1-20" value="" oninput="calcA()"><span class="calc-lkr">LKR</span></div>
+          <div class="calc-row"><label>HKT-DMK</label><input class="calc-input" id="a-f2" value="" oninput="calcA()"><span class="calc-lkr">LKR</span></div>
+          <div class="calc-row"><label>HKT-DMK +20KG</label><input class="calc-input" id="a-f2-20" value="" oninput="calcA()"><span class="calc-lkr">LKR</span></div>
+          <div class="calc-row"><label>DMK-CMB</label><input class="calc-input" id="a-f3" value="" oninput="calcA()"><span class="calc-lkr">LKR</span></div>
+          <div class="calc-row"><label>DMK-CMB +20KG</label><input class="calc-input" id="a-f3-20" value="" oninput="calcA()"><span class="calc-lkr">LKR</span></div>
+          <div class="calc-section-label" style="margin-top:10px">Add-ons (Per Person)</div>
+          <div class="calc-row"><label>&#128101; No. of Pax</label><input class="calc-input" id="a-pax" value="2" oninput="calcA()" style="text-align:center;font-weight:700;color:#1e40af"><span class="calc-lkr">pax</span></div>
+          <div class="calc-row"><label>Meal</label><input class="calc-input" id="a-meal" value="1600" oninput="calcA()"><span class="calc-lkr">LKR</span></div>
+          <div class="calc-row"><label>Water</label><input class="calc-input" id="a-water" value="1000" oninput="calcA()"><span class="calc-lkr">LKR</span></div>
+          <div class="calc-row"><label>Margin</label><input class="calc-input" id="a-margin" value="3500" oninput="calcA()"><span class="calc-lkr">LKR</span></div>
+          <div class="calc-row"><label>Bank Card Fee</label><input class="calc-input" id="a-cardfee" value="0" oninput="calcA()"><span class="calc-lkr">%</span></div>
+          <div class="calc-results" style="margin-top:12px">
+            <div class="calc-results-title">&#128200; Results (Per Person)</div>
+            <div class="calc-result-row"><span class="calc-result-label">Without baggage+7KG</span><span class="calc-result-val" id="a-r1">LKR 0</span></div>
+            <div class="calc-result-row"><span class="calc-result-label">Only return 20KG+7KG</span><span class="calc-result-val" id="a-r2">LKR 0</span></div>
+            <div class="calc-result-row"><span class="calc-result-label">Both ways 20KG+7KG</span><span class="calc-result-val" id="a-r3">LKR 0</span></div>
+            <button class="calc-apply-btn" onclick="applyCalc('a')">&#9660; Done - Close Calculator</button>
+          </div>
+        </div>
+
+        <!-- ── ROUND TRIP CALCULATOR ── -->
+        <div class="calc-card">
+          <div class="calc-card-title">&#8651; Round Trip (2 Flights)</div>
+          <div class="calc-section-label">Flight Fares (Per Person)</div>
+          <div class="calc-row"><label>CMB &#8594; DMK</label><input class="calc-input" id="b-f1" value="" oninput="calcB()"><span class="calc-lkr">LKR</span></div>
+          <div class="calc-row"><label>CMB &#8594; DMK +20KG</label><input class="calc-input" id="b-f1-20" value="" oninput="calcB()"><span class="calc-lkr">LKR</span></div>
+          <div class="calc-row"><label>DMK &#8594; CMB +20KG</label><input class="calc-input" id="b-f2-20" value="" oninput="calcB()"><span class="calc-lkr">LKR</span></div>
+          <div class="calc-section-label" style="margin-top:10px">Add-ons (Per Person)</div>
+          <div class="calc-row"><label>&#128101; No. of Pax</label><input class="calc-input" id="b-pax" value="2" oninput="calcB()" style="text-align:center;font-weight:700;color:#1e40af"><span class="calc-lkr">pax</span></div>
+          <div class="calc-row"><label>Meal</label><input class="calc-input" id="b-meal" value="1600" oninput="calcB()"><span class="calc-lkr">LKR</span></div>
+          <div class="calc-row"><label>Water</label><input class="calc-input" id="b-water" value="1000" oninput="calcB()"><span class="calc-lkr">LKR</span></div>
+          <div class="calc-row"><label>Margin</label><input class="calc-input" id="b-margin" value="3500" oninput="calcB()"><span class="calc-lkr">LKR</span></div>
+          <div class="calc-row"><label>Bank Card Fee</label><input class="calc-input" id="b-cardfee" value="0" oninput="calcB()"><span class="calc-lkr">%</span></div>
+          <div class="calc-results" style="margin-top:12px">
+            <div class="calc-results-title">&#128200; Results (Per Person)</div>
+            <div class="calc-result-row"><span class="calc-result-label">Without baggage+7KG</span><span class="calc-result-val" id="b-r1">LKR 0</span></div>
+            <div class="calc-result-row"><span class="calc-result-label">Only return 20KG+7KG</span><span class="calc-result-val" id="b-r2">LKR 0</span></div>
+            <div class="calc-result-row"><span class="calc-result-label">Both ways 20KG+7KG</span><span class="calc-result-val" id="b-r3">LKR 0</span></div>
+            <button class="calc-apply-btn" onclick="applyCalc('b')">&#9660; Done - Close Calculator</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div id="flights-container"></div>
+
+  <div class="included-section">
+    <div class="section-title">INCLUDED</div>
+    <div class="included-body" id="inc-list"></div>
+    <button class="add-inc-btn" onclick="addIncItem()">+ Add Item</button>
+  </div>
+
+  <div class="price-section">
+    <div class="section-title">Price Breakdown (Per Person)</div>
+    <table class="price-table">
+      <thead><tr><th>Air Fare</th><th>Per Person Price LKR</th><th style="width:30px"></th></tr></thead>
+      <tbody id="price-body"></tbody>
+      <tfoot><tr><td colspan="3"><input class="note-input" id="f-note" value="The above airfares are applicable for today. Please note that all fares are subject to change."></td></tr></tfoot>
+    </table>
+    <button class="add-price-btn" onclick="addPriceRow()">+ Add Row</button>
+  </div>
+
+  <div class="doc-footer">Sun Leisure World Pvt Ltd &bull; sales@sunleisureworld.lk &bull; +94778877054</div>
+  <div class="copyright-bar">&#169; All Rights Reserved. Buddhika Prabod</div>
+</div>
+
+<script>
+var FC = 0;
+var pasteTarget = null;
+
+// ── helpers ──────────────────────────────────────────────
+function el(id){ return document.getElementById(id); }
+
+// ── LOGO ─────────────────────────────────────────────────
+function uploadLogo(e){
+  var f = e.target.files[0]; if(!f) return;
+  var r = new FileReader();
+  r.onload = function(ev){
+    el('logo-wrap').innerHTML = '<img src="'+ev.target.result+'" style="max-height:64px;max-width:140px;object-fit:contain;cursor:pointer" onclick="document.getElementById(\'logo-file2\').click()" title="Click to replace"><input type="file" id="logo-file2" accept="image/*" style="display:none" onchange="uploadLogo(event)">';
+  };
+  r.readAsDataURL(f);
+}
+
+// ── FLIGHT ────────────────────────────────────────────────
+function addFlight(name, airline, imgSrc){
+  FC++;
+  var id = 'fl-' + FC + '-' + Date.now();
+  var div = document.createElement('div');
+  div.className = 'flight-section';
+  div.id = id;
+  div.innerHTML =
+    '<div class="flight-header">' +
+      '<div style="display:flex;align-items:center;gap:8px">' +
+        '<input class="flight-name-input" value="'+(name||('Flight- '+FC))+'">' +
+      '</div>' +
+      '<div style="display:flex;align-items:center;gap:8px">' +
+        '<input class="airline-input" value="'+(airline||'Airline')+'">' +
+        '<button class="flight-del-btn" onclick="delFlight(\''+id+'\')">&#10005; Remove</button>' +
+      '</div>' +
+    '</div>' +
+    '<div class="flight-img-area" id="ia-'+id+'">' +
+      '<div class="upload-placeholder" id="ph-'+id+'" onclick="pickImg(\''+id+'\')">' +
+        '<span class="ico">&#128247;</span>' +
+        '<span class="txt">Click to upload flight screenshot</span>' +
+        '<span class="sub">or drag &amp; drop &bull; or click here then Ctrl+V to paste</span>' +
+      '</div>' +
+      '<input type="file" id="fi-'+id+'" accept="image/*" style="display:none" onchange="fileImg(event,\''+id+'\')">' +
+    '</div>';
+  el('flights-container').appendChild(div);
+
+  // drag & drop
+  var area = el('ia-'+id);
+  area.addEventListener('dragover', function(e){ e.preventDefault(); el('ph-'+id)&&el('ph-'+id).classList.add('drag-over'); });
+  area.addEventListener('dragleave', function(){ el('ph-'+id)&&el('ph-'+id).classList.remove('drag-over'); });
+  area.addEventListener('drop', function(e){
+    e.preventDefault();
+    el('ph-'+id)&&el('ph-'+id).classList.remove('drag-over');
+    var f = e.dataTransfer.files[0];
+    if(f && f.type.startsWith('image/')){ readImg(f, id); }
+  });
+
+  if(imgSrc) setImg(id, imgSrc);
+}
+
+function delFlight(id){
+  if(confirm('Remove this flight?')) el(id).remove();
+}
+
+function pickImg(id){
+  pasteTarget = id;
+  el('fi-'+id).click();
+}
+
+function fileImg(e, id){
+  var f = e.target.files[0]; if(!f) return;
+  readImg(f, id);
+}
+
+function readImg(f, id){
+  var r = new FileReader();
+  r.onload = function(e){ setImg(id, e.target.result); };
+  r.readAsDataURL(f);
+}
+
+function setImg(id, src){
+  var area = el('ia-'+id);
+  var ph = el('ph-'+id); if(ph) ph.remove();
+  var old = el('img-'+id); if(old) old.remove();
+  var ov = area.querySelector('.img-overlay'); if(ov) ov.remove();
+
+  var img = document.createElement('img');
+  img.src = src; img.id = 'img-'+id;
+  area.insertBefore(img, area.querySelector('input[type="file"]'));
+
+  var ov2 = document.createElement('div');
+  ov2.className = 'img-overlay';
+  ov2.innerHTML =
+    '<button class="img-btn" onclick="pickImg(\''+id+'\')">&#8635; Replace</button>' +
+    '<button class="img-btn del" onclick="clearImg(\''+id+'\')">&#10005; Remove</button>';
+  area.appendChild(ov2);
+
+  area.classList.remove('paste-ready');
+  area.classList.add('paste-flash');
+  setTimeout(function(){ area.classList.remove('paste-flash'); }, 600);
+
+}
+
+function clearImg(id){
+  var area = el('ia-'+id);
+  var img = el('img-'+id); if(img) img.remove();
+  var ov = area.querySelector('.img-overlay'); if(ov) ov.remove();
+
+  var ph = document.createElement('div');
+  ph.className = 'upload-placeholder'; ph.id = 'ph-'+id;
+  ph.onclick = function(){ pickImg(id); };
+  ph.innerHTML = '<span class="ico">&#128247;</span><span class="txt">Click to upload flight screenshot</span><span class="sub">or drag &amp; drop &bull; or Ctrl+V to paste</span>';
+  area.insertBefore(ph, area.querySelector('input[type="file"]'));
+}
+
+// ── INCLUDED ──────────────────────────────────────────────
+function addIncItem(text){
+  var list = el('inc-list');
+  var div = document.createElement('div');
+  div.className = 'inc-item';
+  div.innerHTML = '<span style="color:#374151;font-size:16px">&#8226;</span><input type="text" value="'+(text||'')+'" placeholder="Add item...">';
+  var btn = document.createElement('button');
+  btn.className = 'rm-btn'; btn.innerHTML = '&times;';
+  btn.onclick = function(){ div.remove(); };
+  div.appendChild(btn);
+  list.appendChild(div);
+  if(!text) div.querySelector('input').focus();
+}
+
+// ── PRICE ROWS ────────────────────────────────────────────
+function addPriceRow(label, price){
+  var tbody = el('price-body');
+  var tr = document.createElement('tr');
+  var td1 = document.createElement('td');
+  var td2 = document.createElement('td');
+  var td3 = document.createElement('td');
+  var inp1 = document.createElement('input'); inp1.value = label||''; inp1.placeholder = 'Description...'; inp1.style.width='100%';
+  var inp2 = document.createElement('input'); inp2.value = price||''; inp2.placeholder = '0.00'; inp2.style.textAlign='right'; inp2.style.fontWeight='600'; inp2.style.width='100%';
+  var rb = document.createElement('button'); rb.className='rm-btn'; rb.innerHTML='&times;'; rb.onclick=function(){ tr.remove(); };
+  td1.appendChild(inp1); td2.appendChild(inp2); td3.appendChild(rb);
+  td3.style.width='30px'; td3.style.textAlign='center';
+  tr.appendChild(td1); tr.appendChild(td2); tr.appendChild(td3);
+  tbody.appendChild(tr);
+  if(!label) inp1.focus();
+}
+
+// ── PASTE ─────────────────────────────────────────────────
+document.addEventListener('click', function(e){
+  var area = e.target.closest('.flight-img-area');
+  document.querySelectorAll('.flight-img-area').forEach(function(a){ a.classList.remove('paste-ready'); });
+  if(area){
+    pasteTarget = area.id.replace('ia-','');
+    area.classList.add('paste-ready');
+  } else {
+    pasteTarget = null;
+  }
+});
+
+document.addEventListener('paste', function(e){
+  var items = (e.clipboardData||window.clipboardData).items;
+  var imgItem = null;
+  for(var i=0;i<items.length;i++){ if(items[i].type.startsWith('image/')){ imgItem=items[i]; break; } }
+  if(!imgItem) return;
+
+  var tid = pasteTarget;
+  if(!tid){
+    var secs = document.querySelectorAll('.flight-section');
+    for(var s=0;s<secs.length;s++){
+      if(!secs[s].querySelector('.flight-img-area img')){ tid=secs[s].id; break; }
+    }
+  }
+  if(!tid) return;
+  e.preventDefault();
+  readImg(imgItem.getAsFile(), tid);
+});
+
+// ── SAVE / LOAD ───────────────────────────────────────────
+function saveDraft(){
+  var data = {
+    company: el('f-company').value, addr1: el('f-addr1').value, addr2: el('f-addr2').value,
+    email: el('f-email').value, phone: el('f-phone').value, ref: el('f-ref').value,
+    prepfor: el('f-prepfor').value, prepby: el('f-prepby').value,
+    date: el('f-date').value, valid: el('f-valid').value, note: el('f-note').value,
+    flights:[], included:[], prices:[]
+  };
+  document.querySelectorAll('.flight-section').forEach(function(s){
+    var img = s.querySelector('.flight-img-area img');
+    data.flights.push({ name: s.querySelector('.flight-name-input').value, airline: s.querySelector('.airline-input').value, img: img?img.src:null });
+  });
+  document.querySelectorAll('#inc-list .inc-item input').forEach(function(i){ data.included.push(i.value); });
+  document.querySelectorAll('#price-body tr').forEach(function(tr){ var ins=tr.querySelectorAll('input'); data.prices.push({label:ins[0].value,price:ins[1].value}); });
+  var blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  var a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='quotation_draft.json'; a.click();
+}
+
+function loadDraft(){
+  var inp = document.createElement('input'); inp.type='file'; inp.accept='.json';
+  inp.onchange = function(e){
+    var f=e.target.files[0]; if(!f) return;
+    var r=new FileReader();
+    r.onload=function(ev){
+      try{
+        var d=JSON.parse(ev.target.result);
+        el('f-company').value=d.company||''; el('f-addr1').value=d.addr1||''; el('f-addr2').value=d.addr2||'';
+        el('f-email').value=d.email||''; el('f-phone').value=d.phone||''; el('f-ref').value=d.ref||'';
+        el('f-prepfor').value=d.prepfor||''; el('f-prepby').value=d.prepby||'';
+        el('f-date').value=d.date||''; el('f-valid').value=d.valid||''; el('f-note').value=d.note||'';
+        el('flights-container').innerHTML=''; FC=0;
+        (d.flights||[]).forEach(function(f){ addFlight(f.name,f.airline,f.img); });
+        el('inc-list').innerHTML='';
+        (d.included||[]).forEach(function(t){ addIncItem(t); });
+        el('price-body').innerHTML='';
+        (d.prices||[]).forEach(function(p){ addPriceRow(p.label,p.price); });
+      } catch(err){ alert('Could not load draft: '+err.message); }
+    };
+    r.readAsText(f);
+  };
+  inp.click();
+}
+
+// ── FARE CALCULATOR ──────────────────────────────────────
+function toggleCalc(){
+  var body = el('calc-body');
+  var arrow = el('calc-arrow');
+  if(body.classList.contains('open')){
+    body.classList.remove('open');
+    arrow.innerHTML = '&#9660; Open';
+  } else {
+    body.classList.add('open');
+    arrow.innerHTML = '&#9650; Close';
+  }
+}
+
+function n(id){ var v = document.getElementById(id).value.replace(/,/g,'').replace(/[^0-9.]/g,''); return parseFloat(v) || 0; }
+function fmt(val){ return 'LKR ' + val.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function r100(v){ return Math.ceil(v/100)*100; }
+
+var activeCalc = null; // 'a' or 'b' - whichever was last edited
+
+function updatePriceTable(r1, r2, r3){
+  // Update existing 3 rows in price table, or create them
+  var tbody = el('price-body');
+  var rows = tbody.querySelectorAll('tr');
+  var labels = ['Without baggage+7KG', 'Only return with 20KG+7KG', 'Both ways with 20KG+7KG'];
+  var vals = [r1, r2, r3];
+
+  if(rows.length !== 3){
+    tbody.innerHTML = '';
+    vals.forEach(function(v,i){ addPriceRow(labels[i], v); });
+  } else {
+    rows.forEach(function(tr, i){
+      var ins = tr.querySelectorAll('input');
+      ins[0].value = labels[i];
+      ins[1].value = vals[i];
+    });
+  }
+}
+
+function stripLKR(str){ return str.replace('LKR ','').trim(); }
+
+function calcA(){
+  // Exact Excel formulas:
+  // B13 = (f1+f2+f3)/pax,  B14 = (f1+f2+f3_20)/pax,  B15 = (f1_20+f2_20+f3_20)/pax
+  // Row1: =(B17*2)+B13+B18+B19+1600  →  meal*2 + b13 + water + margin + meal  =  meal*3 + b13 + water + margin
+  // Row2: =B14+B17+B18+B19           →  b14 + meal + water + margin
+  // Row3: =B15+B19+B18               →  b15 + margin + water  (no meal!)
+  var pax    = Math.max(1, n('a-pax'));
+  var meal   = n('a-meal');
+  var water  = n('a-water');
+  var margin = n('a-margin');
+  var cardfee = n('a-cardfee');
+
+  var b13 = (n('a-f1') + n('a-f2') + n('a-f3'))            / pax;
+  var b14 = (n('a-f1') + n('a-f2') + n('a-f3-20'))         / pax;
+  var b15 = (n('a-f1-20') + n('a-f2-20') + n('a-f3-20'))   / pax;
+
+  var sub1 = (meal*2) + b13 + water + margin + meal;
+  var sub2 = b14 + meal + water + margin;
+  var sub3 = b15 + margin + water;
+
+  var r1 = fmt(r100( sub1 + (sub1 * cardfee / 100) ));
+  var r2 = fmt(r100( sub2 + (sub2 * cardfee / 100) ));
+  var r3 = fmt(r100( sub3 + (sub3 * cardfee / 100) ));
+
+  el('a-r1').innerHTML = r1;
+  el('a-r2').innerHTML = r2;
+  el('a-r3').innerHTML = r3;
+  activeCalc = 'a';
+  updatePriceTable(stripLKR(r1), stripLKR(r2), stripLKR(r3));
+}
+
+function calcB(){
+  // Fields: b-f1=CMB-DMK total, b-f1-20=CMB-DMK+20KG total, b-f2-20=DMK-CMB+20KG total
+  // b13 = CMB-DMK / pax
+  // b14 = CMB-DMK+20KG / pax
+  // b15 = DMK-CMB+20KG / pax
+  // Row1: =(meal*2) + b13 + water + margin + meal  → meal*3 + b13 + water + margin
+  // Row2: =b14 + meal + water + margin
+  // Row3: =b15 + margin + water
+  var pax    = Math.max(1, n('b-pax'));
+  var meal   = n('b-meal');
+  var water  = n('b-water');
+  var margin = n('b-margin');
+  var cardfee = n('b-cardfee');
+
+  var b13 = n('b-f1')    / pax;
+  var b14 = n('b-f1-20') / pax;
+  var b15 = n('b-f2-20') / pax;
+
+  var sub1 = (meal*2) + b13 + water + margin + meal;
+  var sub2 = b14 + meal + water + margin;
+  var sub3 = b15 + margin + water;
+
+  var r1 = fmt(r100( sub1 + (sub1 * cardfee / 100) ));
+  var r2 = fmt(r100( sub2 + (sub2 * cardfee / 100) ));
+  var r3 = fmt(r100( sub3 + (sub3 * cardfee / 100) ));
+
+  el('b-r1').innerHTML = r1;
+  el('b-r2').innerHTML = r2;
+  el('b-r3').innerHTML = r3;
+  activeCalc = 'b';
+  updatePriceTable(stripLKR(r1), stripLKR(r2), stripLKR(r3));
+}
+
+function applyCalc(prefix){
+  // Already live-updated, just close and scroll
+  el('calc-body').classList.remove('open');
+  el('calc-arrow').innerHTML = '&#9660; Open';
+  el('price-body').closest('.price-section').scrollIntoView({behavior:'smooth'});
+}
+
+// ── WHATSAPP SHARE ───────────────────────────────────────
+function shareWhatsApp(){
+  window.slwLogActivity && window.slwLogActivity('Shared Airfare Quotation on WhatsApp');
+  var company = el('f-company').value || 'Customer';
+  var prepfor = el('f-prepfor').value || '';
+  var prepby  = el('f-prepby').value || '';
+  var ref     = el('f-ref').value || '';
+  var date    = el('f-date').value || '';
+  var valid   = el('f-valid').value || '';
+
+  // Build price lines
+  var priceLines = '';
+  document.querySelectorAll('#price-body tr').forEach(function(tr){
+    var ins = tr.querySelectorAll('input');
+    if(ins[0].value) priceLines += '  • ' + ins[0].value + ': LKR ' + ins[1].value + '\n';
+  });
+
+  // Build included lines
+  var incLines = '';
+  document.querySelectorAll('#inc-list .inc-item input').forEach(function(i){
+    if(i.value) incLines += '  ✓ ' + i.value + '\n';
+  });
+
+  // Build flight lines
+  var flightLines = '';
+  document.querySelectorAll('.flight-section').forEach(function(s){
+    var name    = s.querySelector('.flight-name-input').value;
+    var airline = s.querySelector('.airline-input').value;
+    flightLines += '\n✈ *' + name + ' — ' + airline + '*\n';
+
+  });
+
+  var msg =
+    '✈ *AIRFARE QUOTATION*\n' +
+    '━━━━━━━━━━━━━━━━━━━━\n' +
+    (prepfor ? '*To:* ' + prepfor + '\n' : '') +
+    '*Ref:* ' + ref + '\n' +
+    '*Date:* ' + date + '\n' +
+    '*Valid Till:* ' + valid + '\n\n' +
+    '*FLIGHTS*\n' +
+    flightLines + '\n' +
+    '*INCLUDED*\n' +
+    incLines + '\n' +
+    '*PRICE BREAKDOWN (Per Person)*\n' +
+    priceLines + '\n' +
+    '━━━━━━━━━━━━━━━━━━━━\n' +
+    '_' + el('f-note').value + '_\n\n' +
+    '*' + company + '*\n' +
+    '📧 ' + el('f-email').value + '\n' +
+    '📞 ' + el('f-phone').value;
+
+  var encoded = encodeURIComponent(msg);
+  window.open('https://wa.me/?text=' + encoded, '_blank');
+}
+
+// ── INIT ─────────────────────────────────────────────────
+
+// ── AUTO DATE (Asia/Colombo) ─────────────────────────────
+function formatDateColombo(date){
+  return date.toLocaleDateString('en-GB', {
+    day: '2-digit', month: 'long', year: 'numeric',
+    timeZone: 'Asia/Colombo'
+  });
+}
+function formatDateTimeColombo(date){
+  var d = date.toLocaleDateString('en-GB', {
+    day: '2-digit', month: 'long', year: 'numeric',
+    timeZone: 'Asia/Colombo'
+  });
+  return d + ' 00:00';
+}
+(function setAutoDate(){
+  var now = new Date();
+  el('f-date').value  = formatDateColombo(now);
+  el('f-valid').value = formatDateTimeColombo(now);
+})();
+
+addFlight('Flight- 1','Air Asia',null);
+addIncItem('MEALS');
+addIncItem('Hand luggage 7kg both ways');
+// Price rows empty by default - auto-filled by calculator
+</script>
+</body>
+</html>
