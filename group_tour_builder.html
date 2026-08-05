@@ -4,12 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Group Tour Itinerary Builder | Sun Leisure World</title>
+    
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- html2pdf for exporting -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Vue 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     
     <script>
         tailwind.config = {
@@ -34,38 +37,15 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@300;400;700&display=swap');
         
-        body {
-            background-color: #f3f4f6;
-            overflow-x: hidden;
-            padding-bottom: 100px;
-        }
-
-        /* Top Action Bar */
-        .action-bar {
-            position: fixed;
-            top: 0; left: 0; right: 0;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            z-index: 50;
-            padding: 12px 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+        body { background-color: #f3f4f6; overflow: hidden; }
 
         /* A4 Page styling for preview */
-        .a4-container {
-            margin-top: 100px;
-            display: flex;
-            justify-content: center;
-        }
-        
         .a4-page {
             width: 210mm;
             min-height: 297mm;
             background: white;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            margin: 0 auto 20px auto;
             position: relative;
             box-sizing: border-box;
             font-size: 11pt;
@@ -73,56 +53,11 @@
             color: #333;
         }
         
-        .page-content {
-            padding: 20mm;
-        }
+        .page-content { padding: 20mm; }
         
-        /* Ensure PDF breaks pages properly */
-        .page-break {
-            page-break-before: always;
-        }
+        .page-break { page-break-before: always; }
 
-        /* Editing hover effects */
-        [contenteditable="true"] {
-            outline: none;
-            transition: all 0.2s;
-            border-radius: 4px;
-        }
-        
-        [contenteditable="true"]:hover {
-            background-color: rgba(242, 145, 0, 0.1);
-            box-shadow: 0 0 0 2px rgba(242, 145, 0, 0.3);
-            cursor: text;
-        }
-        
-        [contenteditable="true"]:focus {
-            background-color: white;
-            box-shadow: 0 0 0 2px #106a37;
-        }
-
-        /* Image hover effects for editing */
-        .editable-image {
-            position: relative;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .editable-image:hover::after {
-            content: "\f030  Click to change";
-            font-family: "Font Awesome 6 Free";
-            font-weight: 900;
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.5);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: inherit;
-        }
-        
-        .timeline-dot {
-            position: relative;
-        }
+        .timeline-dot { position: relative; }
         .timeline-dot::before {
             content: '';
             position: absolute;
@@ -161,392 +96,473 @@
             padding: 15px;
             border: 1px solid #e2e8f0;
         }
+
+        /* Form styling */
+        .form-section { background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+        .form-section h3 { font-size: 1.1rem; font-weight: 600; color: #111827; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .form-group { margin-bottom: 12px; }
+        .form-label { display: block; font-size: 0.875rem; font-weight: 500; color: #4b5563; margin-bottom: 4px; }
+        .form-input, .form-textarea { width: 100%; border: 1px solid #d1d5db; border-radius: 6px; padding: 8px 12px; font-size: 0.875rem; outline: none; transition: border-color 0.2s; }
+        .form-input:focus, .form-textarea:focus { border-color: #106a37; ring: 2px; ring-color: #106a37; }
+        .form-textarea { min-height: 80px; }
         
-        /* Print styles to hide the action bar */
-        @media print {
-            .action-bar { display: none !important; }
-            body { background: white; margin: 0; padding: 0; }
-            .a4-container { margin: 0; }
-            .a4-page { box-shadow: none; margin: 0; }
-        }
+        /* Hide scrollbar for neatness */
+        .no-scrollbar::-webkit-scrollbar { width: 6px; }
+        .no-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .no-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .no-scrollbar:hover::-webkit-scrollbar-thumb { background: #94a3b8; }
+        
+        /* Utility */
+        pre { white-space: pre-wrap; font-family: inherit; margin: 0; }
     </style>
 </head>
-<body class="text-gray-800">
+<body class="flex h-screen overflow-hidden text-gray-800">
 
-    <!-- Hidden file input for images -->
-    <input type="file" id="imageUploader" accept="image/*" style="display: none;">
-
-    <!-- Top Action Bar -->
-    <div class="action-bar" data-html2canvas-ignore>
-        <div class="flex items-center gap-4">
-            <a href="index.html" class="text-sun-green hover:text-green-800 transition" title="Back to Dashboard">
-                <i class="fas fa-arrow-left fa-lg"></i>
-            </a>
-            <img src="https://sunleisureworld.com/images/logo.png" alt="Logo" class="h-8">
-            <h1 class="font-bold text-lg text-gray-800 border-l border-gray-300 pl-4 ml-2">Group Tour Builder</h1>
-        </div>
-        
-        <div class="flex items-center gap-4">
-            <div class="bg-blue-50 text-blue-800 px-4 py-2 rounded-lg text-sm flex gap-2">
-                <i class="fas fa-edit mt-1"></i>
-                <p>Click any text or image on the document below to edit it directly!</p>
+    <div id="app" class="flex w-full h-full">
+        <!-- Left Panel: Form Wizard -->
+        <div class="w-[450px] bg-gray-50 flex flex-col h-full border-r border-gray-200 shrink-0 shadow-lg z-10" data-html2canvas-ignore>
+            <!-- Header -->
+            <div class="p-4 bg-sun-green text-white flex justify-between items-center shrink-0">
+                <div class="flex items-center gap-3">
+                    <a href="index.html" class="hover:bg-white/20 p-2 rounded-lg transition" title="Back to Dashboard">
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
+                    <h1 class="font-bold text-lg">Group Tour Builder</h1>
+                </div>
             </div>
-            
-            <button onclick="window.print()" class="bg-white border border-gray-300 hover:bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium transition flex items-center gap-2">
-                <i class="fas fa-print"></i> Print
-            </button>
-            <button onclick="exportToPDF()" class="bg-sun-green hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold shadow-md transition flex items-center gap-2">
-                <i class="fas fa-file-pdf"></i> Download PDF
-            </button>
-        </div>
-    </div>
 
-    <!-- Centered Preview Container -->
-    <div class="a4-container">
-        
-        <!-- MAIN DOCUMENT -->
-        <div class="a4-page" id="documentToExport">
-            <!-- PAGE 1: Header & Day 1-2 -->
-            <div class="page-content">
-                <!-- Header -->
-                <div class="header-bg -mx-8 -mt-8 p-8 mb-6 rounded-t-lg relative overflow-hidden">
-                    <img src="https://sunleisureworld.com/images/logo.png" alt="Logo" class="h-16 mb-4 relative z-10" crossorigin="anonymous">
-                    <h1 class="text-3xl font-bold text-sun-green mb-1 font-serif uppercase" id="doc-tourname" contenteditable="true">BANGKOK – PATTAYA GROUP TOUR</h1>
-                    <h2 class="text-xl text-sun-orange font-semibold mb-4" id="doc-dates" contenteditable="true">23 - 28 August 2026</h2>
-                    
-                    <div class="bg-white/80 p-3 rounded shadow-sm border-l-4 border-sun-green inline-block">
-                        <p class="text-xs text-gray-500 font-semibold uppercase tracking-wider mb-1">Prepared For</p>
-                        <p class="text-lg font-bold text-gray-800" id="doc-customer" contenteditable="true">Mr. John Doe & Family</p>
-                    </div>
-                    
-                    <div class="absolute top-8 right-8 text-right bg-white p-3 rounded shadow-md border border-gray-100">
-                        <p class="text-sm"><strong>Ref:</strong> <span id="doc-ref" contenteditable="true">INQ-59560</span></p>
-                        <p class="text-sm"><strong>Pax:</strong> <span id="doc-pax" contenteditable="true">2</span> Persons</p>
-                        <p class="text-sm text-gray-500 mt-1">Issue Date: <span id="doc-issue-date" contenteditable="true">05 Aug 2026</span></p>
-                    </div>
-                </div>
-
-                <!-- Hero Images -->
-                <div class="grid grid-cols-3 gap-2 mb-8">
-                    <img src="https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Bangkok" class="h-40 w-full object-cover rounded editable-image" onclick="triggerImageUpload(this)" crossorigin="anonymous">
-                    <img src="https://images.unsplash.com/photo-1563492065599-3520f775eeed?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Pattaya" class="h-40 w-full object-cover rounded editable-image" onclick="triggerImageUpload(this)" crossorigin="anonymous">
-                    <img src="https://images.unsplash.com/photo-1540420773420-3366772f4999?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Food" class="h-40 w-full object-cover rounded editable-image" onclick="triggerImageUpload(this)" crossorigin="anonymous">
-                </div>
-
-                <!-- Itinerary Details -->
-                <h3 class="text-2xl font-bold text-gray-800 mb-6 border-b-2 border-sun-green pb-2">Tour Itinerary</h3>
+            <!-- Form Content (Scrollable) -->
+            <div class="flex-1 overflow-y-auto p-4 no-scrollbar">
                 
-                <div class="mb-4">
-                    <h4 class="font-bold text-lg text-sun-green">Departure Procedure:</h4>
-                    <ul class="list-disc pl-5 mt-2 space-y-1" contenteditable="true">
-                        <li>Sun Leisure World's representative will meet you at Colombo Bandaranayake International Airport.</li>
-                        <li>You will get a briefing of the departure procedure & our representative will guide you in the process.</li>
-                    </ul>
-                </div>
-
-                <!-- Timeline Container -->
-                <div class="pl-4 mt-6">
-                    
-                    <!-- Day 1 -->
-                    <div class="timeline-line pb-6">
-                        <div class="timeline-dot">
-                            <span class="day-header" contenteditable="true">Day 01 – Pattaya</span>
-                        </div>
-                        <div contenteditable="true" class="mt-2 text-gray-700 space-y-2">
-                            <ul class="list-disc pl-5 space-y-1">
-                                <li>Arrival to Bangkok Don Mueang International Airport.</li>
-                                <li><strong>On the way to Pattaya there will be a stop for breakfast.</strong> (Not included in the package)</li>
-                            </ul>
-                            <p class="text-sun-blue font-semibold mt-3">Sightseeing & Tours:</p>
-                            <p><strong>Pattaya Big Buddha Temple Tour with Viewpoint</strong><br>
-                                Experience a panoramic view of the city and marvel at the sheer size of the Big Buddha Statue at Wat Phra Yai.
-                            </p>
-                            <p><strong>Pattaya Tiger Park</strong><br>
-                                View and observe different types of tigers including giant Bengal tigers. <em>Optional: Go in the cage to touch and play with tigers.</em>
-                            </p>
-                            <p><strong>Pattaya Dolphinarium</strong><br>
-                                Number 01 marine mammal show in Asia, featuring South American fur seals and bottlenose dolphins.
-                            </p>
-                            <p class="mt-2"><strong>Hotel:</strong> Baron Beach Hotel Pattaya 3* (Check-in at 02.00 pm)</p>
-                        </div>
+                <!-- Section 1: General Info -->
+                <div class="form-section">
+                    <h3>General Details</h3>
+                    <div class="form-group">
+                        <label class="form-label">Logo URL</label>
+                        <input type="text" v-model="state.logoUrl" class="form-input">
                     </div>
-
-                    <!-- Day 2 -->
-                    <div class="timeline-line pb-2">
-                        <div class="timeline-dot">
-                            <span class="day-header" contenteditable="true">Day 02 – Pattaya</span>
-                        </div>
-                        <div contenteditable="true" class="mt-2 text-gray-700 space-y-2">
-                            <p><strong>Meal Plan:</strong> Breakfast, Lunch</p>
-                            <p class="text-sun-blue font-semibold mt-3">Sightseeing & Tours: Coral Island Tour by Speed Boat</p>
-                            <ul class="list-disc pl-5 space-y-1">
-                                <li>09:00 AM transfer to Coral Island by speedboat.</li>
-                                <li><strong>Optional:</strong> Parasailing, jet skiing, underwater walk en route.</li>
-                                <li>Lunch will be served at an Indian restaurant (Complimentary basic lunch).</li>
-                            </ul>
-                            <p class="mt-2"><strong>Overnight Stay at Hotel</strong></p>
-                        </div>
+                    <div class="form-group">
+                        <label class="form-label">Tour Title</label>
+                        <input type="text" v-model="state.tourName" class="form-input">
                     </div>
-                </div>
-            </div> <!-- End Page 1 Content -->
-            
-            <div class="page-break"></div>
-            
-            <!-- PAGE 2: Day 3-6 & Flights -->
-            <div class="page-content">
-                <div class="pl-4">
-                    <!-- Day 3 -->
-                    <div class="timeline-line pb-6">
-                        <div class="timeline-dot">
-                            <span class="day-header" contenteditable="true">Day 03 – Bangkok</span>
-                        </div>
-                        <div contenteditable="true" class="mt-2 text-gray-700 space-y-2">
-                            <p><strong>Meal Plan:</strong> Breakfast, Dinner</p>
-                            <ul class="list-disc pl-5 space-y-1">
-                                <li>Check out from Pattaya hotel & transfer to Bangkok.</li>
-                            </ul>
-                            <p class="text-sun-blue font-semibold mt-3">Sightseeing & Tours:</p>
-                            <p><strong>Sea Life Bangkok Ocean World + Madame Tussauds</strong><br>
-                                Experience fascinating marine life and lifelike celebrity figures.
-                            </p>
-                            <p><strong>Chao Phraya Cruise Dinner</strong><br>
-                                05:00 PM pickup for a magical evening river cruise encompassing rich Thai royal history and illuminated landmarks with an international buffet.
-                            </p>
-                            <p class="mt-2"><strong>Hotel:</strong> Picnic Hotel Bangkok 3*</p>
-                        </div>
+                    <div class="form-group">
+                        <label class="form-label">Date Range (Subtitle)</label>
+                        <input type="text" v-model="state.dateRange" class="form-input">
                     </div>
-
-                    <!-- Day 4 -->
-                    <div class="timeline-line pb-6">
-                        <div class="timeline-dot">
-                            <span class="day-header" contenteditable="true">Day 04 – Bangkok</span>
-                        </div>
-                        <div contenteditable="true" class="mt-2 text-gray-700 space-y-2">
-                            <p><strong>Meal Plan:</strong> Breakfast, Lunch</p>
-                            <p class="text-sun-blue font-semibold mt-3">Sightseeing & Tours: Dream World & Snow Town</p>
-                            <ul class="list-disc pl-5 space-y-1">
-                                <li>09:00 AM pickup for a fun-filled day at a popular amusement park.</li>
-                                <li>Enjoy adventure activities, thrill rides, and the Snow Town experience.</li>
-                                <li>04:00 PM depart from Dream World.</li>
-                            </ul>
-                            <p class="mt-2"><strong>Overnight Stay at Hotel</strong></p>
-                        </div>
-                    </div>
-
-                    <!-- Day 5 -->
-                    <div class="timeline-line pb-6">
-                        <div class="timeline-dot">
-                            <span class="day-header" contenteditable="true">Day 05 – Bangkok</span>
-                        </div>
-                        <div contenteditable="true" class="mt-2 text-gray-700 space-y-2">
-                            <p><strong>Meal Plan:</strong> Breakfast</p>
-                            <p><strong>Free time for shopping!</strong><br>
-                                Explore popular locations like Platinum Mall, Indra Market, Big C, Palladium Mall, and Central World. The hotel is within walking distance of shopping complexes.
-                            </p>
-                            <p class="mt-2"><strong>Overnight Stay at Hotel</strong></p>
-                        </div>
-                    </div>
-
-                    <!-- Day 6 -->
-                    <div class="timeline-line pb-2" style="border-left-color: transparent;">
-                        <div class="timeline-dot">
-                            <span class="day-header bg-sun-orange" contenteditable="true">Day 06 – Departure</span>
-                        </div>
-                        <div contenteditable="true" class="mt-2 text-gray-700 space-y-2">
-                            <p><strong>Meal Plan:</strong> Breakfast</p>
-                            <ul class="list-disc pl-5 space-y-1">
-                                <li>Hotel check out at 12:00 PM (Luggage can be left at lobby).</li>
-                                <li>04:00 PM: Pickup from hotel and transfer to DMK International Airport.</li>
-                                <li>Departure to Colombo.</li>
-                            </ul>
-                            <p class="text-center font-bold text-sun-green text-xl mt-4">***** Tour Ends *****</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Inclusions & Exclusions -->
-                <div class="grid grid-cols-2 gap-6 mt-8">
-                    <div class="bg-green-50 p-4 rounded-lg border border-green-200">
-                        <h4 class="font-bold text-sun-green text-lg mb-2"><i class="fas fa-check-circle mr-2"></i>Inclusions</h4>
-                        <ul class="list-disc pl-5 text-sm space-y-1" contenteditable="true">
-                            <li>All mentioned tours & admission fees</li>
-                            <li>Coral Island Tour by Speedboat</li>
-                            <li>05 Nights at 3* hotel in Pattaya & BKK</li>
-                            <li>Air-conditioned luxury transfers</li>
-                            <li>Thailand Professional Tour Guide</li>
-                            <li>Tour manager from Sun Leisure World</li>
-                            <li>Air Ticket (Air Asia)</li>
-                            <li>Meals: Breakfast 05, Lunch 02, Dinner 01</li>
-                        </ul>
-                    </div>
-                    <div class="bg-red-50 p-4 rounded-lg border border-red-200">
-                        <h4 class="font-bold text-red-600 text-lg mb-2"><i class="fas fa-times-circle mr-2"></i>Exclusions</h4>
-                        <ul class="list-disc pl-5 text-sm space-y-1" contenteditable="true">
-                            <li>Early check-in or late check-out</li>
-                            <li>Optional water sports & cage access</li>
-                            <li>Personal expenses (laundry, phone calls)</li>
-                            <li>Tips for guide & driver</li>
-                            <li>Anything not mentioned in inclusions</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- Flights -->
-                <div class="mt-6 border border-gray-200 rounded-lg p-4 bg-gray-50">
-                    <h4 class="font-bold text-gray-800 text-lg mb-2"><i class="fas fa-plane-departure text-sun-blue mr-2"></i>Flight Details (Air Asia)</h4>
-                    <div contenteditable="true" class="text-sm space-y-1">
-                        <p id="doc-flight-dep"><strong>Departure:</strong> Colombo to Bangkok - FD 141 – CMB-DMK - 23:15-04:20(+1)</p>
-                        <p id="doc-flight-ret"><strong>Return:</strong> Bangkok to Colombo - FD 140 – DMK-CMB - 20:25-22:15</p>
-                        <p class="text-gray-500 mt-2 italic">Included: Meals + 20KG Baggage + 7KG Hand Luggage (both ways)</p>
-                    </div>
-                </div>
-            </div> <!-- End Page 2 Content -->
-
-            <div class="page-break"></div>
-
-            <!-- PAGE 3: Reviews and Images -->
-            <div class="page-content bg-[#f8fafc] h-full relative">
-                <!-- Background decoration -->
-                <div class="absolute top-0 right-0 w-64 h-64 bg-sun-green opacity-5 rounded-bl-full z-0"></div>
-                <div class="absolute bottom-0 left-0 w-48 h-48 bg-sun-orange opacity-5 rounded-tr-full z-0"></div>
-                
-                <div class="relative z-10">
-                    <div class="text-center mb-8">
-                        <h3 class="text-3xl font-bold text-sun-green mb-2" contenteditable="true">Our Satisfied Travelers</h3>
-                        <p class="text-gray-500 italic" contenteditable="true">Don't just take our word for it. Here is what our clients have to say!</p>
-                        <div class="w-16 h-1 bg-sun-orange mx-auto mt-4"></div>
-                    </div>
-
-                    <!-- Reviews Grid -->
-                    <div class="grid grid-cols-2 gap-6 mb-10">
-                        <!-- Review 1 -->
-                        <div class="review-card">
-                            <div class="flex items-center gap-3 mb-3">
-                                <img src="https://ui-avatars.com/api/?name=Ruklani+W&background=random" class="w-10 h-10 rounded-full editable-image" onclick="triggerImageUpload(this)" crossorigin="anonymous">
-                                <div>
-                                    <h5 class="font-bold text-sm" contenteditable="true">Ruklani Wickramasinghe</h5>
-                                    <div class="text-sun-yellow text-xs"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-                                </div>
-                            </div>
-                            <p class="text-xs text-gray-600 italic" contenteditable="true">"We recently went on a tour of Pattaya and Bangkok with Sun Leisure World and it was an amazing experience! Both cities offered a perfect mix of culture, entertainment, and beautiful sights... Highly recommend it for anyone wanting to see the best of Thailand."</p>
-                        </div>
-                        
-                        <!-- Review 2 -->
-                        <div class="review-card">
-                            <div class="flex items-center gap-3 mb-3">
-                                <img src="https://ui-avatars.com/api/?name=Asanka+S&background=random" class="w-10 h-10 rounded-full editable-image" onclick="triggerImageUpload(this)" crossorigin="anonymous">
-                                <div>
-                                    <h5 class="font-bold text-sm" contenteditable="true">Asanka Sanjeewa</h5>
-                                    <div class="text-sun-yellow text-xs"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-                                </div>
-                            </div>
-                            <p class="text-xs text-gray-600 italic" contenteditable="true">"I really enjoyed my trip to Thailand. The team was very trustworthy and gave us a great experience. Everything was well organized, and I felt comfortable throughout the journey. I hope to travel with you again!"</p>
-                        </div>
-                        
-                        <!-- Review 3 -->
-                        <div class="review-card">
-                            <div class="flex items-center gap-3 mb-3">
-                                <img src="https://ui-avatars.com/api/?name=Sandesh+R&background=random" class="w-10 h-10 rounded-full editable-image" onclick="triggerImageUpload(this)" crossorigin="anonymous">
-                                <div>
-                                    <h5 class="font-bold text-sm" contenteditable="true">Sandesh Rajapakshe</h5>
-                                    <div class="text-sun-yellow text-xs"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-                                </div>
-                            </div>
-                            <p class="text-xs text-gray-600 italic" contenteditable="true">"I arranged a Thailand group tour for my mum and dad through Sun Leisure Tours, and I'm really happy with the service they provided. Everything was very well organized, from the hotels and transport to the sightseeing. A big thank you to tour guide Mr. Chathura."</p>
-                        </div>
-                        
-                        <!-- Review 4 -->
-                        <div class="review-card">
-                            <div class="flex items-center gap-3 mb-3">
-                                <img src="https://ui-avatars.com/api/?name=Sangeeth+U&background=random" class="w-10 h-10 rounded-full editable-image" onclick="triggerImageUpload(this)" crossorigin="anonymous">
-                                <div>
-                                    <h5 class="font-bold text-sm" contenteditable="true">Sangeeth Udara</h5>
-                                    <div class="text-sun-yellow text-xs"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-                                </div>
-                            </div>
-                            <p class="text-xs text-gray-600 italic" contenteditable="true">"They carefully planned our trip, making sure everything was organized. The service was excellent, and the team was friendly and professional, which made our trip easy and fun. I highly recommend Sun Leisure World to anyone!"</p>
-                        </div>
-                    </div>
-
-                    <!-- Images Section -->
-                    <div class="text-center mb-6 mt-10">
-                        <h3 class="text-2xl font-bold text-sun-green mb-2" contenteditable="true">Moments of Joyful Travelers</h3>
-                        <p class="text-sm text-gray-500">Click any image to upload your own photos</p>
-                    </div>
-
                     <div class="grid grid-cols-2 gap-4">
-                        <img src="https://images.unsplash.com/photo-1517400508447-f8dd518b86db?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Group 1" class="w-full h-40 object-cover rounded-lg shadow-md border-2 border-white editable-image" onclick="triggerImageUpload(this)" crossorigin="anonymous">
-                        <img src="https://images.unsplash.com/photo-1523482580672-f109ba8cb9be?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Group 2" class="w-full h-40 object-cover rounded-lg shadow-md border-2 border-white editable-image" onclick="triggerImageUpload(this)" crossorigin="anonymous">
-                        <img src="https://images.unsplash.com/photo-1529156069898-49953eb1b5ce?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Group 3" class="w-full h-40 object-cover rounded-lg shadow-md border-2 border-white editable-image" onclick="triggerImageUpload(this)" crossorigin="anonymous">
-                        <img src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Group 4" class="w-full h-40 object-cover rounded-lg shadow-md border-2 border-white editable-image" onclick="triggerImageUpload(this)" crossorigin="anonymous">
+                        <div class="form-group">
+                            <label class="form-label">Customer Name</label>
+                            <input type="text" v-model="state.customer" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Pax</label>
+                            <input type="text" v-model="state.pax" class="form-input">
+                        </div>
                     </div>
-
-                    <div class="mt-8 text-center border-t pt-4">
-                        <p class="text-xs text-gray-400">© 2026 Sun Leisure World. All rights reserved.</p>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="form-group">
+                            <label class="form-label">Reference No.</label>
+                            <input type="text" v-model="state.ref" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Issue Date</label>
+                            <input type="text" v-model="state.issueDate" class="form-input">
+                        </div>
                     </div>
                 </div>
-            </div> <!-- End Page 3 Content -->
+
+                <!-- Section 2: Hero Images -->
+                <div class="form-section">
+                    <h3>Hero Images (Top of Itinerary)</h3>
+                    <div v-for="(img, idx) in state.heroImages" :key="idx" class="flex gap-2 mb-2">
+                        <input type="text" v-model="state.heroImages[idx]" class="form-input flex-1" placeholder="Image URL">
+                        <button @click="state.heroImages.splice(idx, 1)" class="bg-red-100 text-red-600 px-3 rounded hover:bg-red-200"><i class="fas fa-trash"></i></button>
+                    </div>
+                    <button @click="state.heroImages.push('')" class="w-full text-sm text-sun-green font-semibold py-2 border border-sun-green rounded hover:bg-green-50 mt-1"><i class="fas fa-plus"></i> Add Hero Image</button>
+                </div>
+
+                <!-- Section 3: Daily Itinerary -->
+                <div class="form-section">
+                    <h3 class="border-b pb-2 mb-3 text-sun-green">Daily Itinerary</h3>
+                    <div class="form-group">
+                        <label class="form-label">Departure Procedure (Intro)</label>
+                        <textarea v-model="state.departureProcedure" class="form-textarea h-20"></textarea>
+                    </div>
+
+                    <div v-for="(day, idx) in state.days" :key="idx" class="mb-4 border border-gray-200 p-3 rounded-lg bg-gray-100 relative">
+                        <button @click="state.days.splice(idx, 1)" class="absolute top-2 right-2 text-red-500 hover:text-red-700"><i class="fas fa-times"></i></button>
+                        
+                        <div class="grid grid-cols-2 gap-2 mb-2 pr-6">
+                            <div>
+                                <label class="form-label text-xs">Day Title (e.g. Day 01 - Pattaya)</label>
+                                <input type="text" v-model="day.title" class="form-input text-sm">
+                            </div>
+                            <div>
+                                <label class="form-label text-xs">Date (e.g. 17/09/2026)</label>
+                                <input type="text" v-model="day.date" class="form-input text-sm" placeholder="Optional date">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-2">
+                            <label class="form-label text-xs">Meal Plan</label>
+                            <input type="text" v-model="day.meals" class="form-input text-sm" placeholder="Breakfast, Lunch...">
+                        </div>
+                        
+                        <div class="form-group mb-2">
+                            <label class="form-label text-xs">Description (HTML allowed)</label>
+                            <textarea v-model="day.description" class="form-textarea text-sm h-32 font-mono"></textarea>
+                        </div>
+                        
+                        <!-- Day Images -->
+                        <label class="form-label text-xs mt-2">Day Images</label>
+                        <div v-for="(img, iIdx) in day.images" :key="'img'+iIdx" class="flex gap-2 mb-1">
+                            <input type="text" v-model="day.images[iIdx]" class="form-input text-xs" placeholder="Image URL">
+                            <button @click="day.images.splice(iIdx, 1)" class="text-red-500 text-xs px-2"><i class="fas fa-trash"></i></button>
+                        </div>
+                        <button @click="day.images.push('')" class="text-xs text-blue-600 mt-1"><i class="fas fa-image"></i> Add Image to Day</button>
+                    </div>
+                    
+                    <button @click="addDay()" class="w-full bg-sun-green text-white py-2 rounded-lg hover:bg-green-700 font-semibold shadow transition"><i class="fas fa-plus"></i> Add New Day</button>
+                </div>
+
+                <!-- Section 4: Inclusions & Flights -->
+                <div class="form-section">
+                    <h3>Inclusions & Exclusions</h3>
+                    <div class="form-group">
+                        <label class="form-label text-sun-green"><i class="fas fa-check-circle"></i> Inclusions (One per line)</label>
+                        <textarea v-model="state.inclusions" class="form-textarea h-32"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label text-red-600"><i class="fas fa-times-circle"></i> Exclusions (One per line)</label>
+                        <textarea v-model="state.exclusions" class="form-textarea h-24"></textarea>
+                    </div>
+                    <hr class="my-3">
+                    <h3>Flight Details</h3>
+                    <div class="form-group">
+                        <label class="form-label">Departure Flight</label>
+                        <input type="text" v-model="state.flightDep" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Return Flight</label>
+                        <input type="text" v-model="state.flightRet" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Flight Note (e.g. Baggage details)</label>
+                        <input type="text" v-model="state.flightNote" class="form-input">
+                    </div>
+                </div>
+
+                <!-- Section 5: Reviews -->
+                <div class="form-section">
+                    <h3 class="text-sun-orange">Satisfied Travelers (Reviews)</h3>
+                    <div v-for="(review, idx) in state.reviews" :key="idx" class="mb-3 border p-2 rounded bg-gray-50 relative">
+                        <button @click="state.reviews.splice(idx, 1)" class="absolute top-1 right-1 text-red-500 hover:text-red-700"><i class="fas fa-times"></i></button>
+                        <input type="text" v-model="review.name" class="form-input text-sm mb-1" placeholder="Reviewer Name">
+                        <input type="text" v-model="review.avatar" class="form-input text-sm mb-1" placeholder="Avatar URL">
+                        <textarea v-model="review.quote" class="form-textarea text-sm h-16" placeholder="Review Quote"></textarea>
+                    </div>
+                    <button @click="addReview()" class="w-full text-sm text-sun-orange font-semibold py-2 border border-sun-orange rounded hover:bg-orange-50"><i class="fas fa-plus"></i> Add Review</button>
+                </div>
+
+                <!-- Section 6: Moments Gallery -->
+                <div class="form-section">
+                    <h3 class="text-sun-blue">Moments Gallery (Images)</h3>
+                    <div v-for="(img, idx) in state.moments" :key="idx" class="flex gap-2 mb-2">
+                        <input type="text" v-model="state.moments[idx]" class="form-input flex-1 text-sm" placeholder="Image URL">
+                        <button @click="state.moments.splice(idx, 1)" class="bg-red-100 text-red-600 px-3 rounded hover:bg-red-200"><i class="fas fa-trash"></i></button>
+                    </div>
+                    <button @click="state.moments.push('')" class="w-full text-sm text-sun-blue font-semibold py-2 border border-sun-blue rounded hover:bg-blue-50 mt-1"><i class="fas fa-plus"></i> Add Gallery Image</button>
+                </div>
+
+            </div>
+
+            <!-- Action Footer -->
+            <div class="p-4 bg-white border-t border-gray-200 shrink-0 grid grid-cols-2 gap-2">
+                <button @click="printDoc()" class="bg-gray-100 border border-gray-300 hover:bg-gray-200 text-gray-700 py-2 rounded-lg font-medium transition flex items-center justify-center gap-2">
+                    <i class="fas fa-print"></i> Print
+                </button>
+                <button @click="exportPDF()" class="bg-sun-green hover:bg-green-700 text-white py-2 rounded-lg font-semibold shadow-md transition flex items-center justify-center gap-2" :disabled="isExporting">
+                    <i class="fas fa-spinner fa-spin" v-if="isExporting"></i>
+                    <i class="fas fa-file-pdf" v-else></i> Download PDF
+                </button>
+            </div>
+        </div>
+
+        <!-- Right Panel: Live Preview (A4) -->
+        <div class="flex-1 overflow-y-auto bg-gray-200 p-8 flex flex-col items-center">
+            
+            <div class="a4-page" id="documentToExport">
+                
+                <!-- PAGE 1: Intro & Itinerary -->
+                <div class="page-content">
+                    
+                    <!-- Header Cover -->
+                    <div class="header-bg -mx-8 -mt-8 p-8 mb-6 rounded-t-lg relative overflow-hidden">
+                        <img :src="state.logoUrl" alt="Logo" class="h-16 mb-4 relative z-10" crossorigin="anonymous" v-if="state.logoUrl">
+                        <h1 class="text-3xl font-bold text-sun-green mb-1 font-serif uppercase">{{ state.tourName }}</h1>
+                        <h2 class="text-xl text-sun-orange font-semibold mb-4">{{ state.dateRange }}</h2>
+                        
+                        <div class="bg-white/80 p-3 rounded shadow-sm border-l-4 border-sun-green inline-block">
+                            <p class="text-xs text-gray-500 font-semibold uppercase tracking-wider mb-1">Prepared For</p>
+                            <p class="text-lg font-bold text-gray-800">{{ state.customer }}</p>
+                        </div>
+                        
+                        <div class="absolute top-8 right-8 text-right bg-white p-3 rounded shadow-md border border-gray-100">
+                            <p class="text-sm"><strong>Ref:</strong> <span>{{ state.ref }}</span></p>
+                            <p class="text-sm"><strong>Pax:</strong> <span>{{ state.pax }}</span></p>
+                            <p class="text-sm text-gray-500 mt-1">Issue Date: <span>{{ state.issueDate }}</span></p>
+                        </div>
+                    </div>
+
+                    <!-- Hero Images Grid -->
+                    <div class="grid gap-2 mb-8" :style="{ gridTemplateColumns: `repeat(${Math.min(state.heroImages.length, 3)}, minmax(0, 1fr))` }" v-if="state.heroImages.length > 0">
+                        <img v-for="(img, idx) in state.heroImages" :key="idx" :src="img" class="h-40 w-full object-cover rounded shadow-sm" crossorigin="anonymous">
+                    </div>
+
+                    <!-- Itinerary Details -->
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4 border-b-2 border-sun-green pb-2">Tour Itinerary</h3>
+                    
+                    <div class="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-100" v-if="state.departureProcedure">
+                        <h4 class="font-bold text-lg text-sun-green mb-2"><i class="fas fa-plane-arrival mr-2"></i>Departure Procedure:</h4>
+                        <div class="text-sm" v-html="formatHTML(state.departureProcedure)"></div>
+                    </div>
+
+                    <!-- Timeline Loop -->
+                    <div class="pl-4 mt-6">
+                        <div v-for="(day, idx) in state.days" :key="idx" class="timeline-line pb-6" :style="idx === state.days.length - 1 ? 'border-left-color: transparent;' : ''">
+                            <div class="timeline-dot flex items-center justify-between">
+                                <div>
+                                    <span class="day-header" :class="idx === state.days.length - 1 ? 'bg-sun-orange' : ''">{{ day.title }}</span>
+                                    <span v-if="day.date" class="ml-3 text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">{{ day.date }}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-2 text-gray-700 text-sm">
+                                <p v-if="day.meals" class="mb-2 text-xs bg-orange-50 text-orange-800 border border-orange-200 inline-block px-2 py-1 rounded">
+                                    <strong><i class="fas fa-utensils mr-1"></i> Meal Plan:</strong> {{ day.meals }}
+                                </p>
+                                
+                                <div v-html="day.description" class="space-y-2 mt-2"></div>
+                                
+                                <!-- Day Images -->
+                                <div class="grid grid-cols-2 gap-2 mt-4" v-if="day.images && day.images.length > 0">
+                                    <img v-for="(img, i) in day.images" :key="i" :src="img" class="h-32 w-full object-cover rounded border border-gray-200" crossorigin="anonymous">
+                                </div>
+                            </div>
+                            
+                            <!-- Add a decorative end marker if it's the last day -->
+                            <div v-if="idx === state.days.length - 1" class="text-center font-bold text-sun-green text-xl mt-8">***** Tour Ends *****</div>
+                        </div>
+                    </div>
+                </div> <!-- End Page 1 Content -->
+
+                <div class="page-break"></div>
+
+                <!-- PAGE 2: Inclusions & Flight Details -->
+                <div class="page-content pt-10">
+                    
+                    <h3 class="text-2xl font-bold text-gray-800 mb-6 border-b-2 border-sun-green pb-2">Package Details</h3>
+
+                    <div class="grid grid-cols-2 gap-6 mb-8">
+                        <!-- Inclusions -->
+                        <div class="bg-green-50 p-5 rounded-lg border border-green-200 shadow-sm">
+                            <h4 class="font-bold text-sun-green text-lg mb-4"><i class="fas fa-check-circle mr-2"></i>Inclusions</h4>
+                            <ul class="list-disc pl-5 text-sm space-y-1.5 text-gray-700">
+                                <li v-for="(inc, i) in state.inclusions.split('\n')" :key="i" v-show="inc.trim()">{{ inc }}</li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Exclusions -->
+                        <div class="bg-red-50 p-5 rounded-lg border border-red-200 shadow-sm">
+                            <h4 class="font-bold text-red-600 text-lg mb-4"><i class="fas fa-times-circle mr-2"></i>Exclusions</h4>
+                            <ul class="list-disc pl-5 text-sm space-y-1.5 text-gray-700">
+                                <li v-for="(exc, i) in state.exclusions.split('\n')" :key="i" v-show="exc.trim()">{{ exc }}</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Flight Details -->
+                    <div class="border border-gray-200 rounded-lg p-5 bg-gray-50 shadow-sm">
+                        <h4 class="font-bold text-gray-800 text-lg mb-3"><i class="fas fa-plane-departure text-sun-blue mr-2"></i>Flight Details</h4>
+                        <div class="text-sm space-y-2 text-gray-700">
+                            <p><strong>Departure:</strong> {{ state.flightDep }}</p>
+                            <p><strong>Return:</strong> {{ state.flightRet }}</p>
+                            <p class="text-gray-500 mt-2 italic border-t pt-2" v-if="state.flightNote">{{ state.flightNote }}</p>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="page-break"></div>
+
+                <!-- PAGE 3: Reviews & Images -->
+                <div class="page-content bg-[#f8fafc] h-full relative" style="min-height: 297mm;">
+                    <!-- Decor -->
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-sun-green opacity-5 rounded-bl-full z-0"></div>
+                    <div class="absolute bottom-0 left-0 w-48 h-48 bg-sun-orange opacity-5 rounded-tr-full z-0"></div>
+                    
+                    <div class="relative z-10 pt-4">
+                        
+                        <!-- Reviews -->
+                        <div v-if="state.reviews.length > 0">
+                            <div class="text-center mb-8">
+                                <h3 class="text-3xl font-bold text-sun-green mb-2">Our Satisfied Travelers</h3>
+                                <p class="text-gray-500 italic">Don't just take our word for it. Here is what our clients have to say!</p>
+                                <div class="w-16 h-1 bg-sun-orange mx-auto mt-4"></div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-6 mb-12">
+                                <div v-for="(review, idx) in state.reviews" :key="idx" class="review-card shadow-sm hover:shadow-md transition">
+                                    <div class="flex items-center gap-3 mb-3">
+                                        <img :src="review.avatar || 'https://ui-avatars.com/api/?name=' + review.name + '&background=random'" class="w-10 h-10 rounded-full" crossorigin="anonymous">
+                                        <div>
+                                            <h5 class="font-bold text-sm text-gray-800">{{ review.name }}</h5>
+                                            <div class="text-sun-yellow text-xs"><i class="fas fa-star" v-for="i in 5"></i></div>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-gray-600 italic leading-relaxed">"{{ review.quote }}"</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Moments Gallery -->
+                        <div v-if="state.moments.length > 0">
+                            <div class="text-center mb-8 mt-10 border-t border-gray-200 pt-8">
+                                <h3 class="text-2xl font-bold text-sun-green mb-2">Moments of Joyful Travelers</h3>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <img v-for="(img, idx) in state.moments" :key="idx" :src="img" class="w-full h-44 object-cover rounded-lg shadow-md border-2 border-white" crossorigin="anonymous">
+                            </div>
+                        </div>
+
+                        <div class="absolute bottom-8 left-0 right-0 text-center">
+                            <p class="text-xs text-gray-400">© 2026 Sun Leisure World. All rights reserved.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div> <!-- End Document -->
         </div>
     </div>
 
     <script>
-        // Set today's date for issue date if not already set by user editing
-        const today = new Date();
-        const options = { day: '2-digit', month: 'short', year: 'numeric' };
-        if(document.getElementById('doc-issue-date').textContent === '05 Aug 2026') {
-            document.getElementById('doc-issue-date').textContent = today.toLocaleDateString('en-GB', options);
-        }
+        const { createApp, ref, reactive, onMounted } = Vue;
 
-        // Image Upload Logic
-        let targetImageElement = null;
-        const uploader = document.getElementById('imageUploader');
+        createApp({
+            setup() {
+                const today = new Date();
+                const options = { day: '2-digit', month: 'short', year: 'numeric' };
+                
+                // Reactive state mimicking original itinerary builder + new features
+                const state = reactive({
+                    logoUrl: 'https://sunleisureworld.com/images/logo.png',
+                    tourName: 'BANGKOK – PATTAYA GROUP TOUR',
+                    dateRange: '23 - 28 August 2026',
+                    customer: 'Mr. John Doe & Family',
+                    ref: 'INQ-59560',
+                    pax: '2',
+                    issueDate: today.toLocaleDateString('en-GB', options),
+                    heroImages: [
+                        'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+                        'https://images.unsplash.com/photo-1563492065599-3520f775eeed?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+                        'https://images.unsplash.com/photo-1540420773420-3366772f4999?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'
+                    ],
+                    departureProcedure: '<ul><li>Sun Leisure World\'s representative will meet you at Colombo Bandaranayake International Airport.</li><li>You will get a briefing of the departure procedure & our representative will guide you in the process.</li></ul>',
+                    flightDep: 'Colombo to Bangkok - FD 141 – CMB-DMK - 23:15-04:20(+1)',
+                    flightRet: 'Bangkok to Colombo - FD 140 – DMK-CMB - 20:25-22:15',
+                    flightNote: 'Included: Meals + 20KG Baggage + 7KG Hand Luggage (both ways)',
+                    inclusions: 'All mentioned tours & admission fees\nCoral Island Tour by Speedboat\n05 Nights at 3* hotel in Pattaya & BKK\nAir-conditioned luxury transfers\nThailand Professional Tour Guide\nTour manager from Sun Leisure World\nAir Ticket (Air Asia)\nMeals: Breakfast 05, Lunch 02, Dinner 01',
+                    exclusions: 'Early check-in or late check-out\nOptional water sports & cage access\nPersonal expenses (laundry, phone calls)\nTips for guide & driver\nAnything not mentioned in inclusions',
+                    days: [
+                        {
+                            title: 'Day 01 – Pattaya',
+                            date: '23/08/2026',
+                            meals: '',
+                            description: '<ul><li>Arrival to Bangkok Don Mueang International Airport.</li><li><strong>On the way to Pattaya there will be a stop for breakfast.</strong> (Not included in the package)</li></ul><br><p class="text-sun-blue font-semibold">Sightseeing & Tours:</p><p><strong>Pattaya Big Buddha Temple Tour with Viewpoint</strong><br>Experience a panoramic view of the city and marvel at the sheer size of the Big Buddha Statue at Wat Phra Yai.</p><p><strong>Pattaya Tiger Park</strong><br>View and observe different types of tigers including giant Bengal tigers. <em>Optional: Go in the cage to touch and play with tigers.</em></p><p><strong>Pattaya Dolphinarium</strong><br>Number 01 marine mammal show in Asia, featuring South American fur seals and bottlenose dolphins.</p><p class="mt-2"><strong>Hotel:</strong> Baron Beach Hotel Pattaya 3* (Check-in at 02.00 pm)</p>',
+                            images: []
+                        },
+                        {
+                            title: 'Day 02 – Pattaya',
+                            date: '24/08/2026',
+                            meals: 'Breakfast, Lunch',
+                            description: '<p class="text-sun-blue font-semibold">Sightseeing & Tours: Coral Island Tour by Speed Boat</p><ul><li>09:00 AM transfer to Coral Island by speedboat.</li><li><strong>Optional:</strong> Parasailing, jet skiing, underwater walk en route.</li><li>Lunch will be served at an Indian restaurant (Complimentary basic lunch).</li></ul><p class="mt-2"><strong>Overnight Stay at Hotel</strong></p>',
+                            images: []
+                        }
+                    ],
+                    reviews: [
+                        { name: 'Ruklani Wickramasinghe', avatar: 'https://ui-avatars.com/api/?name=Ruklani+W&background=random', quote: 'We recently went on a tour of Pattaya and Bangkok with Sun Leisure World and it was an amazing experience! Both cities offered a perfect mix of culture, entertainment, and beautiful sights... Highly recommend it.' },
+                        { name: 'Asanka Sanjeewa', avatar: 'https://ui-avatars.com/api/?name=Asanka+S&background=random', quote: 'I really enjoyed my trip to Thailand. The team was very trustworthy and gave us a great experience. Everything was well organized, and I felt comfortable throughout the journey. I hope to travel with you again!' }
+                    ],
+                    moments: [
+                        'https://images.unsplash.com/photo-1517400508447-f8dd518b86db?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+                        'https://images.unsplash.com/photo-1523482580672-f109ba8cb9be?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+                        'https://images.unsplash.com/photo-1529156069898-49953eb1b5ce?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+                        'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
+                    ]
+                });
 
-        function triggerImageUpload(imgElement) {
-            targetImageElement = imgElement;
-            uploader.click();
-        }
+                const isExporting = ref(false);
 
-        uploader.addEventListener('change', function(e) {
-            if (e.target.files && e.target.files[0] && targetImageElement) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    targetImageElement.src = e.target.result;
-                    targetImageElement.removeAttribute('crossorigin'); // Remove for local base64
+                function addDay() {
+                    const nextNum = state.days.length + 1;
+                    state.days.push({
+                        title: `Day 0${nextNum} – Bangkok`,
+                        date: '',
+                        meals: 'Breakfast',
+                        description: '<p>New Day Description...</p>',
+                        images: []
+                    });
                 }
-                reader.readAsDataURL(e.target.files[0]);
+
+                function addReview() {
+                    state.reviews.push({ name: '', avatar: '', quote: '' });
+                }
+
+                function formatHTML(text) {
+                    return text; // It's bound via v-html, so this is just a pass-through for now. Can parse markdown if needed.
+                }
+
+                function printDoc() {
+                    window.print();
+                }
+
+                function exportPDF() {
+                    isExporting.value = true;
+                    const element = document.getElementById('documentToExport');
+                    const filename = `Group_Tour_Itinerary_${state.customer.replace(/[^a-z0-9]/gi, '_')}.pdf`;
+                    
+                    const opt = {
+                        margin:       0,
+                        filename:     filename,
+                        image:        { type: 'jpeg', quality: 0.98 },
+                        html2canvas:  { scale: 2, useCORS: true, logging: false },
+                        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                    };
+
+                    // Small timeout to allow UI update for spinner
+                    setTimeout(() => {
+                        html2pdf().set(opt).from(element).save().then(() => {
+                            isExporting.value = false;
+                        }).catch(err => {
+                            console.error("PDF generation failed:", err);
+                            alert("There was an issue generating the PDF. Make sure all images have loaded properly.");
+                            isExporting.value = false;
+                        });
+                    }, 100);
+                }
+
+                return {
+                    state,
+                    isExporting,
+                    addDay,
+                    addReview,
+                    formatHTML,
+                    printDoc,
+                    exportPDF
+                }
             }
-        });
-
-        // Export PDF Function using html2pdf
-        function exportToPDF() {
-            const element = document.getElementById('documentToExport');
-            const customerName = document.getElementById('doc-customer').textContent || 'Customer';
-            const filename = `Group_Tour_Itinerary_${customerName.replace(/[^a-z0-9]/gi, '_')}.pdf`;
-            
-            // Add a visual loading state to button
-            const btn = document.querySelector('button[onclick="exportToPDF()"]');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating PDF...';
-            btn.disabled = true;
-
-            const opt = {
-                margin:       0,
-                filename:     filename,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true, logging: true },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-
-            html2pdf().set(opt).from(element).save().then(() => {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }).catch(err => {
-                console.error("PDF generation failed:", err);
-                alert("There was an issue generating the PDF. Make sure all images have loaded properly.");
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            });
-        }
+        }).mount('#app');
     </script>
 </body>
 </html>
