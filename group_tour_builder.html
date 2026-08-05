@@ -269,7 +269,11 @@
                     <!-- Timeline Loop -->
                     <div class="pl-4 mt-6">
                         <div v-for="(day, idx) in state.days" :key="day.id" class="timeline-line pb-6 hover-group relative" :style="idx === state.days.length - 1 ? 'border-left-color: transparent;' : ''">
-                            
+                            <div v-if="day.pageBreakBefore" class="html2pdf__page-break"></div>
+                            <!-- Day Page Break Toggle -->
+                            <button class="no-print absolute -top-8 right-16 text-xs bg-gray-200 hover:bg-gray-300 rounded px-2 py-1 text-gray-700 opacity-0 group-hover:opacity-100 transition" @click="day.pageBreakBefore = !day.pageBreakBefore" title="Toggle Page Break Before">
+                                <i class="fas fa-cut"></i> {{ day.pageBreakBefore ? 'Remove Page Break' : 'Add Page Break' }}
+                            </button>
                             <!-- Day Delete Button -->
                             <button class="delete-btn -right-10" @click="state.days.splice(idx, 1)" title="Remove Day"><i class="fas fa-trash text-xs"></i></button>
 
@@ -294,7 +298,10 @@
                                     <div class="grid grid-cols-2 gap-2 mb-2" v-if="day.images.length > 0">
                                         <div v-for="(img, i) in day.images" :key="i" class="editable-image-container h-32 relative">
                                             <img :src="img" class="h-full w-full object-cover rounded border border-gray-200" crossorigin="anonymous">
-                                            <div class="edit-overlay rounded" @click="triggerUpload('dayImage', idx, i)">Upload</div>
+                                            <div class="edit-overlay rounded flex-col gap-2 !cursor-default" style="pointer-events: auto;">
+                                                <button @click.stop="triggerUpload('dayImage', idx, i)" class="bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded w-3/4">Upload</button>
+                                                <button @click.stop="promptImageUrl('dayImage', idx, i)" class="bg-green-600 hover:bg-green-700 px-2 py-1 rounded w-3/4">From URL</button>
+                                            </div>
                                             <button class="delete-btn" @click.stop="day.images.splice(i, 1)" title="Remove Image"><i class="fas fa-trash text-xs"></i></button>
                                         </div>
                                     </div>
@@ -449,8 +456,8 @@
                         'https://images.unsplash.com/photo-1563492065599-3520f775eeed?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'
                     ],
                     days: [
-                        { id: Date.now(), images: ['https://images.unsplash.com/photo-1540420773420-3366772f4999?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'] },
-                        { id: Date.now()+1, images: [] }
+                        { id: Date.now(), images: ['https://images.unsplash.com/photo-1540420773420-3366772f4999?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'], pageBreakBefore: false },
+                        { id: Date.now()+1, images: [], pageBreakBefore: false }
                     ],
                     reviews: [
                         { id: Date.now(), avatar: 'https://ui-avatars.com/api/?name=Ruklani&background=random' },
@@ -466,7 +473,7 @@
 
                 // --- ARRAY MANAGEMENT ---
                 function addDay() {
-                    state.days.push({ id: Date.now(), images: [] });
+                    state.days.push({ id: Date.now(), images: [], pageBreakBefore: false });
                 }
                 function addHeroImage() {
                     state.heroImages.push('https://placehold.co/600x400?text=Upload+Image');
@@ -482,6 +489,16 @@
                 }
 
                 // --- UPLOAD LOGIC ---
+                function promptImageUrl(type, index1 = null, index2 = null) {
+                    const url = window.prompt("Enter the Image URL:");
+                    if (url && url.trim() !== '') {
+                        if (type === 'dayImage') {
+                            const day = state.days[index1];
+                            if (day && day.images) day.images.push(url);
+                        }
+                    }
+                }
+
                 function triggerUpload(type, index1 = null, index2 = null) {
                     uploadContext.type = type;
                     uploadContext.dayIndex = index1;
@@ -559,7 +576,8 @@
                     triggerUpload,
                     handleFileUpload,
                     printDoc,
-                    exportPDF
+                    exportPDF,
+                    promptImageUrl
                 }
             }
         }).mount('#app');
