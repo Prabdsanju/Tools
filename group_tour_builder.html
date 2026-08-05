@@ -221,25 +221,22 @@
                 <div class="page-content">
                     
                     <!-- Header Cover -->
-                    <div class="header-bg -mx-8 -mt-8 p-8 mb-6 rounded-t-lg relative overflow-hidden">
+                    <div class="header-bg -mx-8 -mt-8 p-8 mb-6 rounded-t-lg relative overflow-hidden editable-image-container min-h-[200px]" 
+                         :style="state.headerBg ? { backgroundImage: 'url(' + state.headerBg + ')', backgroundSize: 'cover', backgroundPosition: 'center' } : {}">
+                        
+                        <!-- Overlay to make text readable if there's a background image -->
+                        <div v-if="state.headerBg" class="absolute inset-0 bg-white/70"></div>
+                        
+                        <div class="edit-overlay rounded-t-lg z-20" @click="triggerUpload('headerBg')">Upload Background Image</div>
+                        <button v-if="state.headerBg" class="delete-btn z-20" @click.stop="state.headerBg = ''" title="Remove Background"><i class="fas fa-trash text-xs"></i></button>
+
                         <div class="editable-image-container inline-block w-48 h-16 mb-4 relative z-10" @click="triggerUpload('logo')">
                             <img :src="state.logoUrl" alt="Logo" class="h-full object-contain" crossorigin="anonymous">
                             <div class="edit-overlay rounded">Change Logo</div>
                         </div>
                         
-                        <h1 class="text-3xl font-bold text-sun-green mb-1 font-serif uppercase" contenteditable="true">BANGKOK – PATTAYA GROUP TOUR</h1>
-                        <h2 class="text-xl text-sun-orange font-semibold mb-4" contenteditable="true">23 - 28 August 2026</h2>
-                        
-                        <div class="bg-white/80 p-3 rounded shadow-sm border-l-4 border-sun-green inline-block hover-group relative">
-                            <p class="text-xs text-gray-500 font-semibold uppercase tracking-wider mb-1">Prepared For</p>
-                            <p class="text-lg font-bold text-gray-800" contenteditable="true">Mr. John Doe & Family</p>
-                        </div>
-                        
-                        <div class="absolute top-8 right-8 text-right bg-white p-3 rounded shadow-md border border-gray-100">
-                            <p class="text-sm"><strong>Ref:</strong> <span contenteditable="true">INQ-59560</span></p>
-                            <p class="text-sm"><strong>Pax:</strong> <span contenteditable="true">2</span></p>
-                            <p class="text-sm text-gray-500 mt-1">Issue Date: <span contenteditable="true">05 Aug 2026</span></p>
-                        </div>
+                        <h1 class="text-3xl font-bold text-sun-green mb-1 font-serif uppercase relative z-10" contenteditable="true">BANGKOK – PATTAYA GROUP TOUR</h1>
+                        <h2 class="text-xl text-sun-orange font-semibold mb-4 relative z-10" contenteditable="true">23 - 28 August 2026</h2>
                     </div>
 
                     <!-- Hero Images Grid -->
@@ -450,6 +447,7 @@
                 // Arrays are stored in state so we can dynamically loop them
                 const state = reactive({
                     logoUrl: 'https://sunleisureworld.com/images/logo.png',
+                    headerBg: '',
                     heroImages: [
                         'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
                         'https://images.unsplash.com/photo-1563492065599-3520f775eeed?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'
@@ -506,6 +504,8 @@
                         // Apply the uploaded image to the correct state property based on context
                         if (uploadContext.type === 'logo') {
                             state.logoUrl = base64Str;
+                        } else if (uploadContext.type === 'headerBg') {
+                            state.headerBg = base64Str;
                         } else if (uploadContext.type === 'hero') {
                             state.heroImages[uploadContext.dayIndex] = base64Str;
                         } else if (uploadContext.type === 'dayImage') {
