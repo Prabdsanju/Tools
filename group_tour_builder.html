@@ -227,16 +227,16 @@
                         <!-- Overlay to make text readable if there's a background image -->
                         <div v-if="state.headerBg" class="absolute inset-0 bg-white/70"></div>
                         
-                        <div class="edit-overlay rounded-t-lg z-20" @click="triggerUpload('headerBg')">Upload Background Image</div>
+                        <div class="edit-overlay rounded-t-lg z-20" @click.stop="triggerUpload('headerBg')">Upload Background Image</div>
                         <button v-if="state.headerBg" class="delete-btn z-20" @click.stop="state.headerBg = ''" title="Remove Background"><i class="fas fa-trash text-xs"></i></button>
 
-                        <div class="editable-image-container inline-block w-48 h-16 mb-4 relative z-10" @click="triggerUpload('logo')">
+                        <div class="editable-image-container inline-block w-48 h-16 mb-4 relative z-30" @click.stop="triggerUpload('logo')">
                             <img :src="state.logoUrl" alt="Logo" class="h-full object-contain" crossorigin="anonymous">
                             <div class="edit-overlay rounded">Change Logo</div>
                         </div>
                         
-                        <h1 class="text-3xl font-bold text-sun-green mb-1 font-serif uppercase relative z-10" contenteditable="true">BANGKOK – PATTAYA GROUP TOUR</h1>
-                        <h2 class="text-xl text-sun-orange font-semibold mb-4 relative z-10" contenteditable="true">23 - 28 August 2026</h2>
+                        <h1 class="text-3xl font-bold text-sun-green mb-1 font-serif uppercase relative z-30" contenteditable="true">BANGKOK – PATTAYA GROUP TOUR</h1>
+                        <h2 class="text-xl text-sun-orange font-semibold mb-4 relative z-30" contenteditable="true">23 - 28 August 2026</h2>
                     </div>
 
                     <!-- Hero Images Grid -->
