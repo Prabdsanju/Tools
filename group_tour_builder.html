@@ -385,10 +385,6 @@
                                     <button class="delete-btn -top-2 -right-2" @click="state.reviews.splice(idx, 1)" title="Remove Review"><i class="fas fa-trash text-xs"></i></button>
                                     
                                     <div class="flex items-center gap-3 mb-3">
-                                        <div class="editable-image-container w-10 h-10 rounded-full shrink-0" @click="triggerUpload('review', idx)">
-                                            <img :src="review.avatar" class="w-full h-full rounded-full object-cover" crossorigin="anonymous">
-                                            <div class="edit-overlay rounded-full text-[10px]">Upload</div>
-                                        </div>
                                         <div>
                                             <h5 class="font-bold text-sm text-gray-800" contenteditable="true">Traveler Name</h5>
                                             <div class="text-sun-yellow text-xs"><i class="fas fa-star" v-for="i in 5"></i></div>
