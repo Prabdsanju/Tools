@@ -45,7 +45,7 @@
             min-height: 297mm;
             background: white;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            margin: 40px auto;
+            margin: 0 auto;
             position: relative;
             box-sizing: border-box;
             font-size: 11pt;
@@ -180,42 +180,149 @@
 
         /* Print formatting */
         @media print {
-            .action-bar, .no-print, .edit-overlay, .delete-btn { display: none !important; }
+            .no-print, .edit-overlay, .delete-btn { display: none !important; }
             .a4-page { box-shadow: none; margin: 0; }
             body { background: white; }
+            #app { display: block !important; height: auto !important; }
             [contenteditable="true"]:hover { background-color: transparent; box-shadow: none; }
         }
     </style>
 </head>
-<body>
+<body class="bg-gray-100 overflow-hidden">
 
-    <div id="app">
-        <!-- Hidden file input for image uploads -->
+    <div id="app" class="flex h-screen w-full">
+        <!-- Hidden file inputs for uploads -->
         <input type="file" ref="fileInput" @change="handleFileUpload" accept="image/*" class="hidden">
+        <input type="file" ref="jsonInput" @change="importJSON" accept=".json" class="hidden">
 
-        <!-- Top Action Bar -->
-        <div class="action-bar no-print" data-html2canvas-ignore>
-            <div class="flex items-center gap-4">
-                <a href="index.html" class="text-gray-600 hover:text-sun-green transition"><i class="fas fa-arrow-left"></i></a>
-                <h1 class="font-bold text-gray-800 text-lg">Group Tour Builder <span class="text-xs font-normal bg-sun-green text-white px-2 py-1 rounded ml-2">WYSIWYG Mode</span></h1>
+        <!-- Sidebar -->
+        <div class="w-[400px] flex flex-col bg-white border-r border-gray-200 shadow-xl z-20 no-print flex-shrink-0" data-html2canvas-ignore>
+            <!-- Header -->
+            <div class="bg-gray-800 text-white p-4">
+                <p class="text-xs font-bold text-gray-400 mb-1">Itinerary Builder Mode</p>
             </div>
-            <div class="flex items-center gap-3">
-                <div class="text-sm text-gray-500 mr-4">
-                    <i class="fas fa-info-circle"></i> Click any text or image to edit
+            <div class="bg-sun-green text-white p-5 flex items-center gap-3">
+                <i class="fas fa-edit text-2xl"></i>
+                <div>
+                    <h2 class="font-bold text-xl leading-tight">Itinerary Builder</h2>
+                    <p class="text-xs text-green-100 mt-1">Customize every detail of your tour</p>
                 </div>
-                <button @click="printDoc()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-4 rounded-lg font-medium transition flex items-center gap-2">
-                    <i class="fas fa-print"></i> Print
+            </div>
+
+            <!-- Tabs -->
+            <div class="flex border-b border-gray-200 bg-gray-50 text-sm font-semibold">
+                <button class="flex-1 py-3 text-center border-b-2 transition" :class="state.activeTab === 'General' ? 'border-sun-green text-sun-green bg-white' : 'border-transparent text-gray-500 hover:text-gray-700'" @click="state.activeTab = 'General'">General</button>
+                <button class="flex-1 py-3 text-center border-b-2 transition" :class="state.activeTab === 'Design' ? 'border-sun-green text-sun-green bg-white' : 'border-transparent text-gray-500 hover:text-gray-700'" @click="state.activeTab = 'Design'">Design</button>
+                <button class="flex-1 py-3 text-center border-b-2 transition" :class="state.activeTab === 'Contact' ? 'border-sun-green text-sun-green bg-white' : 'border-transparent text-gray-500 hover:text-gray-700'" @click="state.activeTab = 'Contact'">Contact</button>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="flex-1 overflow-y-auto p-5">
+                <div class="bg-green-50 text-green-800 p-3 rounded text-sm mb-6 flex gap-2 items-start border border-green-100">
+                    <i class="fas fa-magic mt-1"></i>
+                    <p><strong>Pro Tip:</strong> Almost all text in the preview on the right can be edited directly by clicking on it! Try clicking the day descriptions, hotel options, or inclusions to customize them.</p>
+                </div>
+
+                <!-- General Tab -->
+                <div v-show="state.activeTab === 'General'" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Company Logo</label>
+                        <div class="flex gap-2 mb-2">
+                            <input type="text" v-model="state.logoUrl" class="flex-1 border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-sun-green" placeholder="Logo URL">
+                            <button @click="triggerUpload('logo')" class="bg-gray-100 border border-gray-300 rounded px-3 py-2 text-sm hover:bg-gray-200 whitespace-nowrap"><i class="fas fa-upload mr-1"></i> Upload</button>
+                        </div>
+                        <img v-if="state.logoUrl" :src="state.logoUrl" class="h-10 object-contain border border-gray-200 rounded p-1 bg-white">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Cover Image</label>
+                        <div class="flex gap-2 mb-2">
+                            <input type="text" v-model="state.headerBg" class="flex-1 border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-sun-green" placeholder="Background Image URL">
+                            <button @click="triggerUpload('headerBg')" class="bg-gray-100 border border-gray-300 rounded px-3 py-2 text-sm hover:bg-gray-200 whitespace-nowrap"><i class="fas fa-upload mr-1"></i> Upload</button>
+                        </div>
+                        <img v-if="state.headerBg" :src="state.headerBg" class="h-20 w-full object-cover border border-gray-200 rounded">
+                    </div>
+                </div>
+
+                <!-- Design Tab -->
+                <div v-show="state.activeTab === 'Design'" class="space-y-6">
+                    <div class="bg-orange-50 border border-orange-100 text-orange-800 p-3 rounded text-sm mb-4 flex gap-2 items-start">
+                        <i class="fas fa-info-square mt-1 text-sun-orange"></i>
+                        <p>Adjust the text spacing globally to match your preferred MS Word style.</p>
+                    </div>
+                    
+                    <h3 class="font-bold text-gray-800 text-lg mb-4">Text Spacing Options</h3>
+                    
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide">Line Spacing</label>
+                            <span class="text-xs font-bold text-blue-600">{{ state.design.lineSpacing }}</span>
+                        </div>
+                        <input type="range" v-model.number="state.design.lineSpacing" min="1.0" max="2.5" step="0.1" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                    </div>
+                    
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide">Letter Spacing</label>
+                            <span class="text-xs font-bold text-blue-600">{{ state.design.letterSpacing }}px</span>
+                        </div>
+                        <input type="range" v-model.number="state.design.letterSpacing" min="-1" max="5" step="0.5" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                    </div>
+                </div>
+
+                <!-- Contact Tab -->
+                <div v-show="state.activeTab === 'Contact'" class="space-y-4">
+                    <h3 class="font-bold text-gray-800 text-lg mb-2">Contact Information</h3>
+                    
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Address</label>
+                        <input type="text" v-model="state.contact.address" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-sun-green">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Tel</label>
+                        <input type="text" v-model="state.contact.tel" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-sun-green">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Hotline</label>
+                        <input type="text" v-model="state.contact.hotline" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-sun-green">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Email</label>
+                        <input type="email" v-model="state.contact.email" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-sun-green">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Facebook</label>
+                        <input type="url" v-model="state.contact.facebook" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-sun-green">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Instagram</label>
+                        <input type="url" v-model="state.contact.instagram" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-sun-green">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons Footer -->
+            <div class="p-4 bg-gray-50 border-t border-gray-200 flex flex-col gap-3">
+                <div class="flex gap-3">
+                    <button @click="exportJSON()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-3 rounded font-semibold text-sm transition flex items-center justify-center gap-2">
+                        <i class="fas fa-download"></i> Export JSON
+                    </button>
+                    <button @click="$refs.jsonInput.click()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-3 rounded font-semibold text-sm transition flex items-center justify-center gap-2">
+                        <i class="fas fa-folder-open"></i> Import JSON
+                    </button>
+                </div>
+                <button @click="saveHTML()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded font-semibold transition flex items-center justify-center gap-2">
+                    <i class="fas fa-save"></i> Save Project (Editable HTML)
                 </button>
-                <button @click="exportPDF()" class="bg-sun-green hover:bg-green-700 text-white py-2 px-4 rounded-lg font-semibold shadow-md transition flex items-center gap-2" :disabled="isExporting">
-                    <i class="fas fa-spinner fa-spin" v-if="isExporting"></i>
-                    <i class="fas fa-file-pdf" v-else></i> Download PDF
+                <button @click="printDoc()" class="w-full bg-sun-green hover:bg-green-700 text-white py-2.5 px-4 rounded font-semibold shadow transition flex items-center justify-center gap-2" :disabled="isExporting">
+                    <i class="fas fa-print"></i> Download PDF / Print
                 </button>
             </div>
         </div>
 
         <!-- The A4 Document Container -->
-        <div style="padding-top: 80px;">
-            <div class="a4-page" id="documentToExport">
+        <div class="flex-1 overflow-y-auto p-10 bg-gray-200 flex justify-center">
+            <div class="a4-page" id="documentToExport" :style="{ lineHeight: state.design.lineSpacing, letterSpacing: state.design.letterSpacing + 'px' }">
                 
                 <!-- PAGE 1: Intro & Itinerary -->
                 <div class="page-content">
@@ -465,7 +572,16 @@
                             </button>
                         </div>
 
-                        <div class="mt-20 text-center pb-4">
+                        <div class="mt-20 border-t border-gray-200 pt-8 pb-4 text-center">
+                            <h4 class="font-bold text-gray-800 text-lg mb-4">Contact Us</h4>
+                            <div class="flex flex-wrap justify-center gap-6 text-sm text-gray-600 mb-6">
+                                <div v-if="state.contact.address" class="flex items-center gap-2"><i class="fas fa-map-marker-alt text-sun-orange"></i> {{ state.contact.address }}</div>
+                                <div v-if="state.contact.tel" class="flex items-center gap-2"><i class="fas fa-phone-alt text-sun-orange"></i> {{ state.contact.tel }}</div>
+                                <div v-if="state.contact.hotline" class="flex items-center gap-2"><i class="fas fa-headset text-sun-orange"></i> {{ state.contact.hotline }}</div>
+                                <div v-if="state.contact.email" class="flex items-center gap-2"><i class="fas fa-envelope text-sun-orange"></i> {{ state.contact.email }}</div>
+                                <div v-if="state.contact.facebook" class="flex items-center gap-2"><i class="fab fa-facebook text-sun-blue"></i> {{ state.contact.facebook }}</div>
+                                <div v-if="state.contact.instagram" class="flex items-center gap-2"><i class="fab fa-instagram text-pink-600"></i> {{ state.contact.instagram }}</div>
+                            </div>
                             <p class="text-xs text-gray-400">© 2026 Sun Leisure World. All rights reserved.</p>
                         </div>
                     </div>
@@ -490,7 +606,18 @@
                 });
 
                 // Arrays are stored in state so we can dynamically loop them
+                // /* STATE_START */
                 const state = reactive({
+                    activeTab: 'General',
+                    design: { lineSpacing: 1.5, letterSpacing: 0 },
+                    contact: {
+                        address: 'No.70/16 Lucky Plaza, St Anthony\'s Mawatha, Colombo - 03, Sri Lanka.',
+                        tel: '077 887 7054077 775 3191',
+                        hotline: '0117-911700',
+                        email: 'info@sunleisureworld.lk',
+                        facebook: 'https://web.facebook.com/sunleisureworldsrilanak',
+                        instagram: 'https://www.instagram.com/sun_leisure_world_sri_lanka_'
+                    },
                     logoUrl: 'https://sunleisureworld.com/images/logo.png',
                     headerBg: '',
                     heroImages: [
@@ -516,6 +643,7 @@
                     ],
                     priceNote: ''
                 });
+                // /* STATE_END */
 
                 const isExporting = ref(false);
 
@@ -586,6 +714,67 @@
                     reader.readAsDataURL(file);
                 }
 
+                // --- JSON & HTML SAVE ---
+                const jsonInput = ref(null);
+
+                function exportJSON() {
+                    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
+                    const downloadAnchorNode = document.createElement('a');
+                    downloadAnchorNode.setAttribute("href", dataStr);
+                    downloadAnchorNode.setAttribute("download", "itinerary_project.json");
+                    document.body.appendChild(downloadAnchorNode);
+                    downloadAnchorNode.click();
+                    downloadAnchorNode.remove();
+                }
+
+                function importJSON(event) {
+                    const file = event.target.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        try {
+                            const importedState = JSON.parse(e.target.result);
+                            Object.assign(state, importedState);
+                        } catch (err) {
+                            alert("Invalid JSON file.");
+                        }
+                        event.target.value = '';
+                    };
+                    reader.readAsText(file);
+                }
+
+                function saveHTML() {
+                    fetch(window.location.href)
+                        .then(res => res.text())
+                        .then(sourceHtml => {
+                            const startMarker = '// /* STATE_START */';
+                            const endMarker = '// /* STATE_END */';
+                            const startIndex = sourceHtml.indexOf(startMarker);
+                            const endIndex = sourceHtml.indexOf(endMarker);
+                            
+                            if (startIndex !== -1 && endIndex !== -1) {
+                                const newStateCode = `const state = reactive(${JSON.stringify(state, null, 4)});`;
+                                const newHtml = sourceHtml.substring(0, startIndex + startMarker.length) + '\n                ' + newStateCode + '\n                ' + sourceHtml.substring(endIndex);
+                                
+                                const blob = new Blob([newHtml], { type: 'text/html' });
+                                const url = URL.createObjectURL(blob);
+                                const a = document.createElement('a');
+                                a.href = url;
+                                a.download = 'Saved_Itinerary_Project.html';
+                                document.body.appendChild(a);
+                                a.click();
+                                document.body.removeChild(a);
+                                URL.revokeObjectURL(url);
+                            } else {
+                                alert("Could not save HTML properly due to missing markers.");
+                            }
+                        })
+                        .catch(err => {
+                            console.error("Save HTML Error", err);
+                            alert("Failed to save HTML.");
+                        });
+                }
+
                 // --- EXPORT LOGIC ---
                 function printDoc() {
                     window.print();
@@ -629,7 +818,11 @@
                     handleFileUpload,
                     printDoc,
                     exportPDF,
-                    promptImageUrl
+                    promptImageUrl,
+                    jsonInput,
+                    exportJSON,
+                    importJSON,
+                    saveHTML
                 }
             }
         }).mount('#app');
