@@ -705,6 +705,8 @@
                             <button class="no-print absolute top-4 right-16 text-xs bg-gray-200 hover:bg-gray-300 rounded px-2 py-1 text-gray-700 opacity-0 group-hover:opacity-100 transition z-50" @click="state.pageBreaks.contact = !state.pageBreaks.contact" title="Toggle Page Break Before">
                                 <i class="fas fa-cut"></i> {{ state.pageBreaks.contact ? 'Remove Page Break' : 'Add Page Break' }}
                             </button>
+                            <spacer-control :model-value="state.spacers.contact" @update:model-value="state.spacers.contact = $event" @start-drag="startDragSpacer" label="Contact Gap" spacer-key="contact"></spacer-control>
+                            <div :style="{ height: (state.spacers.contact || 0) + 'px' }"></div>
                             <h4 class="font-bold text-gray-800 text-lg mb-4">Contact Us</h4>
                             <div class="flex flex-wrap justify-center gap-6 text-sm text-gray-600 mb-6">
                                 <div v-if="state.contact.address" class="flex items-center gap-2"><i class="fas fa-map-marker-alt text-sun-orange"></i> {{ state.contact.address }}</div>
@@ -776,7 +778,7 @@
                         flightNote: 'Note: Meals + 20KG Baggage + 7KG Hand Luggage included.'
                     },
                     imagePos: {},
-                    spacers: { page1: 0, page2: 0, inclusions: 0, flights: 0, prices: 0, reviews: 0, gallery: 0 },
+                    spacers: { page1: 0, page2: 0, inclusions: 0, flights: 0, prices: 0, reviews: 0, gallery: 0, contact: 0 },
                     pageBreaks: { packageDetails: false, inclusions: false, flights: false, prices: false, reviews: false, gallery: false, contact: false },
                     design: { lineSpacing: 1.5, letterSpacing: 0 },
                     contact: {
