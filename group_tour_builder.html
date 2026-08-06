@@ -188,6 +188,7 @@
             .review-card, tr, .day-header { page-break-inside: avoid; break-inside: avoid; }
             @page { margin: 0; size: A4 portrait; }
         }
+        .spacer-ctrl { opacity: 0; }
         .hover-group:hover .spacer-ctrl, .spacer-ctrl:hover { opacity: 1 !important; }
     </style>
 </head>
@@ -709,7 +710,7 @@
     <script>
         const { createApp, ref, reactive, onMounted, onUnmounted, nextTick } = Vue;
 
-        createApp({
+        const app = createApp({
             setup() {
                 const fileInput = ref(null);
                 
@@ -1113,7 +1114,7 @@
             props: ['modelValue', 'label', 'spacerKey'],
             emits: ['update:modelValue', 'start-drag'],
             template: `
-                <div class="spacer-ctrl no-print w-full opacity-0 transition-opacity duration-300 absolute top-0 left-0 right-0 flex justify-center z-50 transform -translate-y-1/2">
+                <div class="spacer-ctrl no-print w-full transition-opacity duration-300 absolute top-0 left-0 right-0 flex justify-center z-50 transform -translate-y-1/2">
                     <div class="bg-white shadow-lg border border-blue-200 rounded-full flex items-center p-0.5 gap-1">
                         <span class="text-[9px] font-bold text-gray-500 px-2 uppercase">{{label}}</span>
                         <button class="w-6 h-6 flex items-center justify-center rounded-full hover:bg-blue-50 text-blue-600 text-xs font-bold" @click.stop="$emit('update:modelValue', Math.max(0, (modelValue||0) - 50))" title="-50px">-50</button>
