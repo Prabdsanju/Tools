@@ -693,7 +693,7 @@
     </div>
 
     <script>
-        const { createApp, ref, reactive, onMounted, onUnmounted } = Vue;
+        const { createApp, ref, reactive, onMounted, onUnmounted, nextTick } = Vue;
 
         createApp({
             setup() {
@@ -839,9 +839,19 @@
 
                 // --- JSON & HTML SAVE ---
                 const jsonInput = ref(null);
-
+                
                 function exportJSON() {
-                    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
+                    const contentData = [];
+                    document.querySelectorAll('[contenteditable="true"]').forEach((el) => {
+                        contentData.push(el.innerHTML);
+                    });
+
+                    const exportData = {
+                        state: state,
+                        contentData: contentData
+                    };
+
+                    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportData, null, 2));
                     const downloadAnchorNode = document.createElement('a');
                     downloadAnchorNode.setAttribute("href", dataStr);
                     downloadAnchorNode.setAttribute("download", "itinerary_project.json");
@@ -856,8 +866,23 @@
                     const reader = new FileReader();
                     reader.onload = (e) => {
                         try {
-                            const importedState = JSON.parse(e.target.result);
-                            Object.assign(state, importedState);
+                            const importedData = JSON.parse(e.target.result);
+                            
+                            if (importedData.state) {
+                                Object.assign(state, importedData.state);
+                                
+                                nextTick(() => {
+                                    if (importedData.contentData) {
+                                        const els = document.querySelectorAll('[contenteditable="true"]');
+                                        importedData.contentData.forEach((html, index) => {
+                                            if (els[index]) els[index].innerHTML = html;
+                                        });
+                                    }
+                                });
+                            } else {
+                                // Fallback for older JSON exports
+                                Object.assign(state, importedData);
+                            }
                         } catch (err) {
                             alert("Invalid JSON file.");
                         }
