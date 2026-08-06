@@ -620,10 +620,34 @@
 
             </div> <!-- End Document -->
         </div>
+        
+        <!-- Floating Rich Text Toolbar -->
+        <div v-show="showToolbar" id="rtf-toolbar" class="fixed bg-white shadow-lg border border-gray-200 rounded flex items-center px-1 py-1 gap-1 z-[9999] no-print transition-opacity duration-200" :style="{ top: toolbarPos.top, left: toolbarPos.left, transform: 'translateY(-100%)', marginTop: '-10px' }">
+            <button type="button" @mousedown.prevent="formatText('bold')" class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded font-bold text-gray-800 transition">B</button>
+            <button type="button" @mousedown.prevent="formatText('italic')" class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded italic font-serif text-gray-800 transition">I</button>
+            
+            <div class="relative w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded transition overflow-hidden group" title="Text Color">
+                <div class="w-4 h-4 rounded-full bg-gradient-to-tr from-green-400 via-blue-500 to-purple-500 shadow-sm pointer-events-none absolute z-10 group-hover:scale-110 transition-transform"></div>
+                <input type="color" @input="formatText('foreColor', $event.target.value)" class="absolute inset-0 w-12 h-12 opacity-0 cursor-pointer z-20 -top-2 -left-2">
+            </div>
+
+            <div class="h-5 w-px bg-gray-300 mx-1"></div>
+            
+            <button type="button" @mousedown.prevent="formatText('justifyLeft')" class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded text-gray-600 transition"><i class="fas fa-align-left text-xs"></i></button>
+            <button type="button" @mousedown.prevent="formatText('justifyCenter')" class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded text-gray-600 transition"><i class="fas fa-align-center text-xs"></i></button>
+            <button type="button" @mousedown.prevent="formatText('justifyRight')" class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded text-gray-600 transition"><i class="fas fa-align-right text-xs"></i></button>
+            
+            <div class="h-5 w-px bg-gray-300 mx-1"></div>
+            
+            <div class="relative w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded transition overflow-hidden group" title="Highlight Color">
+                <div class="w-4 h-4 rounded-full bg-sun-orange shadow-sm pointer-events-none absolute z-10 group-hover:scale-110 transition-transform"></div>
+                <input type="color" @input="formatText('hiliteColor', $event.target.value)" class="absolute inset-0 w-12 h-12 opacity-0 cursor-pointer z-20 -top-2 -left-2">
+            </div>
+        </div>
     </div>
 
     <script>
-        const { createApp, ref, reactive } = Vue;
+        const { createApp, ref, reactive, onMounted, onUnmounted } = Vue;
 
         createApp({
             setup() {
@@ -869,6 +893,44 @@
                     }
                 }
 
+                // --- RICH TEXT TOOLBAR LOGIC ---
+                const showToolbar = ref(false);
+                const toolbarPos = reactive({ top: '0px', left: '0px' });
+                let hideTimeout = null;
+
+                function formatText(command, value = null) {
+                    document.execCommand(command, false, value);
+                }
+
+                function handleFocusIn(e) {
+                    if (e.target.hasAttribute('contenteditable')) {
+                        clearTimeout(hideTimeout);
+                        showToolbar.value = true;
+                        setTimeout(() => {
+                            const rect = e.target.getBoundingClientRect();
+                            toolbarPos.top = (rect.top - 5) + 'px';
+                            toolbarPos.left = (rect.left) + 'px'; 
+                        }, 10);
+                    }
+                }
+
+                function handleFocusOut(e) {
+                    hideTimeout = setTimeout(() => {
+                        if (document.activeElement && !document.activeElement.hasAttribute('contenteditable') && !document.activeElement.closest('#rtf-toolbar')) {
+                            showToolbar.value = false;
+                        }
+                    }, 200);
+                }
+
+                onMounted(() => {
+                    document.addEventListener('focusin', handleFocusIn);
+                    document.addEventListener('focusout', handleFocusOut);
+                });
+                onUnmounted(() => {
+                    document.removeEventListener('focusin', handleFocusIn);
+                    document.removeEventListener('focusout', handleFocusOut);
+                });
+
                 return {
                     state,
                     isExporting,
@@ -888,7 +950,10 @@
                     exportJSON,
                     importJSON,
                     saveHTML,
-                    startDragSpacer
+                    startDragSpacer,
+                    showToolbar,
+                    toolbarPos,
+                    formatText
                 }
             }
         }).mount('#app');
