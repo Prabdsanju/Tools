@@ -348,17 +348,25 @@
                                 <button v-if="state.headerBg" @click.stop="state.headerBg = ''" class="bg-red-600 hover:bg-red-700 text-white rounded w-7 h-7 flex items-center justify-center" title="Remove Background"><i class="fas fa-trash text-xs"></i></button>
                                 <button @click.stop="triggerUpload('headerBg')" class="bg-blue-600 hover:bg-blue-700 text-white text-[10px] px-2 py-1 rounded">Upload Background Image</button>
                             </div>
+                            <div class="flex gap-1 px-2 justify-center mt-1 pb-1 border-t border-gray-600 pt-1">
+                                <button @click.stop="state.headerAlign = 'left'" :class="['rounded px-2 py-1 text-xs', state.headerAlign === 'left' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800 hover:bg-white']"><i class="fas fa-align-left"></i></button>
+                                <button @click.stop="state.headerAlign = 'center'" :class="['rounded px-2 py-1 text-xs', state.headerAlign === 'center' || !state.headerAlign ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800 hover:bg-white']"><i class="fas fa-align-center"></i></button>
+                                <button @click.stop="state.headerAlign = 'right'" :class="['rounded px-2 py-1 text-xs', state.headerAlign === 'right' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800 hover:bg-white']"><i class="fas fa-align-right"></i></button>
+                            </div>
                         </div>
 
-                        <div class="editable-image-container inline-block w-48 h-16 mb-4 relative z-30" @click.stop="triggerUpload('logo')">
-                            <img :src="state.logoUrl" alt="Logo" class="h-full object-contain" crossorigin="anonymous">
-                            <div class="edit-overlay rounded">Change Logo</div>
-                        </div>
-                        
-                        <h1 class="text-3xl font-bold text-sun-green mb-2 font-serif uppercase relative z-30" contenteditable="true">BANGKOK – PATTAYA GROUP TOUR</h1>
-                        <div class="flex items-center gap-3 mb-4 relative z-30">
-                            <span class="bg-sun-blue text-white px-3 py-1 rounded-full text-sm font-bold shadow-sm inline-block" contenteditable="true">5 Nights 6 Days</span>
-                            <h2 class="text-xl text-sun-orange font-semibold" contenteditable="true">23 - 28 August 2026</h2>
+                        <div :class="['flex flex-col relative z-30 w-full', state.headerAlign === 'left' ? 'items-start text-left' : (state.headerAlign === 'right' ? 'items-end text-right' : 'items-center text-center')]">
+                            <div :class="['editable-image-container inline-block w-48 h-16 mb-4', state.headerAlign === 'left' ? 'mr-auto' : (state.headerAlign === 'right' ? 'ml-auto' : 'mx-auto')]" @click.stop="triggerUpload('logo')">
+                                <img :src="state.logoUrl" alt="Logo" :class="['h-full object-contain', state.headerAlign === 'left' ? 'mr-auto' : (state.headerAlign === 'right' ? 'ml-auto' : 'mx-auto')]" crossorigin="anonymous">
+                                <div class="edit-overlay rounded">Change Logo</div>
+                            </div>
+                            
+                            <h1 class="text-3xl font-bold text-sun-green mb-2 font-serif uppercase w-full" contenteditable="true">BANGKOK – PATTAYA GROUP TOUR</h1>
+                            
+                            <div :class="['flex items-center gap-3 mb-4 w-full', state.headerAlign === 'left' ? 'justify-start' : (state.headerAlign === 'right' ? 'justify-end' : 'justify-center')]">
+                                <span class="bg-sun-blue text-white px-3 py-1 rounded-full text-sm font-bold shadow-sm inline-block" contenteditable="true">5 Nights 6 Days</span>
+                                <h2 class="text-xl text-sun-orange font-semibold" contenteditable="true">23 - 28 August 2026</h2>
+                            </div>
                         </div>
                     </div>
 
@@ -723,6 +731,7 @@
                     },
                     logoUrl: 'https://sunleisureworld.com/images/logo.png',
                     headerBg: '',
+                    headerAlign: 'center',
                     heroImages: [
                         'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
                         'https://images.unsplash.com/photo-1563492065599-3520f775eeed?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'
