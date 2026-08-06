@@ -609,8 +609,8 @@
                                 <div v-if="state.contact.tel" class="flex items-center gap-2"><i class="fas fa-phone-alt text-sun-orange"></i> {{ state.contact.tel }}</div>
                                 <div v-if="state.contact.hotline" class="flex items-center gap-2"><i class="fas fa-headset text-sun-orange"></i> {{ state.contact.hotline }}</div>
                                 <div v-if="state.contact.email" class="flex items-center gap-2"><i class="fas fa-envelope text-sun-orange"></i> {{ state.contact.email }}</div>
-                                <div v-if="state.contact.facebook" class="flex items-center gap-2"><i class="fab fa-facebook text-sun-blue"></i> {{ state.contact.facebook }}</div>
-                                <div v-if="state.contact.instagram" class="flex items-center gap-2"><i class="fab fa-instagram text-pink-600"></i> {{ state.contact.instagram }}</div>
+                                <a v-if="state.contact.facebook" :href="state.contact.facebook" target="_blank" class="flex items-center gap-2 hover:text-blue-600 hover:underline transition"><i class="fab fa-facebook text-sun-blue"></i> {{ state.contact.facebook }}</a>
+                                <a v-if="state.contact.instagram" :href="state.contact.instagram" target="_blank" class="flex items-center gap-2 hover:text-pink-600 hover:underline transition"><i class="fab fa-instagram text-pink-600"></i> {{ state.contact.instagram }}</a>
                             </div>
                             <p class="text-xs text-gray-400">© 2026 Sun Leisure World. All rights reserved.</p>
                         </div>
