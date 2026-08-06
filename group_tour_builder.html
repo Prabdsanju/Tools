@@ -356,9 +356,15 @@
                         </div>
 
                         <div :class="['flex flex-col relative z-30 w-full', state.headerAlign === 'left' ? 'items-start text-left' : (state.headerAlign === 'right' ? 'items-end text-right' : 'items-center text-center')]">
-                            <div :class="['editable-image-container inline-block w-48 h-16 mb-4', state.headerAlign === 'left' ? 'mr-auto' : (state.headerAlign === 'right' ? 'ml-auto' : 'mx-auto')]" @click.stop="triggerUpload('logo')">
-                                <img :src="state.logoUrl" alt="Logo" :class="['h-full object-contain', state.headerAlign === 'left' ? 'mr-auto' : (state.headerAlign === 'right' ? 'ml-auto' : 'mx-auto')]" crossorigin="anonymous">
-                                <div class="edit-overlay rounded">Change Logo</div>
+                            <div :class="['editable-image-container inline-block mb-4', state.headerAlign === 'left' ? 'mr-auto' : (state.headerAlign === 'right' ? 'ml-auto' : 'mx-auto')]" :style="{ height: (state.logoHeight || 64) + 'px' }" @click.stop="triggerUpload('logo')">
+                                <img :src="state.logoUrl" alt="Logo" :class="['h-full w-auto object-contain', state.headerAlign === 'left' ? 'mr-auto' : (state.headerAlign === 'right' ? 'ml-auto' : 'mx-auto')]" crossorigin="anonymous">
+                                <div class="edit-overlay flex-col justify-center items-center gap-1 rounded !cursor-default" style="pointer-events: auto;">
+                                    <div class="flex gap-1 mb-1">
+                                        <button @click.stop="state.logoHeight = (state.logoHeight || 64) + 10" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-6 h-6 flex items-center justify-center" title="Increase Size"><i class="fas fa-plus text-xs"></i></button>
+                                        <button @click.stop="state.logoHeight = Math.max(30, (state.logoHeight || 64) - 10)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-6 h-6 flex items-center justify-center" title="Decrease Size"><i class="fas fa-minus text-xs"></i></button>
+                                    </div>
+                                    <button @click.stop="triggerUpload('logo')" class="bg-blue-600 hover:bg-blue-700 text-white text-[10px] px-2 py-1 rounded">Change Logo</button>
+                                </div>
                             </div>
                             
                             <h1 class="text-3xl font-bold text-sun-green mb-2 font-serif uppercase w-full" contenteditable="true">BANGKOK – PATTAYA GROUP TOUR</h1>
@@ -730,6 +736,7 @@
                         instagram: 'https://www.instagram.com/sun_leisure_world_sri_lanka_'
                     },
                     logoUrl: 'https://sunleisureworld.com/images/logo.png',
+                    logoHeight: 64,
                     headerBg: '',
                     headerAlign: 'center',
                     heroImages: [
