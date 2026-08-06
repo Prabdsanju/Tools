@@ -890,25 +890,34 @@
                                     const c = importedData.contentData;
                                     importedData.state.tourName = c[0] || importedData.state.tourName;
                                     importedData.state.texts = {
-                                        durationBadge: c[1] || '5 Nights 6 Days',
-                                        dateBadge: c[2] || '23 - 28 August 2026',
-                                        departureProcedure: c[3] || '',
-                                        inclusions: c[c.length - 7] || '',
-                                        exclusions: c[c.length - 6] || '',
-                                        flightDeparture: c[c.length - 5] || '',
-                                        flightReturn: c[c.length - 4] || '',
-                                        flightNote: c[c.length - 3] || ''
-                                    };
-                                    // Try to recover days
-                                    let contentIdx = 4;
-                                    if (importedData.state.days) {
-                                        importedData.state.days.forEach(day => {
-                                            day.header = c[contentIdx++] || 'Day – City Name';
-                                            day.date = c[contentIdx++] || 'Date';
-                                            day.mealPlan = c[contentIdx++] || 'Breakfast, Lunch';
-                                            day.description = c[contentIdx++] || 'Description';
-                                        });
-                                    }
+                                         durationBadge: c[1] || '5 Nights 6 Days',
+                                         dateBadge: c[2] || '23 - 28 August 2026',
+                                         departureProcedure: c[3] || ''
+                                     };
+                                     
+                                     // Try to recover days
+                                     let contentIdx = 4;
+                                     if (importedData.state.days) {
+                                         importedData.state.days.forEach(day => {
+                                             day.header = c[contentIdx++] || 'Day – City Name';
+                                             day.date = c[contentIdx++] || 'Date';
+                                             day.mealPlan = c[contentIdx++] || 'Breakfast, Lunch';
+                                             day.description = c[contentIdx++] || 'Description';
+                                         });
+                                     }
+                                     
+                                     importedData.state.texts.inclusions = c[contentIdx++] || '';
+                                     importedData.state.texts.exclusions = c[contentIdx++] || '';
+                                     importedData.state.texts.flightDeparture = c[contentIdx++] || '';
+                                     importedData.state.texts.flightReturn = c[contentIdx++] || '';
+                                     importedData.state.texts.flightNote = c[contentIdx++] || '';
+                                     
+                                     if (importedData.state.prices) {
+                                         importedData.state.prices.forEach(price => {
+                                             price.category = c[contentIdx++] || price.category || 'Category';
+                                             price.amount = c[contentIdx++] || price.amount || '0.00';
+                                         });
+                                     }
                                 }
                                 
                                 Object.assign(state, importedData.state);
