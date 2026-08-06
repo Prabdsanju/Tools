@@ -738,8 +738,8 @@
                         'https://images.unsplash.com/photo-1563492065599-3520f775eeed?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'
                     ],
                     days: [
-                        { id: Date.now(), images: ['https://images.unsplash.com/photo-1540420773420-3366772f4999?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'], pageBreakBefore: false, header: 'Day 01 – City Name', date: 'Date (e.g. 23/08)', mealPlan: 'Breakfast, Lunch', description: 'Description of the day\\'s activities goes here. You can type freely.' },
-                        { id: Date.now()+1, images: [], pageBreakBefore: false, header: 'Day 02 – City Name', date: 'Date (e.g. 24/08)', mealPlan: 'Breakfast, Lunch', description: 'Description of the day\\'s activities goes here. You can type freely.' }
+                        { id: Date.now(), images: ['https://images.unsplash.com/photo-1540420773420-3366772f4999?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'], pageBreakBefore: false, header: 'Day 01 – City Name', date: 'Date (e.g. 23/08)', mealPlan: 'Breakfast, Lunch', description: "Description of the day's activities goes here. You can type freely." },
+                        { id: Date.now()+1, images: [], pageBreakBefore: false, header: 'Day 02 – City Name', date: 'Date (e.g. 24/08)', mealPlan: 'Breakfast, Lunch', description: "Description of the day's activities goes here. You can type freely." }
                     ],
                     reviews: [
                         { id: Date.now(), avatar: 'https://ui-avatars.com/api/?name=Ruklani&background=random', name: 'Traveler Name', text: '"Type the review here..."' },
@@ -794,7 +794,7 @@
                 // --- ARRAY MANAGEMENT ---
                 function addDay() {
                     const idx = state.days.length + 1;
-                    state.days.push({ id: Date.now(), images: [], pageBreakBefore: false, header: 'Day ' + String(idx).padStart(2, '0') + ' – City Name', date: 'Date (e.g. 23/08)', mealPlan: 'Breakfast, Lunch', description: 'Description of the day\\'s activities goes here. You can type freely.' });
+                    state.days.push({ id: Date.now(), images: [], pageBreakBefore: false, header: 'Day ' + String(idx).padStart(2, '0') + ' – City Name', date: 'Date (e.g. 23/08)', mealPlan: 'Breakfast, Lunch', description: "Description of the day's activities goes here. You can type freely." });
                 }
                 function addHeroImage() {
                     state.heroImages.push('https://placehold.co/600x400?text=Upload+Image');
