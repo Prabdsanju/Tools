@@ -335,7 +335,7 @@
                         <!-- Overlay to make text readable if there's a background image -->
                         <div v-if="state.headerBg" class="absolute inset-0 bg-white/70 z-0"></div>
                         
-                        <div class="edit-overlay rounded-t-lg z-20 flex-col gap-1 !cursor-default" style="pointer-events: auto;">
+                        <div class="edit-overlay rounded-t-lg z-20 flex-col gap-1 !cursor-default !justify-start !items-end p-4" style="pointer-events: auto;">
                             <div class="grid grid-cols-2 gap-1 bg-black bg-opacity-70 p-2 rounded-xl mb-1">
                                 <button @click.stop="adjustImg('headerBg', 's', 10)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-7 h-7 flex items-center justify-center"><i class="fas fa-plus"></i></button>
                                 <button @click.stop="adjustImg('headerBg', 's', -10)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-7 h-7 flex items-center justify-center"><i class="fas fa-minus"></i></button>
