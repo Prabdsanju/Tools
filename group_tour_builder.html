@@ -478,7 +478,11 @@
                             </div>
                             
                             <!-- Add a decorative end marker if it's the last day -->
-                            <div v-if="idx === state.days.length - 1" class="text-center font-bold text-sun-green text-xl mt-8">***** Tour Ends *****</div>
+                            <div v-if="idx === state.days.length - 1" class="relative hover-group mt-8">
+                                <spacer-control :model-value="state.spacers.tourEnds" @update:model-value="state.spacers.tourEnds = $event" @start-drag="startDragSpacer" label="Tour End Gap" spacer-key="tourEnds"></spacer-control>
+                                <div :style="{ height: (state.spacers.tourEnds || 0) + 'px' }"></div>
+                                <div class="text-center font-bold text-sun-green text-xl">***** Tour Ends *****</div>
+                            </div>
                         </div>
 
                         <!-- Add Day Button -->
@@ -769,7 +773,7 @@
                         flightNote: 'Note: Meals + 20KG Baggage + 7KG Hand Luggage included.'
                     },
                     imagePos: {},
-                    spacers: { page1: 0, page2: 0, inclusions: 0, flights: 0, prices: 0, reviews: 0, gallery: 0, contact: 0 },
+                    spacers: { page1: 0, page2: 0, inclusions: 0, flights: 0, prices: 0, reviews: 0, gallery: 0, contact: 0, tourEnds: 0 },
                     pageBreaks: { packageDetails: false, inclusions: false, flights: false, prices: false, reviews: false, gallery: false, contact: false },
                     design: { lineSpacing: 1.5, letterSpacing: 0 },
                     contact: {
