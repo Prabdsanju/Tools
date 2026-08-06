@@ -495,11 +495,19 @@
                 </div>
 
                 <!-- PAGE 2: Inclusions & Flight Details -->
-                <div class="page-content pt-10">
+                <div class="page-content pt-10 relative hover-group">
+                    <div v-if="state.pageBreaks.packageDetails" class="html2pdf__page-break"></div>
+                    <button class="no-print absolute top-0 right-16 text-xs bg-gray-200 hover:bg-gray-300 rounded px-2 py-1 text-gray-700 opacity-0 group-hover:opacity-100 transition z-50" @click="state.pageBreaks.packageDetails = !state.pageBreaks.packageDetails" title="Toggle Page Break Before">
+                        <i class="fas fa-cut"></i> {{ state.pageBreaks.packageDetails ? 'Remove Page Break' : 'Add Page Break' }}
+                    </button>
                     
                     <h3 class="text-2xl font-bold text-gray-800 mb-6 border-b-2 border-sun-green pb-2">Package Details</h3>
 
                     <div class="relative hover-group mb-8 pt-4">
+                        <div v-if="state.pageBreaks.inclusions" class="html2pdf__page-break"></div>
+                        <button class="no-print absolute -top-4 right-16 text-xs bg-gray-200 hover:bg-gray-300 rounded px-2 py-1 text-gray-700 opacity-0 group-hover:opacity-100 transition z-50" @click="state.pageBreaks.inclusions = !state.pageBreaks.inclusions" title="Toggle Page Break Before">
+                            <i class="fas fa-cut"></i> {{ state.pageBreaks.inclusions ? 'Remove Page Break' : 'Add Page Break' }}
+                        </button>
                         <spacer-control :model-value="state.spacers.inclusions" @update:model-value="state.spacers.inclusions = $event" @start-drag="startDragSpacer" label="Inc/Exc Gap" spacer-key="inclusions"></spacer-control>
                         <div :style="{ height: (state.spacers.inclusions || 0) + 'px' }"></div>
                         <div class="grid grid-cols-2 gap-6">
@@ -527,6 +535,10 @@
 
                     <!-- Flight Details -->
                     <div class="relative hover-group mb-8 pt-4">
+                        <div v-if="state.pageBreaks.flights" class="html2pdf__page-break"></div>
+                        <button class="no-print absolute -top-4 right-16 text-xs bg-gray-200 hover:bg-gray-300 rounded px-2 py-1 text-gray-700 opacity-0 group-hover:opacity-100 transition z-50" @click="state.pageBreaks.flights = !state.pageBreaks.flights" title="Toggle Page Break Before">
+                            <i class="fas fa-cut"></i> {{ state.pageBreaks.flights ? 'Remove Page Break' : 'Add Page Break' }}
+                        </button>
                         <spacer-control :model-value="state.spacers.flights" @update:model-value="state.spacers.flights = $event" @start-drag="startDragSpacer" label="Flight Gap" spacer-key="flights"></spacer-control>
                         <div :style="{ height: (state.spacers.flights || 0) + 'px' }"></div>
                         <div class="border border-gray-200 rounded-lg p-5 bg-gray-50 shadow-sm relative hover-group mb-8">
@@ -547,6 +559,10 @@
 
                     <!-- Pricing Table -->
                     <div class="relative hover-group mb-8 pt-4">
+                        <div v-if="state.pageBreaks.prices" class="html2pdf__page-break"></div>
+                        <button class="no-print absolute -top-4 right-16 text-xs bg-gray-200 hover:bg-gray-300 rounded px-2 py-1 text-gray-700 opacity-0 group-hover:opacity-100 transition z-50" @click="state.pageBreaks.prices = !state.pageBreaks.prices" title="Toggle Page Break Before">
+                            <i class="fas fa-cut"></i> {{ state.pageBreaks.prices ? 'Remove Page Break' : 'Add Page Break' }}
+                        </button>
                         <spacer-control :model-value="state.spacers.prices" @update:model-value="state.spacers.prices = $event" @start-drag="startDragSpacer" label="Pricing Gap" spacer-key="prices"></spacer-control>
                         <div :style="{ height: (state.spacers.prices || 0) + 'px' }"></div>
                         <div class="border border-gray-200 rounded-lg bg-white shadow-sm overflow-hidden relative">
@@ -609,6 +625,10 @@
                         
                         <!-- Reviews -->
                         <div class="relative hover-group mb-8 pt-4">
+                            <div v-if="state.pageBreaks.reviews" class="html2pdf__page-break"></div>
+                            <button class="no-print absolute -top-4 right-16 text-xs bg-gray-200 hover:bg-gray-300 rounded px-2 py-1 text-gray-700 opacity-0 group-hover:opacity-100 transition z-50" @click="state.pageBreaks.reviews = !state.pageBreaks.reviews" title="Toggle Page Break Before">
+                                <i class="fas fa-cut"></i> {{ state.pageBreaks.reviews ? 'Remove Page Break' : 'Add Page Break' }}
+                            </button>
                             <spacer-control :model-value="state.spacers.reviews" @update:model-value="state.spacers.reviews = $event" @start-drag="startDragSpacer" label="Reviews Gap" spacer-key="reviews"></spacer-control>
                             <div :style="{ height: (state.spacers.reviews || 0) + 'px' }"></div>
                             <div class="text-center mb-8">
@@ -639,6 +659,10 @@
 
                         <!-- Moments Gallery -->
                         <div class="relative hover-group mb-8 pt-4 border-t border-gray-200 mt-10">
+                            <div v-if="state.pageBreaks.gallery" class="html2pdf__page-break"></div>
+                            <button class="no-print absolute -top-4 right-16 text-xs bg-gray-200 hover:bg-gray-300 rounded px-2 py-1 text-gray-700 opacity-0 group-hover:opacity-100 transition z-50" @click="state.pageBreaks.gallery = !state.pageBreaks.gallery" title="Toggle Page Break Before">
+                                <i class="fas fa-cut"></i> {{ state.pageBreaks.gallery ? 'Remove Page Break' : 'Add Page Break' }}
+                            </button>
                             <spacer-control :model-value="state.spacers.gallery" @update:model-value="state.spacers.gallery = $event" @start-drag="startDragSpacer" label="Gallery Gap" spacer-key="gallery"></spacer-control>
                             <div :style="{ height: (state.spacers.gallery || 0) + 'px' }"></div>
                             <div class="text-center mb-8 pt-4">
@@ -670,7 +694,11 @@
                             </button>
                         </div>
 
-                        <div class="mt-20 border-t border-gray-200 pt-8 pb-4 text-center">
+                        <div class="mt-20 border-t border-gray-200 pt-8 pb-4 text-center relative hover-group">
+                            <div v-if="state.pageBreaks.contact" class="html2pdf__page-break"></div>
+                            <button class="no-print absolute top-4 right-16 text-xs bg-gray-200 hover:bg-gray-300 rounded px-2 py-1 text-gray-700 opacity-0 group-hover:opacity-100 transition z-50" @click="state.pageBreaks.contact = !state.pageBreaks.contact" title="Toggle Page Break Before">
+                                <i class="fas fa-cut"></i> {{ state.pageBreaks.contact ? 'Remove Page Break' : 'Add Page Break' }}
+                            </button>
                             <h4 class="font-bold text-gray-800 text-lg mb-4">Contact Us</h4>
                             <div class="flex flex-wrap justify-center gap-6 text-sm text-gray-600 mb-6">
                                 <div v-if="state.contact.address" class="flex items-center gap-2"><i class="fas fa-map-marker-alt text-sun-orange"></i> {{ state.contact.address }}</div>
@@ -742,7 +770,8 @@
                         flightNote: 'Note: Meals + 20KG Baggage + 7KG Hand Luggage included.'
                     },
                     imagePos: {},
-                    spacers: { page1: 0, page2: 0 },
+                    spacers: { page1: 0, page2: 0, inclusions: 0, flights: 0, prices: 0, reviews: 0, gallery: 0 },
+                    pageBreaks: { packageDetails: false, inclusions: false, flights: false, prices: false, reviews: false, gallery: false, contact: false },
                     design: { lineSpacing: 1.5, letterSpacing: 0 },
                     contact: {
                         address: 'No.70/17 Lucky Plaza, St Anthony\'s Mawatha, Colombo - 03, Sri Lanka.',
