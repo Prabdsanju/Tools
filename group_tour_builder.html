@@ -415,6 +415,9 @@
                     <!-- Timeline Loop -->
                     <div class="pl-4 mt-6">
                         <div v-for="(day, idx) in state.days" :key="day.id" class="timeline-line pb-6 hover-group relative" :style="idx === state.days.length - 1 ? 'border-left-color: transparent;' : ''">
+                            <spacer-control :model-value="state.spacers['day-' + day.id]" @update:model-value="state.spacers['day-' + day.id] = $event" @start-drag="startDragSpacer" label="Day Gap" :spacer-key="'day-' + day.id"></spacer-control>
+                            <div :style="{ height: (state.spacers['day-' + day.id] || 0) + 'px' }"></div>
+                            
                             <div v-if="day.pageBreakBefore" class="html2pdf__page-break"></div>
                             <!-- Day Page Break Toggle -->
                             <button class="no-print absolute -top-8 right-16 text-xs bg-gray-200 hover:bg-gray-300 rounded px-2 py-1 text-gray-700 opacity-0 group-hover:opacity-100 transition" @click="day.pageBreakBefore = !day.pageBreakBefore" title="Toggle Page Break Before">
@@ -484,24 +487,21 @@
                     <span class="absolute right-0 -top-4 bg-white border border-gray-300 text-gray-500 font-bold px-3 py-1 rounded-t-lg rounded-bl-lg text-xs">Itinerary End</span>
                     <span class="absolute left-0 -top-4 bg-white border border-gray-300 text-blue-500 font-bold px-3 py-1 rounded-t-lg rounded-br-lg text-xs">Package Details</span>
                 </div>
-                <div class="no-print flex justify-center gap-2 mb-4">
-                    <button class="bg-white border border-blue-200 text-blue-600 rounded-full px-3 py-1 text-xs font-bold shadow-sm hover:bg-blue-50" @click="state.spacers.page1 -= 50">-50</button>
-                    <button class="bg-white border border-blue-200 text-blue-600 rounded-full px-3 py-1 text-xs font-bold shadow-sm hover:bg-blue-50" @click="state.spacers.page1 -= 20">-20</button>
-                    <button class="bg-white border border-blue-200 text-blue-600 rounded-full px-3 py-1 text-xs font-bold shadow-sm hover:bg-blue-50" @click="state.spacers.page1 += 20">+20</button>
-                    <button class="bg-white border border-blue-200 text-blue-600 rounded-full px-3 py-1 text-xs font-bold shadow-sm hover:bg-blue-50" @click="state.spacers.page1 += 50">+50</button>
-                    <button class="bg-blue-600 text-white rounded-full px-4 py-1 text-xs font-bold shadow-md hover:bg-blue-700 flex items-center gap-1 cursor-ns-resize" @mousedown="startDragSpacer($event, 'page1')" title="Drag up/down to adjust, or click to reset">
-                        <i class="fas fa-grip-lines"></i> {{ state.spacers.page1 }}px <i class="fas fa-grip-lines"></i>
-                    </button>
+                <div class="relative hover-group">
+                    <spacer-control :model-value="state.spacers.page1" @update:model-value="state.spacers.page1 = $event" @start-drag="startDragSpacer" label="Section Gap" spacer-key="page1"></spacer-control>
+                    <div :style="{ height: (state.spacers.page1 || 0) + 'px' }"></div>
                 </div>
-                <div :style="{ marginTop: state.spacers.page1 + 'px' }"></div>
 
                 <!-- PAGE 2: Inclusions & Flight Details -->
                 <div class="page-content pt-10">
                     
                     <h3 class="text-2xl font-bold text-gray-800 mb-6 border-b-2 border-sun-green pb-2">Package Details</h3>
 
-                    <div class="grid grid-cols-2 gap-6 mb-8">
-                        <!-- Inclusions -->
+                    <div class="relative hover-group mb-8 pt-4">
+                        <spacer-control :model-value="state.spacers.inclusions" @update:model-value="state.spacers.inclusions = $event" @start-drag="startDragSpacer" label="Inc/Exc Gap" spacer-key="inclusions"></spacer-control>
+                        <div :style="{ height: (state.spacers.inclusions || 0) + 'px' }"></div>
+                        <div class="grid grid-cols-2 gap-6">
+                            <!-- Inclusions -->
                         <div class="bg-green-50 p-5 rounded-lg border border-green-200 shadow-sm relative hover-group">
                             <h4 class="font-bold text-sun-green text-lg mb-4"><i class="fas fa-check-circle mr-2"></i>Inclusions</h4>
                             <div contenteditable="true" class="text-sm text-gray-700 min-h-[100px]" @blur="state.texts.inclusions = $event.target.innerHTML" v-html="state.texts.inclusions"></div>
@@ -510,28 +510,44 @@
                         <!-- Exclusions -->
                         <div class="bg-red-50 p-5 rounded-lg border border-red-200 shadow-sm relative hover-group">
                             <h4 class="font-bold text-red-600 text-lg mb-4"><i class="fas fa-times-circle mr-2"></i>Exclusions</h4>
-                            <div contenteditable="true" class="text-sm text-gray-700 min-h-[100px]" @blur="state.texts.exclusions = $event.target.innerHTML" v-html="state.texts.exclusions"></div>
+                            <div class="bg-green-50 p-5 rounded-lg border border-green-200 shadow-sm relative hover-group">
+                                <h4 class="font-bold text-sun-green text-lg mb-4"><i class="fas fa-check-circle mr-2"></i>Inclusions</h4>
+                                <div contenteditable="true" class="text-sm text-gray-700 min-h-[100px]" @blur="state.texts.inclusions = $event.target.innerHTML" v-html="state.texts.inclusions"></div>
+                            </div>
+                            
+                            <!-- Exclusions -->
+                            <div class="bg-red-50 p-5 rounded-lg border border-red-200 shadow-sm relative hover-group">
+                                <h4 class="font-bold text-red-600 text-lg mb-4"><i class="fas fa-times-circle mr-2"></i>Exclusions</h4>
+                                <div contenteditable="true" class="text-sm text-gray-700 min-h-[100px]" @blur="state.texts.exclusions = $event.target.innerHTML" v-html="state.texts.exclusions"></div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Flight Details -->
-                    <div class="border border-gray-200 rounded-lg p-5 bg-gray-50 shadow-sm relative hover-group mb-8">
-                        <h4 class="font-bold text-gray-800 text-lg mb-3"><i class="fas fa-plane-departure text-sun-blue mr-2"></i>Flight Details</h4>
-                        <div class="text-sm space-y-2 text-gray-700">
-                            <p><strong>Departure:</strong> <span contenteditable="true" @blur="state.texts.flightDeparture = $event.target.innerHTML" v-html="state.texts.flightDeparture"></span></p>
-                            <p><strong>Return:</strong> <span contenteditable="true" @blur="state.texts.flightReturn = $event.target.innerHTML" v-html="state.texts.flightReturn"></span></p>
-                            <p class="text-gray-500 mt-2 italic border-t pt-2" contenteditable="true" @blur="state.texts.flightNote = $event.target.innerHTML" v-html="state.texts.flightNote"></p>
+                    <div class="relative hover-group mb-8 pt-4">
+                        <spacer-control :model-value="state.spacers.flights" @update:model-value="state.spacers.flights = $event" @start-drag="startDragSpacer" label="Flight Gap" spacer-key="flights"></spacer-control>
+                        <div :style="{ height: (state.spacers.flights || 0) + 'px' }"></div>
+                        <div class="border border-gray-200 rounded-lg p-5 bg-gray-50 shadow-sm relative hover-group mb-8">
+                            <h4 class="font-bold text-gray-800 text-lg mb-3"><i class="fas fa-plane-departure text-sun-blue mr-2"></i>Flight Details</h4>
+                            <div class="text-sm space-y-2 text-gray-700">
+                                <p><strong>Departure:</strong> <span contenteditable="true" @blur="state.texts.flightDeparture = $event.target.innerHTML" v-html="state.texts.flightDeparture"></span></p>
+                                <p><strong>Return:</strong> <span contenteditable="true" @blur="state.texts.flightReturn = $event.target.innerHTML" v-html="state.texts.flightReturn"></span></p>
+                                <p class="text-gray-500 mt-2 italic border-t pt-2" contenteditable="true" @blur="state.texts.flightNote = $event.target.innerHTML" v-html="state.texts.flightNote"></p>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Pricing Details -->
-                    <div class="border border-gray-200 rounded-lg bg-white shadow-sm overflow-hidden relative hover-group">
-                        <h4 class="font-bold text-gray-800 text-lg mb-0 p-4 bg-gray-50 border-b border-gray-200"><i class="fas fa-tags text-sun-orange mr-2"></i>Price Breakdown (Per Person)</h4>
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="bg-gray-100 border-b border-gray-200 text-gray-700 text-sm">
-                                    <th class="py-2 px-4 font-bold">Category</th>
-                                    <th class="py-2 px-4 font-bold text-right">Per Person Price LKR</th>
+                    <!-- Pricing Table -->
+                    <div class="relative hover-group mb-8 pt-4">
+                        <spacer-control :model-value="state.spacers.prices" @update:model-value="state.spacers.prices = $event" @start-drag="startDragSpacer" label="Pricing Gap" spacer-key="prices"></spacer-control>
+                        <div :style="{ height: (state.spacers.prices || 0) + 'px' }"></div>
+                        <div class="border border-gray-200 rounded-lg bg-white shadow-sm overflow-hidden relative">
+                            <h4 class="font-bold text-gray-800 text-lg mb-0 p-4 bg-gray-50 border-b border-gray-200"><i class="fas fa-tags text-sun-orange mr-2"></i>Price Breakdown (Per Person)</h4>
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-gray-100 border-b border-gray-200 text-gray-700 text-sm">
+                                        <th class="py-2 px-4 font-bold">Category</th>
+                                        <th class="py-2 px-4 font-bold text-right">Per Person Price LKR</th>
                                     <th class="py-2 px-2 font-bold w-10 text-center no-print"></th>
                                 </tr>
                             </thead>
@@ -570,16 +586,10 @@
                     <span class="absolute right-0 -top-4 bg-white border border-gray-300 text-gray-500 font-bold px-3 py-1 rounded-t-lg rounded-bl-lg text-xs">Package Details End</span>
                     <span class="absolute left-0 -top-4 bg-white border border-gray-300 text-blue-500 font-bold px-3 py-1 rounded-t-lg rounded-br-lg text-xs">Reviews & Gallery</span>
                 </div>
-                <div class="no-print flex justify-center gap-2 mb-4">
-                    <button class="bg-white border border-blue-200 text-blue-600 rounded-full px-3 py-1 text-xs font-bold shadow-sm hover:bg-blue-50" @click="state.spacers.page2 -= 50">-50</button>
-                    <button class="bg-white border border-blue-200 text-blue-600 rounded-full px-3 py-1 text-xs font-bold shadow-sm hover:bg-blue-50" @click="state.spacers.page2 -= 20">-20</button>
-                    <button class="bg-white border border-blue-200 text-blue-600 rounded-full px-3 py-1 text-xs font-bold shadow-sm hover:bg-blue-50" @click="state.spacers.page2 += 20">+20</button>
-                    <button class="bg-white border border-blue-200 text-blue-600 rounded-full px-3 py-1 text-xs font-bold shadow-sm hover:bg-blue-50" @click="state.spacers.page2 += 50">+50</button>
-                    <button class="bg-blue-600 text-white rounded-full px-4 py-1 text-xs font-bold shadow-md hover:bg-blue-700 flex items-center gap-1 cursor-ns-resize" @mousedown="startDragSpacer($event, 'page2')" title="Drag up/down to adjust, or click to reset">
-                        <i class="fas fa-grip-lines"></i> {{ state.spacers.page2 }}px <i class="fas fa-grip-lines"></i>
-                    </button>
+                <div class="relative hover-group">
+                    <spacer-control :model-value="state.spacers.page2" @update:model-value="state.spacers.page2 = $event" @start-drag="startDragSpacer" label="Section Gap" spacer-key="page2"></spacer-control>
+                    <div :style="{ height: (state.spacers.page2 || 0) + 'px' }"></div>
                 </div>
-                <div :style="{ marginTop: state.spacers.page2 + 'px' }"></div>
 
                 <!-- PAGE 3: Reviews & Images -->
                 <div class="page-content bg-[#f8fafc] h-full relative">
@@ -590,7 +600,9 @@
                     <div class="relative z-10 pt-4">
                         
                         <!-- Reviews -->
-                        <div>
+                        <div class="relative hover-group mb-8 pt-4">
+                            <spacer-control :model-value="state.spacers.reviews" @update:model-value="state.spacers.reviews = $event" @start-drag="startDragSpacer" label="Reviews Gap" spacer-key="reviews"></spacer-control>
+                            <div :style="{ height: (state.spacers.reviews || 0) + 'px' }"></div>
                             <div class="text-center mb-8">
                                 <h3 class="text-3xl font-bold text-sun-green mb-2">Our Satisfied Travelers</h3>
                                 <p class="text-gray-500 italic">Don't just take our word for it. Here is what our clients have to say!</p>
@@ -615,9 +627,13 @@
                             </button>
                         </div>
 
+                        </div>
+
                         <!-- Moments Gallery -->
-                        <div>
-                            <div class="text-center mb-8 mt-10 border-t border-gray-200 pt-8">
+                        <div class="relative hover-group mb-8 pt-4 border-t border-gray-200 mt-10">
+                            <spacer-control :model-value="state.spacers.gallery" @update:model-value="state.spacers.gallery = $event" @start-drag="startDragSpacer" label="Gallery Gap" spacer-key="gallery"></spacer-control>
+                            <div :style="{ height: (state.spacers.gallery || 0) + 'px' }"></div>
+                            <div class="text-center mb-8 pt-4">
                                 <h3 class="text-2xl font-bold text-sun-green mb-2">Moments of Joyful Travelers</h3>
                             </div>
 
@@ -1011,7 +1027,7 @@
                     if (Math.abs(deltaY) > 2) {
                         isDraggingSpacer = true;
                     }
-                    state.spacers[activeSpacerKey] = dragStartValue + deltaY;
+                    state.spacers[activeSpacerKey] = Math.max(0, dragStartValue + deltaY);
                 }
 
                 function stopDragSpacer(event) {
@@ -1090,7 +1106,28 @@
                     toggleFit
                 }
             }
-        }).mount('#app');
+        });
+        
+        app.component('spacer-control', {
+            props: ['modelValue', 'label', 'spacerKey'],
+            emits: ['update:modelValue', 'start-drag'],
+            template: `
+                <div class="no-print w-full opacity-0 hover:opacity-100 transition-opacity duration-300 absolute top-0 left-0 right-0 flex justify-center z-50 transform -translate-y-1/2">
+                    <div class="bg-white shadow-lg border border-blue-200 rounded-full flex items-center p-0.5 gap-1">
+                        <span class="text-[9px] font-bold text-gray-500 px-2 uppercase">{{label}}</span>
+                        <button class="w-6 h-6 flex items-center justify-center rounded-full hover:bg-blue-50 text-blue-600 text-xs font-bold" @click.stop="$emit('update:modelValue', Math.max(0, (modelValue||0) - 50))" title="-50px">-50</button>
+                        <button class="w-6 h-6 flex items-center justify-center rounded-full hover:bg-blue-50 text-blue-600 text-xs font-bold" @click.stop="$emit('update:modelValue', Math.max(0, (modelValue||0) - 10))" title="-10px">-10</button>
+                        <button class="w-6 h-6 flex items-center justify-center rounded-full hover:bg-blue-50 text-blue-600 text-xs font-bold" @click.stop="$emit('update:modelValue', (modelValue||0) + 10)" title="+10px">+10</button>
+                        <button class="w-6 h-6 flex items-center justify-center rounded-full hover:bg-blue-50 text-blue-600 text-xs font-bold" @click.stop="$emit('update:modelValue', (modelValue||0) + 50)" title="+50px">+50</button>
+                        <div class="px-2 py-1 bg-blue-600 text-white rounded-full text-xs font-bold cursor-ns-resize flex items-center gap-1 shadow-inner ml-1" @mousedown.stop="$emit('start-drag', $event, spacerKey)" title="Drag up/down">
+                            <i class="fas fa-grip-lines"></i> {{ modelValue || 0 }}px <i class="fas fa-grip-lines"></i>
+                        </div>
+                    </div>
+                </div>
+            `
+        });
+        
+        app.mount('#app');
     </script>
 </body>
 </html>
