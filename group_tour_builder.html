@@ -444,7 +444,7 @@
                     <button class="bg-white border border-blue-200 text-blue-600 rounded-full px-3 py-1 text-xs font-bold shadow-sm hover:bg-blue-50" @click="state.spacers.page1 -= 20">-20</button>
                     <button class="bg-white border border-blue-200 text-blue-600 rounded-full px-3 py-1 text-xs font-bold shadow-sm hover:bg-blue-50" @click="state.spacers.page1 += 20">+20</button>
                     <button class="bg-white border border-blue-200 text-blue-600 rounded-full px-3 py-1 text-xs font-bold shadow-sm hover:bg-blue-50" @click="state.spacers.page1 += 50">+50</button>
-                    <button class="bg-blue-600 text-white rounded-full px-4 py-1 text-xs font-bold shadow-md hover:bg-blue-700 flex items-center gap-1" @click="state.spacers.page1 = 0">
+                    <button class="bg-blue-600 text-white rounded-full px-4 py-1 text-xs font-bold shadow-md hover:bg-blue-700 flex items-center gap-1 cursor-ns-resize" @mousedown="startDragSpacer($event, 'page1')" title="Drag up/down to adjust, or click to reset">
                         <i class="fas fa-grip-lines"></i> {{ state.spacers.page1 }}px <i class="fas fa-grip-lines"></i>
                     </button>
                 </div>
@@ -543,7 +543,7 @@
                     <button class="bg-white border border-blue-200 text-blue-600 rounded-full px-3 py-1 text-xs font-bold shadow-sm hover:bg-blue-50" @click="state.spacers.page2 -= 20">-20</button>
                     <button class="bg-white border border-blue-200 text-blue-600 rounded-full px-3 py-1 text-xs font-bold shadow-sm hover:bg-blue-50" @click="state.spacers.page2 += 20">+20</button>
                     <button class="bg-white border border-blue-200 text-blue-600 rounded-full px-3 py-1 text-xs font-bold shadow-sm hover:bg-blue-50" @click="state.spacers.page2 += 50">+50</button>
-                    <button class="bg-blue-600 text-white rounded-full px-4 py-1 text-xs font-bold shadow-md hover:bg-blue-700 flex items-center gap-1" @click="state.spacers.page2 = 0">
+                    <button class="bg-blue-600 text-white rounded-full px-4 py-1 text-xs font-bold shadow-md hover:bg-blue-700 flex items-center gap-1 cursor-ns-resize" @mousedown="startDragSpacer($event, 'page2')" title="Drag up/down to adjust, or click to reset">
                         <i class="fas fa-grip-lines"></i> {{ state.spacers.page2 }}px <i class="fas fa-grip-lines"></i>
                     </button>
                 </div>
@@ -835,6 +835,39 @@
                     }, 100);
                 }
 
+                // --- DRAG SPACER LOGIC ---
+                let isDraggingSpacer = false;
+                let dragStartY = 0;
+                let dragStartValue = 0;
+                let activeSpacerKey = null;
+
+                function startDragSpacer(event, key) {
+                    isDraggingSpacer = false;
+                    dragStartY = event.clientY;
+                    dragStartValue = state.spacers[key];
+                    activeSpacerKey = key;
+                    
+                    document.addEventListener('mousemove', onDragSpacer);
+                    document.addEventListener('mouseup', stopDragSpacer);
+                }
+
+                function onDragSpacer(event) {
+                    const deltaY = event.clientY - dragStartY;
+                    if (Math.abs(deltaY) > 2) {
+                        isDraggingSpacer = true;
+                    }
+                    state.spacers[activeSpacerKey] = dragStartValue + deltaY;
+                }
+
+                function stopDragSpacer(event) {
+                    document.removeEventListener('mousemove', onDragSpacer);
+                    document.removeEventListener('mouseup', stopDragSpacer);
+                    if (!isDraggingSpacer) {
+                        // Was just a click, reset to 0
+                        state.spacers[activeSpacerKey] = 0;
+                    }
+                }
+
                 return {
                     state,
                     isExporting,
@@ -853,7 +886,8 @@
                     jsonInput,
                     exportJSON,
                     importJSON,
-                    saveHTML
+                    saveHTML,
+                    startDragSpacer
                 }
             }
         }).mount('#app');
