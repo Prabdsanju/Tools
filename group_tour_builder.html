@@ -531,10 +531,16 @@
                         <div :style="{ height: (state.spacers.flights || 0) + 'px' }"></div>
                         <div class="border border-gray-200 rounded-lg p-5 bg-gray-50 shadow-sm relative hover-group mb-8">
                             <h4 class="font-bold text-gray-800 text-lg mb-3"><i class="fas fa-plane-departure text-sun-blue mr-2"></i>Flight Details</h4>
-                            <div class="text-sm space-y-2 text-gray-700">
-                                <p><strong>Departure:</strong> <span contenteditable="true" @blur="state.texts.flightDeparture = $event.target.innerHTML" v-html="state.texts.flightDeparture"></span></p>
-                                <p><strong>Return:</strong> <span contenteditable="true" @blur="state.texts.flightReturn = $event.target.innerHTML" v-html="state.texts.flightReturn"></span></p>
-                                <p class="text-gray-500 mt-2 italic border-t pt-2" contenteditable="true" @blur="state.texts.flightNote = $event.target.innerHTML" v-html="state.texts.flightNote"></p>
+                            <div class="text-sm space-y-3 text-gray-700">
+                                <div class="flex items-start gap-2">
+                                    <strong class="shrink-0 mt-0.5">Departure:</strong> 
+                                    <div contenteditable="true" class="flex-1 outline-none" @blur="state.texts.flightDeparture = $event.target.innerHTML" v-html="state.texts.flightDeparture"></div>
+                                </div>
+                                <div class="flex items-start gap-2">
+                                    <strong class="shrink-0 mt-0.5">Return:</strong> 
+                                    <div contenteditable="true" class="flex-1 outline-none" @blur="state.texts.flightReturn = $event.target.innerHTML" v-html="state.texts.flightReturn"></div>
+                                </div>
+                                <p class="text-gray-500 mt-3 italic border-t pt-2 outline-none" contenteditable="true" @blur="state.texts.flightNote = $event.target.innerHTML" v-html="state.texts.flightNote"></p>
                             </div>
                         </div>
                     </div>
