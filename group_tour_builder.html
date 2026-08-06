@@ -526,16 +526,7 @@
                         <!-- Exclusions -->
                         <div class="bg-red-50 p-5 rounded-lg border border-red-200 shadow-sm relative hover-group">
                             <h4 class="font-bold text-red-600 text-lg mb-4"><i class="fas fa-times-circle mr-2"></i>Exclusions</h4>
-                            <div class="bg-green-50 p-5 rounded-lg border border-green-200 shadow-sm relative hover-group">
-                                <h4 class="font-bold text-sun-green text-lg mb-4"><i class="fas fa-check-circle mr-2"></i>Inclusions</h4>
-                                <div contenteditable="true" class="text-sm text-gray-700 min-h-[100px]" @blur="state.texts.inclusions = $event.target.innerHTML" v-html="state.texts.inclusions"></div>
-                            </div>
-                            
-                            <!-- Exclusions -->
-                            <div class="bg-red-50 p-5 rounded-lg border border-red-200 shadow-sm relative hover-group">
-                                <h4 class="font-bold text-red-600 text-lg mb-4"><i class="fas fa-times-circle mr-2"></i>Exclusions</h4>
-                                <div contenteditable="true" class="text-sm text-gray-700 min-h-[100px]" @blur="state.texts.exclusions = $event.target.innerHTML" v-html="state.texts.exclusions"></div>
-                            </div>
+                            <div contenteditable="true" class="text-sm text-gray-700 min-h-[100px]" @blur="state.texts.exclusions = $event.target.innerHTML" v-html="state.texts.exclusions"></div>
                         </div>
                     </div>
 
