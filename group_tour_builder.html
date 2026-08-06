@@ -434,7 +434,22 @@
                     </div>
                 </div> <!-- End Page 1 Content -->
 
+                <!-- Page Break Adjustment 1 -->
+                <div class="no-print relative border-t-2 border-dashed border-red-300 my-8">
+                    <span class="absolute right-0 -top-4 bg-white border border-red-300 text-red-400 font-bold px-3 py-1 rounded-t-lg rounded-bl-lg text-xs">End of Page 1</span>
+                    <span class="absolute left-0 -top-4 bg-white border border-red-300 text-blue-500 font-bold px-3 py-1 rounded-t-lg rounded-br-lg text-xs">Start of Page 2</span>
+                </div>
+                <div class="no-print flex justify-center gap-2 mb-4">
+                    <button class="bg-white border border-blue-200 text-blue-600 rounded-full px-3 py-1 text-xs font-bold shadow-sm hover:bg-blue-50" @click="state.spacers.page1 -= 50">-50</button>
+                    <button class="bg-white border border-blue-200 text-blue-600 rounded-full px-3 py-1 text-xs font-bold shadow-sm hover:bg-blue-50" @click="state.spacers.page1 -= 20">-20</button>
+                    <button class="bg-white border border-blue-200 text-blue-600 rounded-full px-3 py-1 text-xs font-bold shadow-sm hover:bg-blue-50" @click="state.spacers.page1 += 20">+20</button>
+                    <button class="bg-white border border-blue-200 text-blue-600 rounded-full px-3 py-1 text-xs font-bold shadow-sm hover:bg-blue-50" @click="state.spacers.page1 += 50">+50</button>
+                    <button class="bg-blue-600 text-white rounded-full px-4 py-1 text-xs font-bold shadow-md hover:bg-blue-700 flex items-center gap-1" @click="state.spacers.page1 = 0">
+                        <i class="fas fa-grip-lines"></i> {{ state.spacers.page1 }}px <i class="fas fa-grip-lines"></i>
+                    </button>
+                </div>
                 <div class="page-break"></div>
+                <div :style="{ marginTop: state.spacers.page1 + 'px' }"></div>
 
                 <!-- PAGE 2: Inclusions & Flight Details -->
                 <div class="page-content pt-10">
@@ -518,7 +533,22 @@
 
                 </div>
 
+                <!-- Page Break Adjustment 2 -->
+                <div class="no-print relative border-t-2 border-dashed border-red-300 my-8">
+                    <span class="absolute right-0 -top-4 bg-white border border-red-300 text-red-400 font-bold px-3 py-1 rounded-t-lg rounded-bl-lg text-xs">End of Page 2</span>
+                    <span class="absolute left-0 -top-4 bg-white border border-red-300 text-blue-500 font-bold px-3 py-1 rounded-t-lg rounded-br-lg text-xs">Start of Page 3</span>
+                </div>
+                <div class="no-print flex justify-center gap-2 mb-4">
+                    <button class="bg-white border border-blue-200 text-blue-600 rounded-full px-3 py-1 text-xs font-bold shadow-sm hover:bg-blue-50" @click="state.spacers.page2 -= 50">-50</button>
+                    <button class="bg-white border border-blue-200 text-blue-600 rounded-full px-3 py-1 text-xs font-bold shadow-sm hover:bg-blue-50" @click="state.spacers.page2 -= 20">-20</button>
+                    <button class="bg-white border border-blue-200 text-blue-600 rounded-full px-3 py-1 text-xs font-bold shadow-sm hover:bg-blue-50" @click="state.spacers.page2 += 20">+20</button>
+                    <button class="bg-white border border-blue-200 text-blue-600 rounded-full px-3 py-1 text-xs font-bold shadow-sm hover:bg-blue-50" @click="state.spacers.page2 += 50">+50</button>
+                    <button class="bg-blue-600 text-white rounded-full px-4 py-1 text-xs font-bold shadow-md hover:bg-blue-700 flex items-center gap-1" @click="state.spacers.page2 = 0">
+                        <i class="fas fa-grip-lines"></i> {{ state.spacers.page2 }}px <i class="fas fa-grip-lines"></i>
+                    </button>
+                </div>
                 <div class="page-break"></div>
+                <div :style="{ marginTop: state.spacers.page2 + 'px' }"></div>
 
                 <!-- PAGE 3: Reviews & Images -->
                 <div class="page-content bg-[#f8fafc] h-full relative" style="min-height: 297mm;">
@@ -609,6 +639,7 @@
                 // /* STATE_START */
                 const state = reactive({
                     activeTab: 'General',
+                    spacers: { page1: 0, page2: 0 },
                     design: { lineSpacing: 1.5, letterSpacing: 0 },
                     contact: {
                         address: 'No.70/16 Lucky Plaza, St Anthony\'s Mawatha, Colombo - 03, Sri Lanka.',
