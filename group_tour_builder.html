@@ -367,11 +367,11 @@
                                 </div>
                             </div>
                             
-                            <h1 class="text-3xl font-bold text-sun-green mb-2 font-serif uppercase w-full" contenteditable="true">BANGKOK – PATTAYA GROUP TOUR</h1>
+                            <h1 class="text-3xl font-bold text-sun-green mb-2 font-serif uppercase w-full" contenteditable="true" @blur="state.tourName = $event.target.innerText" v-html="state.tourName"></h1>
                             
                             <div :class="['flex items-center gap-3 mb-4 w-full', state.headerAlign === 'left' ? 'justify-start' : (state.headerAlign === 'right' ? 'justify-end' : 'justify-center')]">
-                                <span class="bg-sun-blue text-white px-3 py-1 rounded-full text-sm font-bold shadow-sm inline-block" contenteditable="true">5 Nights 6 Days</span>
-                                <h2 class="text-xl text-sun-orange font-semibold" contenteditable="true">23 - 28 August 2026</h2>
+                                <span class="bg-sun-blue text-white px-3 py-1 rounded-full text-sm font-bold shadow-sm inline-block" contenteditable="true" @blur="state.texts.durationBadge = $event.target.innerHTML" v-html="state.texts.durationBadge"></span>
+                                <h2 class="text-xl text-sun-orange font-semibold" contenteditable="true" @blur="state.texts.dateBadge = $event.target.innerHTML" v-html="state.texts.dateBadge"></h2>
                             </div>
                         </div>
                     </div>
@@ -408,12 +408,7 @@
                     
                     <div class="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-100 relative hover-group">
                         <h4 class="font-bold text-lg text-sun-green mb-2"><i class="fas fa-plane-arrival mr-2"></i>Departure Procedure:</h4>
-                        <div class="text-sm" contenteditable="true">
-                            <ul>
-                                <li>Sun Leisure World's representative will meet you at Colombo Bandaranayake International Airport.</li>
-                                <li>You will get a briefing of the departure procedure & our representative will guide you in the process.</li>
-                            </ul>
-                        </div>
+                        <div class="text-sm" contenteditable="true" @blur="state.texts.departureProcedure = $event.target.innerHTML" v-html="state.texts.departureProcedure"></div>
                     </div>
 
                     <!-- Timeline Loop -->
@@ -429,19 +424,17 @@
 
                             <div class="timeline-dot flex items-center justify-between">
                                 <div>
-                                    <span class="day-header" :class="idx === state.days.length - 1 ? 'bg-sun-orange' : ''" contenteditable="true">Day {{ String(idx+1).padStart(2, '0') }} – City Name</span>
-                                    <span class="ml-3 text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded" contenteditable="true">Date (e.g. 23/08)</span>
+                                    <span class="day-header" :class="idx === state.days.length - 1 ? 'bg-sun-orange' : ''" contenteditable="true" @blur="day.header = $event.target.innerHTML" v-html="day.header"></span>
+                                    <span class="ml-3 text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded" contenteditable="true" @blur="day.date = $event.target.innerHTML" v-html="day.date"></span>
                                 </div>
                             </div>
                             
                             <div class="mt-2 text-gray-700 text-sm">
                                 <p class="mb-2 text-xs bg-orange-50 text-orange-800 border border-orange-200 inline-block px-2 py-1 rounded">
-                                    <strong><i class="fas fa-utensils mr-1"></i> Meal Plan:</strong> <span contenteditable="true">Breakfast, Lunch</span>
+                                    <strong><i class="fas fa-utensils mr-1"></i> Meal Plan:</strong> <span contenteditable="true" @blur="day.mealPlan = $event.target.innerHTML" v-html="day.mealPlan"></span>
                                 </p>
                                 
-                                <div contenteditable="true" class="space-y-2 mt-2 min-h-[40px]">
-                                    <p>Description of the day's activities goes here. You can type freely.</p>
-                                </div>
+                                <div contenteditable="true" class="space-y-2 mt-2 min-h-[40px]" @blur="day.description = $event.target.innerHTML" v-html="day.description"></div>
                                 
                                 <!-- Day Images -->
                                 <div class="mt-4">
@@ -511,25 +504,13 @@
                         <!-- Inclusions -->
                         <div class="bg-green-50 p-5 rounded-lg border border-green-200 shadow-sm relative hover-group">
                             <h4 class="font-bold text-sun-green text-lg mb-4"><i class="fas fa-check-circle mr-2"></i>Inclusions</h4>
-                            <div contenteditable="true" class="text-sm text-gray-700 min-h-[100px]">
-                                <ul class="list-disc pl-5 space-y-1.5">
-                                    <li>All mentioned tours & admission fees</li>
-                                    <li>Coral Island Tour by Speedboat</li>
-                                    <li>05 Nights at 3* hotel in Pattaya & BKK</li>
-                                </ul>
-                            </div>
+                            <div contenteditable="true" class="text-sm text-gray-700 min-h-[100px]" @blur="state.texts.inclusions = $event.target.innerHTML" v-html="state.texts.inclusions"></div>
                         </div>
                         
                         <!-- Exclusions -->
                         <div class="bg-red-50 p-5 rounded-lg border border-red-200 shadow-sm relative hover-group">
                             <h4 class="font-bold text-red-600 text-lg mb-4"><i class="fas fa-times-circle mr-2"></i>Exclusions</h4>
-                            <div contenteditable="true" class="text-sm text-gray-700 min-h-[100px]">
-                                <ul class="list-disc pl-5 space-y-1.5">
-                                    <li>Early check-in or late check-out</li>
-                                    <li>Personal expenses</li>
-                                    <li>Tips for guide & driver</li>
-                                </ul>
-                            </div>
+                            <div contenteditable="true" class="text-sm text-gray-700 min-h-[100px]" @blur="state.texts.exclusions = $event.target.innerHTML" v-html="state.texts.exclusions"></div>
                         </div>
                     </div>
 
@@ -537,9 +518,9 @@
                     <div class="border border-gray-200 rounded-lg p-5 bg-gray-50 shadow-sm relative hover-group mb-8">
                         <h4 class="font-bold text-gray-800 text-lg mb-3"><i class="fas fa-plane-departure text-sun-blue mr-2"></i>Flight Details</h4>
                         <div class="text-sm space-y-2 text-gray-700">
-                            <p><strong>Departure:</strong> <span contenteditable="true">Colombo to Bangkok - FD 141 – CMB-DMK - 23:15-04:20(+1)</span></p>
-                            <p><strong>Return:</strong> <span contenteditable="true">Bangkok to Colombo - FD 140 – DMK-CMB - 20:25-22:15</span></p>
-                            <p class="text-gray-500 mt-2 italic border-t pt-2" contenteditable="true">Note: Meals + 20KG Baggage + 7KG Hand Luggage included.</p>
+                            <p><strong>Departure:</strong> <span contenteditable="true" @blur="state.texts.flightDeparture = $event.target.innerHTML" v-html="state.texts.flightDeparture"></span></p>
+                            <p><strong>Return:</strong> <span contenteditable="true" @blur="state.texts.flightReturn = $event.target.innerHTML" v-html="state.texts.flightReturn"></span></p>
+                            <p class="text-gray-500 mt-2 italic border-t pt-2" contenteditable="true" @blur="state.texts.flightNote = $event.target.innerHTML" v-html="state.texts.flightNote"></p>
                         </div>
                     </div>
 
@@ -623,11 +604,11 @@
                                     
                                     <div class="flex items-center gap-3 mb-3">
                                         <div>
-                                            <h5 class="font-bold text-sm text-gray-800" contenteditable="true">Traveler Name</h5>
+                                            <h5 class="font-bold text-sm text-gray-800" contenteditable="true" @blur="review.name = $event.target.innerHTML" v-html="review.name"></h5>
                                             <div class="text-sun-yellow text-xs"><i class="fas fa-star" v-for="i in 5"></i></div>
                                         </div>
                                     </div>
-                                    <p class="text-xs text-gray-600 italic leading-relaxed" contenteditable="true">"Type the review here..."</p>
+                                    <p class="text-xs text-gray-600 italic leading-relaxed" contenteditable="true" @blur="review.text = $event.target.innerHTML" v-html="review.text"></p>
                                 </div>
                             </div>
                             <button class="no-print text-sm text-sun-orange font-semibold py-2 w-full border border-dashed border-sun-orange rounded hover:bg-orange-50 mb-12" @click="addReview()">
@@ -726,7 +707,17 @@
                 // Arrays are stored in state so we can dynamically loop them
                 // /* STATE_START */
                 const state = reactive({
-                    activeTab: 'General',
+                    tourName: 'Sri Lanka Unveiled: A Journey Through Time & Nature',
+                    texts: {
+                        durationBadge: '5 Nights 6 Days',
+                        dateBadge: '23 - 28 August 2026',
+                        departureProcedure: `<ul>\n                                <li>Sun Leisure World's representative will meet you at Colombo Bandaranayake International Airport.</li>\n                                <li>You will get a briefing of the departure procedure & our representative will guide you in the process.</li>\n                            </ul>`,
+                        inclusions: `<ul class="list-disc pl-5 space-y-1.5">\n                                    <li>All mentioned tours & admission fees</li>\n                                    <li>Coral Island Tour by Speedboat</li>\n                                    <li>05 Nights at 3* hotel in Pattaya & BKK</li>\n                                </ul>`,
+                        exclusions: `<ul class="list-disc pl-5 space-y-1.5">\n                                    <li>Early check-in or late check-out</li>\n                                    <li>Personal expenses</li>\n                                    <li>Tips for guide & driver</li>\n                                </ul>`,
+                        flightDeparture: 'Colombo to Bangkok - FD 141 – CMB-DMK - 23:15-04:20(+1)',
+                        flightReturn: 'Bangkok to Colombo - FD 140 – DMK-CMB - 20:25-22:15',
+                        flightNote: 'Note: Meals + 20KG Baggage + 7KG Hand Luggage included.'
+                    },
                     imagePos: {},
                     spacers: { page1: 0, page2: 0 },
                     design: { lineSpacing: 1.5, letterSpacing: 0 },
@@ -747,12 +738,12 @@
                         'https://images.unsplash.com/photo-1563492065599-3520f775eeed?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'
                     ],
                     days: [
-                        { id: Date.now(), images: ['https://images.unsplash.com/photo-1540420773420-3366772f4999?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'], pageBreakBefore: false },
-                        { id: Date.now()+1, images: [], pageBreakBefore: false }
+                        { id: Date.now(), images: ['https://images.unsplash.com/photo-1540420773420-3366772f4999?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'], pageBreakBefore: false, header: 'Day 01 – City Name', date: 'Date (e.g. 23/08)', mealPlan: 'Breakfast, Lunch', description: 'Description of the day\\'s activities goes here. You can type freely.' },
+                        { id: Date.now()+1, images: [], pageBreakBefore: false, header: 'Day 02 – City Name', date: 'Date (e.g. 24/08)', mealPlan: 'Breakfast, Lunch', description: 'Description of the day\\'s activities goes here. You can type freely.' }
                     ],
                     reviews: [
-                        { id: Date.now(), avatar: 'https://ui-avatars.com/api/?name=Ruklani&background=random' },
-                        { id: Date.now()+1, avatar: 'https://ui-avatars.com/api/?name=Asanka&background=random' }
+                        { id: Date.now(), avatar: 'https://ui-avatars.com/api/?name=Ruklani&background=random', name: 'Traveler Name', text: '"Type the review here..."' },
+                        { id: Date.now()+1, avatar: 'https://ui-avatars.com/api/?name=Asanka&background=random', name: 'Traveler Name', text: '"Type the review here..."' }
                     ],
                     moments: [
                         'https://images.unsplash.com/photo-1517400508447-f8dd518b86db?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
@@ -804,7 +795,8 @@
 
                 // --- ARRAY MANAGEMENT ---
                 function addDay() {
-                    state.days.push({ id: Date.now(), images: [], pageBreakBefore: false });
+                    const idx = state.days.length + 1;
+                    state.days.push({ id: Date.now(), images: [], pageBreakBefore: false, header: 'Day ' + String(idx).padStart(2, '0') + ' – City Name', date: 'Date (e.g. 23/08)', mealPlan: 'Breakfast, Lunch', description: 'Description of the day\\'s activities goes here. You can type freely.' });
                 }
                 function addHeroImage() {
                     state.heroImages.push('https://placehold.co/600x400?text=Upload+Image');
@@ -813,7 +805,7 @@
                     state.days[dayIdx].images.push('https://placehold.co/600x400?text=Upload+Image');
                 }
                 function addReview() {
-                    state.reviews.push({ id: Date.now(), avatar: 'https://placehold.co/100x100?text=Avatar' });
+                    state.reviews.push({ id: Date.now(), avatar: 'https://placehold.co/100x100?text=Avatar', name: 'Traveler Name', text: '"Type the review here..."' });
                 }
                 function addMoment() {
                     state.moments.push('https://placehold.co/600x400?text=Upload+Image');
@@ -873,14 +865,8 @@
                 const jsonInput = ref(null);
                 
                 function exportJSON() {
-                    const contentData = [];
-                    document.querySelectorAll('[contenteditable="true"]').forEach((el) => {
-                        contentData.push(el.innerHTML);
-                    });
-
                     const exportData = {
-                        state: state,
-                        contentData: contentData
+                        state: state
                     };
 
                     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportData, null, 2));
@@ -901,16 +887,33 @@
                             const importedData = JSON.parse(e.target.result);
                             
                             if (importedData.state) {
-                                Object.assign(state, importedData.state);
-                                
-                                nextTick(() => {
-                                    if (importedData.contentData) {
-                                        const els = document.querySelectorAll('[contenteditable="true"]');
-                                        importedData.contentData.forEach((html, index) => {
-                                            if (els[index]) els[index].innerHTML = html;
+                                // Fallback mapping for old JSONs that had contentData
+                                if (importedData.contentData && !importedData.state.texts) {
+                                    const c = importedData.contentData;
+                                    importedData.state.tourName = c[0] || importedData.state.tourName;
+                                    importedData.state.texts = {
+                                        durationBadge: c[1] || '5 Nights 6 Days',
+                                        dateBadge: c[2] || '23 - 28 August 2026',
+                                        departureProcedure: c[3] || '',
+                                        inclusions: c[c.length - 7] || '',
+                                        exclusions: c[c.length - 6] || '',
+                                        flightDeparture: c[c.length - 5] || '',
+                                        flightReturn: c[c.length - 4] || '',
+                                        flightNote: c[c.length - 3] || ''
+                                    };
+                                    // Try to recover days
+                                    let contentIdx = 4;
+                                    if (importedData.state.days) {
+                                        importedData.state.days.forEach(day => {
+                                            day.header = c[contentIdx++] || 'Day – City Name';
+                                            day.date = c[contentIdx++] || 'Date';
+                                            day.mealPlan = c[contentIdx++] || 'Breakfast, Lunch';
+                                            day.description = c[contentIdx++] || 'Description';
                                         });
                                     }
-                                });
+                                }
+                                
+                                Object.assign(state, importedData.state);
                             } else {
                                 // Fallback for older JSON exports
                                 Object.assign(state, importedData);
