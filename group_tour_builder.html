@@ -329,14 +329,26 @@
                 <div class="page-content">
                     
                     <!-- Header Cover -->
-                    <div class="header-bg -mx-[20mm] -mt-[20mm] px-[20mm] pt-[20mm] pb-8 mb-6 rounded-t-lg relative overflow-hidden editable-image-container min-h-[200px]" 
-                         :style="state.headerBg ? { backgroundImage: 'url(' + state.headerBg + ')', backgroundSize: 'cover', backgroundPosition: 'center' } : {}">
+                    <div class="header-bg -mx-[20mm] -mt-[20mm] px-[20mm] pt-[20mm] pb-8 mb-6 rounded-t-lg relative overflow-hidden editable-image-container min-h-[200px]">
+                        <img v-if="state.headerBg" :src="state.headerBg" class="absolute inset-0 w-full h-full object-cover z-0" :style="getImgStyle('headerBg')">
                         
                         <!-- Overlay to make text readable if there's a background image -->
-                        <div v-if="state.headerBg" class="absolute inset-0 bg-white/70"></div>
+                        <div v-if="state.headerBg" class="absolute inset-0 bg-white/70 z-0"></div>
                         
-                        <div class="edit-overlay rounded-t-lg z-20" @click.stop="triggerUpload('headerBg')">Upload Background Image</div>
-                        <button v-if="state.headerBg" class="delete-btn z-20" @click.stop="state.headerBg = ''" title="Remove Background"><i class="fas fa-trash text-xs"></i></button>
+                        <div class="edit-overlay rounded-t-lg z-20 flex-col gap-1 !cursor-default" style="pointer-events: auto;">
+                            <div class="grid grid-cols-2 gap-1 bg-black bg-opacity-70 p-2 rounded-xl mb-1">
+                                <button @click.stop="adjustImg('headerBg', 's', 10)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-7 h-7 flex items-center justify-center"><i class="fas fa-plus"></i></button>
+                                <button @click.stop="adjustImg('headerBg', 's', -10)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-7 h-7 flex items-center justify-center"><i class="fas fa-minus"></i></button>
+                                <button @click.stop="adjustImg('headerBg', 'x', -5)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-7 h-7 flex items-center justify-center"><i class="fas fa-arrow-left"></i></button>
+                                <button @click.stop="adjustImg('headerBg', 'x', 5)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-7 h-7 flex items-center justify-center"><i class="fas fa-arrow-right"></i></button>
+                                <button @click.stop="adjustImg('headerBg', 'y', -5)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-7 h-7 flex items-center justify-center"><i class="fas fa-arrow-up"></i></button>
+                                <button @click.stop="adjustImg('headerBg', 'y', 5)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-7 h-7 flex items-center justify-center"><i class="fas fa-arrow-down"></i></button>
+                            </div>
+                            <div class="flex gap-1 px-2 justify-center">
+                                <button v-if="state.headerBg" @click.stop="state.headerBg = ''" class="bg-red-600 hover:bg-red-700 text-white rounded w-7 h-7 flex items-center justify-center" title="Remove Background"><i class="fas fa-trash text-xs"></i></button>
+                                <button @click.stop="triggerUpload('headerBg')" class="bg-blue-600 hover:bg-blue-700 text-white text-[10px] px-2 py-1 rounded">Upload Background Image</button>
+                            </div>
+                        </div>
 
                         <div class="editable-image-container inline-block w-48 h-16 mb-4 relative z-30" @click.stop="triggerUpload('logo')">
                             <img :src="state.logoUrl" alt="Logo" class="h-full object-contain" crossorigin="anonymous">
@@ -354,9 +366,21 @@
                     <div class="mb-8">
                         <div class="grid gap-2 mb-2" :style="{ gridTemplateColumns: `repeat(${Math.min(state.heroImages.length, 4)}, minmax(0, 1fr))` }">
                             <div v-for="(img, idx) in state.heroImages" :key="idx" class="editable-image-container relative">
-                                <img :src="img" class="h-40 w-full object-cover rounded shadow-sm" crossorigin="anonymous">
-                                <div class="edit-overlay rounded" @click="triggerUpload('hero', idx)">Upload</div>
-                                <button class="delete-btn" @click.stop="state.heroImages.splice(idx, 1)" title="Remove Image"><i class="fas fa-trash text-xs"></i></button>
+                                <img :src="img" class="h-40 w-full object-cover rounded shadow-sm" crossorigin="anonymous" :style="getImgStyle('hero-' + idx)">
+                                <div class="edit-overlay rounded flex-col gap-1 !cursor-default" style="pointer-events: auto;">
+                                    <div class="grid grid-cols-2 gap-1 bg-black bg-opacity-70 p-2 rounded-xl mb-1">
+                                        <button @click.stop="adjustImg('hero-' + idx, 's', 10)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-7 h-7 flex items-center justify-center"><i class="fas fa-plus"></i></button>
+                                        <button @click.stop="adjustImg('hero-' + idx, 's', -10)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-7 h-7 flex items-center justify-center"><i class="fas fa-minus"></i></button>
+                                        <button @click.stop="adjustImg('hero-' + idx, 'x', -5)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-7 h-7 flex items-center justify-center"><i class="fas fa-arrow-left"></i></button>
+                                        <button @click.stop="adjustImg('hero-' + idx, 'x', 5)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-7 h-7 flex items-center justify-center"><i class="fas fa-arrow-right"></i></button>
+                                        <button @click.stop="adjustImg('hero-' + idx, 'y', -5)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-7 h-7 flex items-center justify-center"><i class="fas fa-arrow-up"></i></button>
+                                        <button @click.stop="adjustImg('hero-' + idx, 'y', 5)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-7 h-7 flex items-center justify-center"><i class="fas fa-arrow-down"></i></button>
+                                    </div>
+                                    <div class="flex gap-1 w-full px-2 justify-center">
+                                        <button @click.stop="state.heroImages.splice(idx, 1)" class="bg-red-600 hover:bg-red-700 text-white rounded w-7 h-7 flex items-center justify-center"><i class="fas fa-trash"></i></button>
+                                        <button @click.stop="triggerUpload('hero', idx)" class="bg-blue-600 hover:bg-blue-700 text-white text-[10px] px-2 rounded flex-1">Upload</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <button class="no-print text-sm text-sun-green font-semibold w-full border border-dashed border-sun-green py-2 rounded hover:bg-green-50" @click="addHeroImage()">
@@ -408,12 +432,22 @@
                                 <div class="mt-4">
                                     <div class="grid grid-cols-2 gap-2 mb-2" v-if="day.images.length > 0">
                                         <div v-for="(img, i) in day.images" :key="i" class="editable-image-container h-32 relative">
-                                            <img :src="img" class="h-full w-full object-cover rounded border border-gray-200" crossorigin="anonymous">
-                                            <div class="edit-overlay rounded flex-col gap-2 !cursor-default" style="pointer-events: auto;">
-                                                <button @click.stop="triggerUpload('dayImage', idx, i)" class="bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded w-3/4">Upload</button>
-                                                <button @click.stop="promptImageUrl('dayImage', idx, i)" class="bg-green-600 hover:bg-green-700 px-2 py-1 rounded w-3/4">From URL</button>
+                                            <img :src="img" class="h-full w-full object-cover rounded border border-gray-200" crossorigin="anonymous" :style="getImgStyle('day-' + day.id + '-' + i)">
+                                            <div class="edit-overlay rounded flex-col gap-1 !cursor-default" style="pointer-events: auto;">
+                                                <div class="grid grid-cols-2 gap-1 bg-black bg-opacity-70 p-2 rounded-xl mb-1">
+                                                    <button @click.stop="adjustImg('day-' + day.id + '-' + i, 's', 10)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-7 h-7 flex items-center justify-center"><i class="fas fa-plus"></i></button>
+                                                    <button @click.stop="adjustImg('day-' + day.id + '-' + i, 's', -10)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-7 h-7 flex items-center justify-center"><i class="fas fa-minus"></i></button>
+                                                    <button @click.stop="adjustImg('day-' + day.id + '-' + i, 'x', -5)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-7 h-7 flex items-center justify-center"><i class="fas fa-arrow-left"></i></button>
+                                                    <button @click.stop="adjustImg('day-' + day.id + '-' + i, 'x', 5)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-7 h-7 flex items-center justify-center"><i class="fas fa-arrow-right"></i></button>
+                                                    <button @click.stop="adjustImg('day-' + day.id + '-' + i, 'y', -5)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-7 h-7 flex items-center justify-center"><i class="fas fa-arrow-up"></i></button>
+                                                    <button @click.stop="adjustImg('day-' + day.id + '-' + i, 'y', 5)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-7 h-7 flex items-center justify-center"><i class="fas fa-arrow-down"></i></button>
+                                                </div>
+                                                <div class="flex gap-1 w-full px-2 justify-center">
+                                                    <button @click.stop="day.images.splice(i, 1)" class="bg-red-600 hover:bg-red-700 text-white rounded w-7 h-7 flex items-center justify-center"><i class="fas fa-trash"></i></button>
+                                                    <button @click.stop="triggerUpload('dayImage', idx, i)" class="bg-blue-600 hover:bg-blue-700 text-white text-[10px] px-2 rounded flex-1">Upload</button>
+                                                    <button @click.stop="promptImageUrl('dayImage', idx, i)" class="bg-green-600 hover:bg-green-700 text-white text-[10px] px-2 rounded flex-1">URL</button>
+                                                </div>
                                             </div>
-                                            <button class="delete-btn" @click.stop="day.images.splice(i, 1)" title="Remove Image"><i class="fas fa-trash text-xs"></i></button>
                                         </div>
                                     </div>
                                     <button class="no-print text-xs text-blue-600 font-semibold" @click="addDayImage(idx)">
@@ -593,9 +627,21 @@
 
                             <div class="grid grid-cols-2 gap-4 mb-4">
                                 <div v-for="(img, idx) in state.moments" :key="idx" class="editable-image-container h-44 relative">
-                                    <img :src="img" class="w-full h-full object-cover rounded-lg shadow-md border-2 border-white" crossorigin="anonymous">
-                                    <div class="edit-overlay rounded-lg" @click="triggerUpload('moment', idx)">Upload Image</div>
-                                    <button class="delete-btn" @click.stop="state.moments.splice(idx, 1)" title="Remove Image"><i class="fas fa-trash text-xs"></i></button>
+                                    <img :src="img" class="w-full h-full object-cover rounded-lg shadow-md border-2 border-white" crossorigin="anonymous" :style="getImgStyle('moment-' + idx)">
+                                    <div class="edit-overlay rounded-lg flex-col gap-1 !cursor-default" style="pointer-events: auto;">
+                                        <div class="grid grid-cols-2 gap-1 bg-black bg-opacity-70 p-2 rounded-xl mb-1">
+                                            <button @click.stop="adjustImg('moment-' + idx, 's', 10)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-7 h-7 flex items-center justify-center"><i class="fas fa-plus"></i></button>
+                                            <button @click.stop="adjustImg('moment-' + idx, 's', -10)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-7 h-7 flex items-center justify-center"><i class="fas fa-minus"></i></button>
+                                            <button @click.stop="adjustImg('moment-' + idx, 'x', -5)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-7 h-7 flex items-center justify-center"><i class="fas fa-arrow-left"></i></button>
+                                            <button @click.stop="adjustImg('moment-' + idx, 'x', 5)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-7 h-7 flex items-center justify-center"><i class="fas fa-arrow-right"></i></button>
+                                            <button @click.stop="adjustImg('moment-' + idx, 'y', -5)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-7 h-7 flex items-center justify-center"><i class="fas fa-arrow-up"></i></button>
+                                            <button @click.stop="adjustImg('moment-' + idx, 'y', 5)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-7 h-7 flex items-center justify-center"><i class="fas fa-arrow-down"></i></button>
+                                        </div>
+                                        <div class="flex gap-1 w-full px-2 justify-center">
+                                            <button @click.stop="state.moments.splice(idx, 1)" class="bg-red-600 hover:bg-red-700 text-white rounded w-7 h-7 flex items-center justify-center"><i class="fas fa-trash"></i></button>
+                                            <button @click.stop="triggerUpload('moment', idx)" class="bg-blue-600 hover:bg-blue-700 text-white text-[10px] px-2 rounded flex-1">Upload</button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <button class="no-print text-sm text-sun-blue font-semibold py-2 w-full border border-dashed border-sun-blue rounded hover:bg-blue-50" @click="addMoment()">
@@ -664,6 +710,7 @@
                 // /* STATE_START */
                 const state = reactive({
                     activeTab: 'General',
+                    imagePos: {},
                     spacers: { page1: 0, page2: 0 },
                     design: { lineSpacing: 1.5, letterSpacing: 0 },
                     contact: {
@@ -702,6 +749,26 @@
                 // /* STATE_END */
 
                 const isExporting = ref(false);
+
+                function getImgStyle(key) {
+                    const pos = state.imagePos[key];
+                    if (!pos) return 'object-position: 50% 50%; transform: scale(1);';
+                    return `object-position: ${pos.x}% ${pos.y}%; transform: scale(${pos.s / 100});`;
+                }
+
+                function adjustImg(key, prop, amount) {
+                    if (!state.imagePos[key]) {
+                        state.imagePos[key] = { x: 50, y: 50, s: 100 };
+                    }
+                    const pos = state.imagePos[key];
+                    if (prop === 's') {
+                        pos.s = Math.max(10, pos.s + amount);
+                    } else if (prop === 'x') {
+                        pos.x += amount;
+                    } else if (prop === 'y') {
+                        pos.y += amount;
+                    }
+                }
 
                 // --- ARRAY MANAGEMENT ---
                 function addDay() {
@@ -932,6 +999,8 @@
                 });
 
                 return {
+                    getImgStyle,
+                    adjustImg,
                     state,
                     isExporting,
                     fileInput,
