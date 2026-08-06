@@ -425,13 +425,19 @@
                             <button class="no-print absolute -top-8 right-16 text-xs bg-gray-200 hover:bg-gray-300 rounded px-2 py-1 text-gray-700 opacity-0 group-hover:opacity-100 transition" @click="day.pageBreakBefore = !day.pageBreakBefore" title="Toggle Page Break Before">
                                 <i class="fas fa-cut"></i> {{ day.pageBreakBefore ? 'Remove Page Break' : 'Add Page Break' }}
                             </button>
-                            <!-- Day Delete Button -->
-                            <button class="delete-btn -right-10" @click="state.days.splice(idx, 1)" title="Remove Day"><i class="fas fa-trash text-xs"></i></button>
 
-                            <div class="timeline-dot flex items-center justify-between">
+                            <div class="timeline-dot flex flex-col items-start justify-center">
                                 <div>
                                     <span class="day-header" :class="idx === state.days.length - 1 ? 'bg-sun-orange' : ''" contenteditable="true" @blur="day.header = $event.target.innerHTML" v-html="day.header"></span>
                                     <span class="ml-3 text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded" contenteditable="true" @blur="day.date = $event.target.innerHTML" v-html="day.date"></span>
+                                </div>
+                                
+                                <!-- Inline Day Controls (Move Up, Move Down, Insert, Delete) -->
+                                <div class="no-print mt-2 flex items-center gap-3 border border-gray-200 rounded-md px-3 py-1.5 bg-white shadow-sm opacity-20 group-hover:opacity-100 transition duration-300">
+                                    <button class="text-gray-400 hover:text-gray-800 disabled:opacity-20 disabled:hover:text-gray-400" @click="moveDayUp(idx)" :disabled="idx === 0" title="Move Up"><i class="fas fa-arrow-up text-[10px]"></i></button>
+                                    <button class="text-gray-400 hover:text-gray-800 disabled:opacity-20 disabled:hover:text-gray-400" @click="moveDayDown(idx)" :disabled="idx === state.days.length - 1" title="Move Down"><i class="fas fa-arrow-down text-[10px]"></i></button>
+                                    <button class="text-gray-400 hover:text-sun-green" @click="insertDay(idx)" title="Insert Day Below"><i class="fas fa-plus text-[10px]"></i></button>
+                                    <button class="text-gray-400 hover:text-red-500" @click="state.days.splice(idx, 1)" title="Remove Day"><i class="far fa-trash-alt text-[10px]"></i></button>
                                 </div>
                             </div>
                             
@@ -848,6 +854,24 @@
                     const idx = state.days.length + 1;
                     state.days.push({ id: Date.now(), images: [], pageBreakBefore: false, header: 'Day ' + String(idx).padStart(2, '0') + ' – City Name', date: 'Date (e.g. 23/08)', mealPlan: 'Breakfast, Lunch', description: "Description of the day's activities goes here. You can type freely." });
                 }
+                function insertDay(idx) {
+                    const newDay = { id: Date.now(), images: [], pageBreakBefore: false, header: 'Day ' + String(idx + 2).padStart(2, '0') + ' – New City', date: 'Date', mealPlan: 'Breakfast, Lunch', description: "New day description." };
+                    state.days.splice(idx + 1, 0, newDay);
+                }
+                function moveDayUp(idx) {
+                    if (idx > 0) {
+                        const temp = state.days[idx];
+                        state.days[idx] = state.days[idx - 1];
+                        state.days[idx - 1] = temp;
+                    }
+                }
+                function moveDayDown(idx) {
+                    if (idx < state.days.length - 1) {
+                        const temp = state.days[idx];
+                        state.days[idx] = state.days[idx + 1];
+                        state.days[idx + 1] = temp;
+                    }
+                }
                 function addHeroImage() {
                     state.heroImages.push('https://placehold.co/600x400?text=Upload+Image');
                 }
@@ -1121,6 +1145,9 @@
                     isExporting,
                     fileInput,
                     addDay,
+                    insertDay,
+                    moveDayUp,
+                    moveDayDown,
                     addHeroImage,
                     addDayImage,
                     addReview,
