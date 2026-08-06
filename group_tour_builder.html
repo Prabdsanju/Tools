@@ -538,13 +538,13 @@
                             <tbody>
                                 <tr v-for="(price, idx) in state.prices" :key="price.id" class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition">
                                     <td class="py-2 px-4">
-                                        <input type="text" v-model="price.category" class="w-full bg-transparent border-none outline-none focus:bg-blue-50 focus:ring-1 focus:ring-blue-500 rounded px-2 py-1 text-gray-800 font-medium text-sm transition" placeholder="Category (e.g. Adult)">
+                                        <input type="text" v-model="price.category" class="w-full bg-transparent border border-transparent hover:border-gray-200 outline-none focus:bg-blue-50 focus:ring-1 focus:ring-blue-500 rounded px-2 py-1 text-gray-800 font-medium text-sm transition" placeholder="Category (e.g. Adult)">
                                     </td>
                                     <td class="py-2 px-4">
-                                        <input type="text" v-model="price.amount" class="w-full bg-transparent border-none outline-none focus:bg-blue-50 focus:ring-1 focus:ring-blue-500 rounded px-2 py-1 text-gray-800 font-bold text-right text-sm transition" placeholder="0.00">
+                                        <input type="text" v-model="price.amount" class="w-full bg-transparent border border-transparent hover:border-gray-200 outline-none focus:bg-blue-50 focus:ring-1 focus:ring-blue-500 rounded px-2 py-1 text-gray-800 font-bold text-right text-sm transition" placeholder="0.00">
                                     </td>
                                     <td class="py-2 px-2 text-center no-print">
-                                        <button @click="state.prices.splice(idx, 1)" class="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition" title="Remove Price">
+                                        <button @click="state.prices.splice(idx, 1)" class="text-red-400 hover:text-red-600 transition p-1 bg-red-50 hover:bg-red-100 rounded" title="Remove Price">
                                             <i class="fas fa-trash text-xs"></i>
                                         </button>
                                     </td>
@@ -750,9 +750,7 @@
                         'https://images.unsplash.com/photo-1523482580672-f109ba8cb9be?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
                     ],
                     prices: [
-                        { id: Date.now(), category: 'Adult Price', amount: '' },
-                        { id: Date.now() + 1, category: 'Child with Extra Bed Price', amount: '' },
-                        { id: Date.now() + 2, category: 'Child Sharing Bed Price', amount: '' }
+                        { id: Date.now(), category: 'Adult Price', amount: '' }
                     ],
                     priceNote: ''
                 });
