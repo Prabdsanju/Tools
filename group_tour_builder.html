@@ -818,7 +818,11 @@
                     if (url && url.trim() !== '') {
                         if (type === 'dayImage') {
                             const day = state.days[index1];
-                            if (day && day.images) day.images.push(url);
+                            if (day && day.images && index2 !== null) {
+                                day.images[index2] = url;
+                            } else if (day && day.images) {
+                                day.images.push(url);
+                            }
                         }
                     }
                 }
@@ -911,13 +915,6 @@
                                      importedData.state.texts.flightDeparture = c[contentIdx++] || '';
                                      importedData.state.texts.flightReturn = c[contentIdx++] || '';
                                      importedData.state.texts.flightNote = c[contentIdx++] || '';
-                                     
-                                     if (importedData.state.prices) {
-                                         importedData.state.prices.forEach(price => {
-                                             price.category = c[contentIdx++] || price.category || 'Category';
-                                             price.amount = c[contentIdx++] || price.amount || '0.00';
-                                         });
-                                     }
                                 }
                                 
                                 Object.assign(state, importedData.state);
