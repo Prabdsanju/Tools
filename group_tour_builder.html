@@ -358,13 +358,52 @@
                     </div>
 
                     <!-- Flight Details -->
-                    <div class="border border-gray-200 rounded-lg p-5 bg-gray-50 shadow-sm relative hover-group">
+                    <div class="border border-gray-200 rounded-lg p-5 bg-gray-50 shadow-sm relative hover-group mb-8">
                         <h4 class="font-bold text-gray-800 text-lg mb-3"><i class="fas fa-plane-departure text-sun-blue mr-2"></i>Flight Details</h4>
                         <div class="text-sm space-y-2 text-gray-700">
                             <p><strong>Departure:</strong> <span contenteditable="true">Colombo to Bangkok - FD 141 – CMB-DMK - 23:15-04:20(+1)</span></p>
                             <p><strong>Return:</strong> <span contenteditable="true">Bangkok to Colombo - FD 140 – DMK-CMB - 20:25-22:15</span></p>
                             <p class="text-gray-500 mt-2 italic border-t pt-2" contenteditable="true">Note: Meals + 20KG Baggage + 7KG Hand Luggage included.</p>
                         </div>
+                    </div>
+
+                    <!-- Pricing Details -->
+                    <div class="border border-gray-200 rounded-lg bg-white shadow-sm overflow-hidden relative hover-group">
+                        <h4 class="font-bold text-gray-800 text-lg mb-0 p-4 bg-gray-50 border-b border-gray-200"><i class="fas fa-tags text-sun-orange mr-2"></i>Price Breakdown (Per Person)</h4>
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-100 border-b border-gray-200 text-gray-700 text-sm">
+                                    <th class="py-2 px-4 font-bold">Category</th>
+                                    <th class="py-2 px-4 font-bold text-right">Per Person Price LKR</th>
+                                    <th class="py-2 px-2 font-bold w-10 text-center no-print"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(price, idx) in state.prices" :key="price.id" class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition">
+                                    <td class="py-2 px-4">
+                                        <input type="text" v-model="price.category" class="w-full bg-transparent border-none outline-none focus:bg-blue-50 focus:ring-1 focus:ring-blue-500 rounded px-2 py-1 text-gray-800 font-medium text-sm transition" placeholder="Category (e.g. Adult)">
+                                    </td>
+                                    <td class="py-2 px-4">
+                                        <input type="text" v-model="price.amount" class="w-full bg-transparent border-none outline-none focus:bg-blue-50 focus:ring-1 focus:ring-blue-500 rounded px-2 py-1 text-gray-800 font-bold text-right text-sm transition" placeholder="0.00">
+                                    </td>
+                                    <td class="py-2 px-2 text-center no-print">
+                                        <button @click="state.prices.splice(idx, 1)" class="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition" title="Remove Price">
+                                            <i class="fas fa-trash text-xs"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                            <tfoot class="bg-gray-50 border-t border-gray-200">
+                                <tr>
+                                    <td colspan="3" class="py-2 px-4">
+                                        <input type="text" v-model="state.priceNote" class="w-full bg-transparent border-none outline-none focus:bg-blue-50 focus:ring-1 focus:ring-blue-500 rounded px-2 py-1 text-xs text-gray-500 italic transition" placeholder="Add a note about pricing...">
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                        <button class="no-print w-full py-2 bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-sun-blue transition text-sm font-semibold border-t border-gray-200" @click="addPriceRow()">
+                            <i class="fas fa-plus border border-dashed border-gray-400 rounded p-1"></i> Add Row
+                        </button>
                     </div>
 
                 </div>
@@ -466,7 +505,13 @@
                     moments: [
                         'https://images.unsplash.com/photo-1517400508447-f8dd518b86db?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
                         'https://images.unsplash.com/photo-1523482580672-f109ba8cb9be?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
-                    ]
+                    ],
+                    prices: [
+                        { id: Date.now(), category: 'Adult Price', amount: '' },
+                        { id: Date.now() + 1, category: 'Child with Extra Bed Price', amount: '' },
+                        { id: Date.now() + 2, category: 'Child Sharing Bed Price', amount: '' }
+                    ],
+                    priceNote: 'The above airfares are applicable for today. Please note that all fares are subject to change.'
                 });
 
                 const isExporting = ref(false);
@@ -486,6 +531,9 @@
                 }
                 function addMoment() {
                     state.moments.push('https://placehold.co/600x400?text=Upload+Image');
+                }
+                function addPriceRow() {
+                    state.prices.push({ id: Date.now(), category: '', amount: '' });
                 }
 
                 // --- UPLOAD LOGIC ---
@@ -573,6 +621,7 @@
                     addDayImage,
                     addReview,
                     addMoment,
+                    addPriceRow,
                     triggerUpload,
                     handleFileUpload,
                     printDoc,
