@@ -127,11 +127,7 @@
                 <input type="number" id="usd_divisor" value="31" step="0.01" class="w-full p-3 bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500">
             </div>
             <h2 class="text-xl font-semibold text-gray-700 border-b pt-4 pb-2">Child Sharing Bed Inputs</h2>
-            <div>
-                <label for="hotel_nights_for_meal" class="block text-sm font-medium text-gray-600 mb-1">Number of Nights (for meal calculation)</label>
-                <input type="number" id="hotel_nights_for_meal" class="w-full p-3 bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500" placeholder="e.g., 3">
-            </div>
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-2 gap-4 mt-2">
                 <div>
                     <label for="meal_price_3star" class="block text-sm font-medium text-gray-600 mb-1">3* Meal Price/Night</label>
                     <input type="number" id="meal_price_3star" class="w-full p-3 bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500" placeholder="THB">
@@ -1086,17 +1082,14 @@
         const markupPercent = markupPercentValue / 100;
         const lkrRate = getNumber('lkr_rate', 10.0);
         const usdDivisor = getNumber('usd_divisor', 31) || 1;
-        
-        const hotelNightsForMeal = getNumber('hotel_nights_for_meal', 0);
         const mealPrice3 = getNumber('meal_price_3star', 0);
         const mealPrice4 = getNumber('meal_price_4star', 0);
-        const mealPriceMix = Math.max(mealPrice3, mealPrice4); // Default mixed to higher
 
         const manualMarkupAdult = getOptionalNumber('adult_manual_markup');
         const manualMarkupChildExtraBed = getOptionalNumber('child_extra_bed_manual_markup');
         const manualMarkupChildSharing = getOptionalNumber('child_sharing_manual_markup');
 
-        // 3. Separate Hotel Calculations
+        // 3. Separate Hotel & Meal Calculations
         const selectedCities = availableCities.filter(c => c.selected);
 
         const hotelCost3 = selectedCities.reduce((sum, c) => sum + (c.hotel3Price * c.numberOfNights), 0) / numPeopleHotel;
@@ -1106,8 +1099,15 @@
             return sum + (preferredPrice * c.numberOfNights);
         }, 0) / numPeopleHotel;
 
+        const totalMealCost3 = selectedCities.reduce((sum, c) => sum + (mealPrice3 * c.numberOfNights), 0);
+        const totalMealCost4 = selectedCities.reduce((sum, c) => sum + (mealPrice4 * c.numberOfNights), 0);
+        const totalMealCostMix = selectedCities.reduce((sum, c) => {
+            const preferredMealPrice = c.mixPref === "4" ? mealPrice4 : mealPrice3;
+            return sum + (preferredMealPrice * c.numberOfNights);
+        }, 0);
+
         // Function to calculate and render a package
-        const renderPackage = (suffix, hotelCost, mealPrice) => {
+        const renderPackage = (suffix, hotelCost, totalMealCost) => {
             // ADULT
             const subtotalAdult = selectedTourCost + perPersonTransferCost + hotelCost;
             let markupAmountAdult = (manualMarkupAdult !== null) ? manualMarkupAdult : subtotalAdult * markupPercent;
@@ -1115,14 +1115,12 @@
             const adultMarkupDisplay = (manualMarkupAdult !== null) ? `+ ${formatCurrency(markupAmountAdult, 'THB')} (Manual)` : `+ ${formatCurrency(markupAmountAdult, 'THB')} (${markupPercentValue}%)`;
 
             // CHILD W/ EXTRA BED
-            // Note: Currently uses Tour + Hotel (no transfer). If it should have transfer, add it here.
             const subtotalChildExtraBed = selectedTourCost + hotelCost;
             let markupAmountChildExtraBed = (manualMarkupChildExtraBed !== null) ? manualMarkupChildExtraBed : subtotalChildExtraBed * markupPercent;
             const totalThbChildExtraBed = subtotalChildExtraBed + markupAmountChildExtraBed;
             const childExtraBedMarkupDisplay = (manualMarkupChildExtraBed !== null) ? `+ ${formatCurrency(markupAmountChildExtraBed, 'THB')} (Manual)` : `+ ${formatCurrency(markupAmountChildExtraBed, 'THB')} (${markupPercentValue}%)`;
 
             // CHILD SHARING
-            const totalMealCost = hotelNightsForMeal * mealPrice;
             const subtotalChildSharing = selectedTourCost + totalMealCost;
             let markupAmountChildSharing = (manualMarkupChildSharing !== null) ? manualMarkupChildSharing : subtotalChildSharing * markupPercent;
             const totalThbChildSharing = subtotalChildSharing + markupAmountChildSharing;
@@ -1143,9 +1141,9 @@
         };
 
         // 4. Calculate all three
-        renderPackage('3star', hotelCost3, mealPrice3);
-        renderPackage('4star', hotelCost4, mealPrice4);
-        renderPackage('mix', hotelCostMix, mealPriceMix);
+        renderPackage('3star', hotelCost3, totalMealCost3);
+        renderPackage('4star', hotelCost4, totalMealCost4);
+        renderPackage('mix', hotelCostMix, totalMealCostMix);
 
         // 5. Display results section
         document.getElementById('results').style.display = 'block';
