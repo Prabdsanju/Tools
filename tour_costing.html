@@ -168,7 +168,7 @@
         <h2 class="text-2xl font-bold text-gray-800 text-center mb-6">Pricing Results (Options)</h2>
         <div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
             <!-- 3 Star Option -->
-            <div class="bg-blue-50 border border-blue-200 p-4 rounded-lg">
+            <div id="result_card_3star" class="bg-blue-50 border border-blue-200 p-4 rounded-lg">
                 <h3 class="text-xl font-bold text-blue-800 mb-4 text-center border-b pb-2">3-Star Package</h3>
                 <div class="space-y-4">
                     <div class="bg-white p-3 rounded shadow-sm">
@@ -193,7 +193,7 @@
             </div>
             
             <!-- 4 Star Option -->
-            <div class="bg-amber-50 border border-amber-200 p-4 rounded-lg">
+            <div id="result_card_4star" class="bg-amber-50 border border-amber-200 p-4 rounded-lg">
                 <h3 class="text-xl font-bold text-amber-800 mb-4 text-center border-b border-amber-200 pb-2">4-Star Package</h3>
                 <div class="space-y-4">
                     <div class="bg-white p-3 rounded shadow-sm">
@@ -217,7 +217,7 @@
                 </div>
             </div>
             <!-- 5 Star Option -->
-            <div class="bg-purple-50 border border-purple-200 p-4 rounded-lg">
+            <div id="result_card_5star" class="bg-purple-50 border border-purple-200 p-4 rounded-lg">
                 <h3 class="text-xl font-bold text-purple-800 mb-4 text-center border-b border-purple-200 pb-2">5-Star Package</h3>
                 <div class="space-y-4">
                     <div class="bg-white p-3 rounded shadow-sm">
@@ -242,7 +242,7 @@
             </div>
 
             <!-- Custom / Mixed Option -->
-            <div class="bg-gray-50 border border-gray-300 p-4 rounded-lg relative">
+            <div id="result_card_mix" class="bg-gray-50 border border-gray-300 p-4 rounded-lg relative">
                 <div class="absolute top-0 right-0 bg-gray-200 text-xs px-2 py-1 rounded-bl-lg text-gray-600 font-bold">All Checked Hotels</div>
                 <h3 class="text-xl font-bold text-gray-800 mb-4 text-center border-b pb-2">Mixed Package</h3>
                 <div class="space-y-4">
@@ -1206,7 +1206,23 @@
         renderPackage('5star', hotelCost5, totalMealCost5);
         renderPackage('mix', hotelCostMix, totalMealCostMix);
 
-        // 5. Display results section
+        // 5. Check which packages are fully valid to display
+        const isValid3 = selectedCities.length > 0 && selectedCities.every(c => c.hotel3Name);
+        const isValid4 = selectedCities.length > 0 && selectedCities.every(c => c.hotel4Name);
+        const isValid5 = selectedCities.length > 0 && selectedCities.every(c => c.hotel5Name);
+        const isValidMix = selectedCities.length > 0 && selectedCities.every(c => {
+            if (c.mixPref === "3") return !!c.hotel3Name;
+            if (c.mixPref === "4") return !!c.hotel4Name;
+            if (c.mixPref === "5") return !!c.hotel5Name;
+            return false;
+        });
+
+        document.getElementById('result_card_3star').style.display = isValid3 ? 'block' : 'none';
+        document.getElementById('result_card_4star').style.display = isValid4 ? 'block' : 'none';
+        document.getElementById('result_card_5star').style.display = isValid5 ? 'block' : 'none';
+        document.getElementById('result_card_mix').style.display = isValidMix ? 'block' : 'none';
+
+        // 6. Display results section
         document.getElementById('results').style.display = 'block';
     }
 
