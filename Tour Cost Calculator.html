@@ -87,17 +87,17 @@
                     <button onclick="clearSelection('transfer')" class="w-full py-2 px-4 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition">Clear Selection</button>
                 </div>
             </div>
-            <!-- Hotel Management -->
+            <!-- City Management -->
             <div>
                 <div class="flex justify-between items-center border-b pt-4 pb-2 mb-4">
-                    <h2 class="text-xl font-semibold text-gray-700">Hotel Management</h2>
-                    <span id="hotelSelectionCount" class="text-sm font-medium text-gray-500"></span>
+                    <h2 class="text-xl font-semibold text-gray-700">City & Hotel Management</h2>
+                    <span id="citySelectionCount" class="text-sm font-medium text-gray-500"></span>
                 </div>
-                <input type="text" id="hotelSearch" onkeyup="renderAll()" placeholder="Search hotels..." class="w-full p-2 mb-4 border rounded-md">
-                <div id="hotel-list-container" class="space-y-2 max-h-40 overflow-y-auto pr-2"></div>
+                <input type="text" id="citySearch" onkeyup="renderAll()" placeholder="Search cities..." class="w-full p-2 mb-4 border rounded-md">
+                <div id="city-list-container" class="space-y-2 max-h-60 overflow-y-auto pr-2"></div>
                 <div class="flex gap-2 mt-4">
-                    <button onclick="openModal('hotelModal')" class="w-full py-2 px-4 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition">Add New Hotel</button>
-                    <button onclick="clearSelection('hotel')" class="w-full py-2 px-4 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition">Clear Selection</button>
+                    <button onclick="openModal('cityModal')" class="w-full py-2 px-4 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition">Add New City Stay</button>
+                    <button onclick="clearSelection('city')" class="w-full py-2 px-4 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition">Clear Selection</button>
                 </div>
             </div>
         </div>
@@ -260,16 +260,27 @@
 <!-- Modals -->
 <div id="tourModal" class="modal-backdrop"><div class="modal-content"><h3 id="tourModalTitle" class="text-2xl font-bold mb-4">Add New Tour</h3><div class="space-y-4"><input type="text" id="newTourName" placeholder="Tour Name" class="w-full p-3 border rounded-md"><input type="number" id="newTourPrice" placeholder="Tour Price (THB)" class="w-full p-3 border rounded-md"><input type="number" id="newTourTransferPrice" placeholder="Specific Transfer Price (optional)" class="w-full p-3 border rounded-md"></div><div class="flex gap-4 mt-6"><button id="saveTourButton" onclick="saveTour()" class="flex-1 py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700">Add Tour</button><button onclick="closeModal('tourModal')" class="flex-1 py-2 px-4 bg-gray-300 rounded-md hover:bg-gray-400">Cancel</button></div></div></div>
 <div id="transferModal" class="modal-backdrop"><div class="modal-content"><h3 id="transferModalTitle" class="text-2xl font-bold mb-4">Add New Transfer</h3><div class="space-y-4"><input type="text" id="newTransferName" placeholder="Transfer Name" class="w-full p-3 border rounded-md"><input type="number" id="newTransferPrice" placeholder="Transfer Price (THB)" class="w-full p-3 border rounded-md"></div><div class="flex gap-4 mt-6"><button id="saveTransferButton" onclick="saveTransfer()" class="flex-1 py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700">Add Transfer</button><button onclick="closeModal('transferModal')" class="flex-1 py-2 px-4 bg-gray-300 rounded-md hover:bg-gray-400">Cancel</button></div></div></div>
-<div id="hotelModal" class="modal-backdrop"><div class="modal-content"><h3 id="hotelModalTitle" class="text-2xl font-bold mb-4">Add New Hotel</h3><div class="space-y-4">
-    <input type="text" id="newHotelName" placeholder="Hotel Name" class="w-full p-3 border rounded-md">
-    <select id="newHotelStar" class="w-full p-3 border rounded-md bg-white">
-        <option value="3">3 Star</option>
-        <option value="4">4 Star</option>
-        <option value="5">5 Star / Other</option>
-    </select>
-    <input type="number" id="newHotelPrice" placeholder="Price per Night (THB)" class="w-full p-3 border rounded-md">
-    <input type="number" id="newHotelNights" placeholder="Number of Nights" class="w-full p-3 border rounded-md">
-</div><div class="flex gap-4 mt-6"><button id="saveHotelButton" onclick="saveHotel()" class="flex-1 py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700">Add Hotel</button><button onclick="closeModal('hotelModal')" class="flex-1 py-2 px-4 bg-gray-300 rounded-md hover:bg-gray-400">Cancel</button></div></div></div>
+<div id="cityModal" class="modal-backdrop"><div class="modal-content overflow-y-auto max-h-[90vh]"><h3 id="cityModalTitle" class="text-2xl font-bold mb-4">Add New City Stay</h3><div class="space-y-4">
+    <input type="text" id="newCityName" placeholder="City Name (e.g. Bangkok)" class="w-full p-3 border rounded-md font-bold bg-gray-50">
+    <input type="number" id="newCityNights" placeholder="Number of Nights" class="w-full p-3 border rounded-md">
+    <div class="border p-3 rounded-md bg-blue-50">
+        <label class="block text-sm font-bold text-blue-800 mb-2">3-Star Option</label>
+        <input type="text" id="newCity3StarName" placeholder="3* Hotel Name" class="w-full p-2 border rounded-md mb-2">
+        <input type="number" id="newCity3StarPrice" placeholder="Price per Night (THB)" class="w-full p-2 border rounded-md">
+    </div>
+    <div class="border p-3 rounded-md bg-amber-50">
+        <label class="block text-sm font-bold text-amber-800 mb-2">4-Star Option</label>
+        <input type="text" id="newCity4StarName" placeholder="4* Hotel Name" class="w-full p-2 border rounded-md mb-2">
+        <input type="number" id="newCity4StarPrice" placeholder="Price per Night (THB)" class="w-full p-2 border rounded-md">
+    </div>
+    <div class="border p-3 rounded-md bg-gray-50">
+        <label class="block text-sm font-bold text-gray-800 mb-2">Mixed Package Preference</label>
+        <select id="newCityMixPref" class="w-full p-2 border rounded-md">
+            <option value="3">Use 3-Star Hotel</option>
+            <option value="4">Use 4-Star Hotel</option>
+        </select>
+    </div>
+</div><div class="flex gap-4 mt-6"><button id="saveCityButton" onclick="saveCity()" class="flex-1 py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700">Add City</button><button onclick="closeModal('cityModal')" class="flex-1 py-2 px-4 bg-gray-300 rounded-md hover:bg-gray-400">Cancel</button></div></div></div>
 
 <!-- Notification element -->
 <div id="notification" class="fixed top-5 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg transition-opacity duration-300 opacity-0 z-50"></div>
@@ -278,7 +289,7 @@
     // --- STATE MANAGEMENT ---
     let availableTours = [];
     let availableTransfers = [];
-    let availableHotels = [];
+    let availableCities = [];
     let logoDataUrl = null;
     const allInputIds = [
         'num_people_transfer', 'num_people_hotel',
@@ -350,33 +361,39 @@
         });
     }
 
-    function renderHotels() {
-        const container = document.getElementById('hotel-list-container');
-        const searchTerm = document.getElementById('hotelSearch').value.toLowerCase();
+    function renderCities() {
+        const container = document.getElementById('city-list-container');
+        const searchTerm = document.getElementById('citySearch').value.toLowerCase();
         container.innerHTML = '';
-        const filteredHotels = availableHotels.filter(h => h.name.toLowerCase().includes(searchTerm));
+        const filteredCities = availableCities.filter(c => c.name.toLowerCase().includes(searchTerm));
 
-        const selectedCount = availableHotels.filter(h => h.selected).length;
-        document.getElementById('hotelSelectionCount').innerText = `(${selectedCount}/${availableHotels.length} selected)`;
+        const selectedCount = availableCities.filter(c => c.selected).length;
+        document.getElementById('citySelectionCount').innerText = `(${selectedCount}/${availableCities.length} selected)`;
 
-        if (filteredHotels.length === 0) {
-            container.innerHTML = `<p class="text-gray-500 text-sm">No matching hotels found.</p>`;
+        if (filteredCities.length === 0) {
+            container.innerHTML = `<p class="text-gray-500 text-sm">No matching cities found.</p>`;
             return;
         }
-        filteredHotels.forEach(hotel => {
-            const index = availableHotels.findIndex(h => h === hotel);
+        filteredCities.forEach(city => {
+            const index = availableCities.findIndex(c => c === city);
             const el = document.createElement('div');
             el.className = 'flex items-center justify-between bg-white p-2 rounded-md border';
-            const total = hotel.pricePerNight * hotel.numberOfNights;
-            const starText = hotel.star === "3" ? "3*" : hotel.star === "4" ? "4*" : "5*";
+            
+            // Format display text
+            const text3 = `3*: ${city.hotel3Name} (${city.hotel3Price})`;
+            const text4 = `4*: ${city.hotel4Name} (${city.hotel4Price})`;
+            
             el.innerHTML = `
                 <div class="flex items-center flex-grow overflow-hidden mr-2">
-                    <input type="checkbox" id="hotel-${index}" class="h-4 w-4 mr-3 flex-shrink-0" onchange="toggleSelection('hotel', ${index})" ${hotel.selected ? 'checked' : ''}>
-                    <label for="hotel-${index}" class="text-sm font-medium truncate"><span class="bg-gray-200 text-xs px-1 rounded mr-1">${starText}</span> ${hotel.name} (${hotel.numberOfNights}N) - ${total} THB</label>
+                    <input type="checkbox" id="city-${index}" class="h-4 w-4 mr-3 flex-shrink-0" onchange="toggleSelection('city', ${index})" ${city.selected ? 'checked' : ''}>
+                    <label for="city-${index}" class="text-sm font-medium truncate">
+                        <strong>${city.name} (${city.numberOfNights}N)</strong><br>
+                        <span class="text-xs text-gray-600">${text3} | ${text4}</span>
+                    </label>
                 </div>
                 <div class="flex-shrink-0">
-                    <button onclick="openEditModal('hotel', ${index})" class="text-blue-500 hover:text-blue-700 font-bold text-lg px-2">✎</button>
-                    <button onclick="removeItem('hotel', ${index})" class="text-red-500 hover:text-red-700 font-bold text-lg px-2">&times;</button>
+                    <button onclick="openEditModal('city', ${index})" class="text-blue-500 hover:text-blue-700 font-bold text-lg px-2">✎</button>
+                    <button onclick="removeItem('city', ${index})" class="text-red-500 hover:text-red-700 font-bold text-lg px-2">&times;</button>
                 </div>
             `;
             container.appendChild(el);
@@ -404,15 +421,18 @@
             saveButton.onclick = () => saveTransfer();
             document.getElementById('newTransferName').value = '';
             document.getElementById('newTransferPrice').value = '';
-        } else if (modalId === 'hotelModal') {
-            document.getElementById('hotelModalTitle').innerText = 'Add New Hotel';
-            const saveButton = document.getElementById('saveHotelButton');
-            saveButton.innerText = 'Add Hotel';
-            saveButton.onclick = () => saveHotel();
-            document.getElementById('newHotelName').value = '';
-            document.getElementById('newHotelStar').value = '3';
-            document.getElementById('newHotelPrice').value = '';
-            document.getElementById('newHotelNights').value = '';
+        } else if (modalId === 'cityModal') {
+            document.getElementById('cityModalTitle').innerText = 'Add New City Stay';
+            const saveButton = document.getElementById('saveCityButton');
+            saveButton.innerText = 'Add City';
+            saveButton.onclick = () => saveCity();
+            document.getElementById('newCityName').value = '';
+            document.getElementById('newCityNights').value = '';
+            document.getElementById('newCity3StarName').value = '';
+            document.getElementById('newCity3StarPrice').value = '';
+            document.getElementById('newCity4StarName').value = '';
+            document.getElementById('newCity4StarPrice').value = '';
+            document.getElementById('newCityMixPref').value = '3';
         }
     }
 
@@ -436,17 +456,20 @@
             saveButton.innerText = 'Save Changes';
             saveButton.onclick = () => saveTransfer(index);
             openModal('transferModal');
-        } else if (type === 'hotel') {
-            const hotel = availableHotels[index];
-            document.getElementById('newHotelName').value = hotel.name;
-            document.getElementById('newHotelStar').value = hotel.star || '3';
-            document.getElementById('newHotelPrice').value = hotel.pricePerNight;
-            document.getElementById('newHotelNights').value = hotel.numberOfNights;
-            document.getElementById('hotelModalTitle').innerText = 'Edit Hotel';
-            const saveButton = document.getElementById('saveHotelButton');
+        } else if (type === 'city') {
+            const city = availableCities[index];
+            document.getElementById('newCityName').value = city.name;
+            document.getElementById('newCityNights').value = city.numberOfNights;
+            document.getElementById('newCity3StarName').value = city.hotel3Name;
+            document.getElementById('newCity3StarPrice').value = city.hotel3Price;
+            document.getElementById('newCity4StarName').value = city.hotel4Name;
+            document.getElementById('newCity4StarPrice').value = city.hotel4Price;
+            document.getElementById('newCityMixPref').value = city.mixPref;
+            document.getElementById('cityModalTitle').innerText = 'Edit City Stay';
+            const saveButton = document.getElementById('saveCityButton');
             saveButton.innerText = 'Save Changes';
-            saveButton.onclick = () => saveHotel(index);
-            openModal('hotelModal');
+            saveButton.onclick = () => saveCity(index);
+            openModal('cityModal');
         }
     }
 
@@ -507,20 +530,20 @@
             availableHotels.push(hotelData);
         }
         closeModal('hotelModal');
-        renderHotels();
+        renderCities();
     }
     
     function removeItem(type, index) {
         if (type === 'tour') availableTours.splice(index, 1);
         if (type === 'transfer') availableTransfers.splice(index, 1);
-        if (type === 'hotel') availableHotels.splice(index, 1);
+        if (type === 'city') availableCities.splice(index, 1);
         renderAll();
     }
     
     function toggleSelection(type, index) {
         if (type === 'tour') availableTours[index].selected = !availableTours[index].selected;
         if (type === 'transfer') availableTransfers[index].selected = !availableTransfers[index].selected;
-        if (type === 'hotel') availableHotels[index].selected = !availableHotels[index].selected;
+        if (type === 'city') availableCities[index].selected = !availableCities[index].selected;
         renderAll();
     }
 
@@ -539,7 +562,7 @@
     function renderAll() {
         renderTours();
         renderTransfers();
-        renderHotels();
+        renderCities();
     }
 
     // --- DATA & NOTIFICATIONS ---
@@ -628,15 +651,15 @@
     function generateItinerary() {
         const selectedTours = availableTours.filter(item => item.selected);
         const selectedTransfers = availableTransfers.filter(item => item.selected);
-        const selectedHotels = availableHotels.filter(item => item.selected);
+        const selectedCities = availableCities.filter(item => item.selected);
 
-        let totalNights = selectedHotels.reduce((sum, hotel) => sum + hotel.numberOfNights, 0);
+        let totalNights = selectedCities.reduce((sum, city) => sum + city.numberOfNights, 0);
         const totalDays = totalNights > 0 ? totalNights + 1 : selectedTours.length > 0 ? selectedTours.length + 1 : 1;
         const packageTitle = `${String(totalNights).padStart(2, '0')}N ${String(totalDays).padStart(2, '0')}D Package`;
 
         let inclusionsHtml = '<h3>Inclusions:</h3><ul>';
-        selectedHotels.forEach(h => {
-            inclusionsHtml += `<li>${h.numberOfNights} nights accommodation at ${h.name} with breakfast.</li>`;
+        selectedCities.forEach(c => {
+            inclusionsHtml += `<li>${c.numberOfNights} nights accommodation in ${c.name} with breakfast (3-Star: ${c.hotel3Name} | 4-Star: ${c.hotel4Name}).</li>`;
         });
         selectedTransfers.forEach(t => {
             inclusionsHtml += `<li>${t.name}.</li>`;
@@ -1065,13 +1088,14 @@
         const manualMarkupChildSharing = getOptionalNumber('child_sharing_manual_markup');
 
         // 3. Separate Hotel Calculations
-        const hotels3 = availableHotels.filter(h => h.selected && h.star === "3");
-        const hotels4 = availableHotels.filter(h => h.selected && h.star === "4");
-        const hotelsAll = availableHotels.filter(h => h.selected);
+        const selectedCities = availableCities.filter(c => c.selected);
 
-        const hotelCost3 = hotels3.reduce((sum, h) => sum + (h.pricePerNight * h.numberOfNights), 0) / numPeopleHotel;
-        const hotelCost4 = hotels4.reduce((sum, h) => sum + (h.pricePerNight * h.numberOfNights), 0) / numPeopleHotel;
-        const hotelCostMix = hotelsAll.reduce((sum, h) => sum + (h.pricePerNight * h.numberOfNights), 0) / numPeopleHotel;
+        const hotelCost3 = selectedCities.reduce((sum, c) => sum + (c.hotel3Price * c.numberOfNights), 0) / numPeopleHotel;
+        const hotelCost4 = selectedCities.reduce((sum, c) => sum + (c.hotel4Price * c.numberOfNights), 0) / numPeopleHotel;
+        const hotelCostMix = selectedCities.reduce((sum, c) => {
+            const preferredPrice = c.mixPref === "4" ? c.hotel4Price : c.hotel3Price;
+            return sum + (preferredPrice * c.numberOfNights);
+        }, 0) / numPeopleHotel;
 
         // Function to calculate and render a package
         const renderPackage = (suffix, hotelCost, mealPrice) => {
