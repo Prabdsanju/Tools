@@ -84,6 +84,16 @@
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Exchange Rate (THB to LKR)</label>
                     <input type="number" v-model.number="state.settings.exchangeRate" step="0.1" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:border-sun-green outline-none">
                 </div>
+                <div class="col-span-1 md:col-span-4 flex items-center justify-end mt-2">
+                    <label class="flex items-center cursor-pointer">
+                        <div class="relative">
+                            <input type="checkbox" v-model="state.settings.manualDivide" class="sr-only">
+                            <div class="block bg-gray-200 w-10 h-6 rounded-full transition" :class="state.settings.manualDivide ? 'bg-sun-orange' : ''"></div>
+                            <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition transform" :class="state.settings.manualDivide ? 'translate-x-4' : ''"></div>
+                        </div>
+                        <span class="ml-3 text-sm font-bold text-gray-600">Enable Manual Override for Pax Division</span>
+                    </label>
+                </div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                 <div>
@@ -163,15 +173,15 @@
                     <tr class="bg-yellow-50">
                         <td colspan="3" class="sum-cell text-sun-orange text-center">Divided by Pax ({{ state.settings.transferDiv }} / {{ state.settings.hotelDiv }})</td>
                         <td class="sum-cell text-gray-400">-</td>
-                        <td class="sum-cell text-sun-orange">{{ divTotals.transfer }}</td>
-                        <td class="sum-cell text-sun-orange">{{ divTotals.hotel3 }}</td>
-                        <td class="sum-cell text-sun-orange">{{ divTotals.hotel4 }}</td>
+                        <td class="td-cell"><input type="number" v-model.number="state.divOverrides.transfer" :readonly="!state.settings.manualDivide" :class="state.settings.manualDivide ? 'bg-white border-sun-orange shadow-sm' : 'bg-transparent border-transparent'" class="w-full text-right font-bold text-sun-orange border rounded outline-none p-1"></td>
+                        <td class="td-cell"><input type="number" v-model.number="state.divOverrides.hotel3" :readonly="!state.settings.manualDivide" :class="state.settings.manualDivide ? 'bg-white border-sun-orange shadow-sm' : 'bg-transparent border-transparent'" class="w-full text-right font-bold text-sun-orange border rounded outline-none p-1"></td>
+                        <td class="td-cell"><input type="number" v-model.number="state.divOverrides.hotel4" :readonly="!state.settings.manualDivide" :class="state.settings.manualDivide ? 'bg-white border-sun-orange shadow-sm' : 'bg-transparent border-transparent'" class="w-full text-right font-bold text-sun-orange border rounded outline-none p-1"></td>
                         <td class="sum-cell text-gray-400">-</td>
                         <td class="sum-cell text-gray-400">-</td>
-                        <td class="sum-cell text-sun-orange">{{ divTotals.childEx3 }}</td>
-                        <td class="sum-cell text-sun-orange">{{ divTotals.childEx4 }}</td>
-                        <td class="sum-cell text-sun-orange">{{ divTotals.childSh3 }}</td>
-                        <td class="sum-cell text-sun-orange">{{ divTotals.childSh4 }}</td>
+                        <td class="td-cell"><input type="number" v-model.number="state.divOverrides.childEx3" :readonly="!state.settings.manualDivide" :class="state.settings.manualDivide ? 'bg-white border-sun-orange shadow-sm' : 'bg-transparent border-transparent'" class="w-full text-right font-bold text-sun-orange border rounded outline-none p-1"></td>
+                        <td class="td-cell"><input type="number" v-model.number="state.divOverrides.childEx4" :readonly="!state.settings.manualDivide" :class="state.settings.manualDivide ? 'bg-white border-sun-orange shadow-sm' : 'bg-transparent border-transparent'" class="w-full text-right font-bold text-sun-orange border rounded outline-none p-1"></td>
+                        <td class="td-cell"><input type="number" v-model.number="state.divOverrides.childSh3" :readonly="!state.settings.manualDivide" :class="state.settings.manualDivide ? 'bg-white border-sun-orange shadow-sm' : 'bg-transparent border-transparent'" class="w-full text-right font-bold text-sun-orange border rounded outline-none p-1"></td>
+                        <td class="td-cell"><input type="number" v-model.number="state.divOverrides.childSh4" :readonly="!state.settings.manualDivide" :class="state.settings.manualDivide ? 'bg-white border-sun-orange shadow-sm' : 'bg-transparent border-transparent'" class="w-full text-right font-bold text-sun-orange border rounded outline-none p-1"></td>
                     </tr>
                 </tfoot>
             </table>
@@ -371,8 +381,10 @@
                         markup: 25,
                         exchangeRate: 10.8,
                         tourTitle: '02N 03D Bangkok',
-                        reference: 'INQ-13796'
+                        reference: 'INQ-13796',
+                        manualDivide: false
                     },
+                    divOverrides: { transfer: 0, hotel3: 0, hotel4: 0, childEx3: 0, childEx4: 0, childSh3: 0, childSh4: 0 },
                     days: [
                         { id: 1, title: 'Day-01-', desc: 'Private arrival transfer from Bangkok Airport to Bangkok Hotel\n14.00 Check in at Bangkok Hotel', mealTxt: '(-/-/-)', tour: 0, transfer: 1000, hotel3: 1500, hotel4: 3000, meal3: 0, meal4: 0, childEx3: 0, childEx4: 0, childSh3: 0, childSh4: 0 },
                         { id: 2, title: 'Day-02-', desc: 'Breakfast at Hotel\nFree For Leisure', mealTxt: '(B/-/-)', tour: 0, transfer: 0, hotel3: 1500, hotel4: 3000, meal3: 0, meal4: 0, childEx3: 0, childEx4: 0, childSh3: 0, childSh4: 0 },
@@ -424,15 +436,17 @@
                     return val / divisor;
                 };
 
-                const divTotals = computed(() => ({
-                    transfer: div(totals.value.transfer, state.settings.transferDiv),
-                    hotel3: div(totals.value.hotel3, state.settings.hotelDiv),
-                    hotel4: div(totals.value.hotel4, state.settings.hotelDiv),
-                    childEx3: div(totals.value.childEx3, state.settings.hotelDiv),
-                    childEx4: div(totals.value.childEx4, state.settings.hotelDiv),
-                    childSh3: div(totals.value.childSh3, state.settings.hotelDiv),
-                    childSh4: div(totals.value.childSh4, state.settings.hotelDiv)
-                }));
+                watch([totals, () => state.settings.transferDiv, () => state.settings.hotelDiv, () => state.settings.manualDivide], () => {
+                    if (!state.settings.manualDivide) {
+                        state.divOverrides.transfer = Number(div(totals.value.transfer, state.settings.transferDiv).toFixed(2));
+                        state.divOverrides.hotel3 = Number(div(totals.value.hotel3, state.settings.hotelDiv).toFixed(2));
+                        state.divOverrides.hotel4 = Number(div(totals.value.hotel4, state.settings.hotelDiv).toFixed(2));
+                        state.divOverrides.childEx3 = Number(div(totals.value.childEx3, state.settings.hotelDiv).toFixed(2));
+                        state.divOverrides.childEx4 = Number(div(totals.value.childEx4, state.settings.hotelDiv).toFixed(2));
+                        state.divOverrides.childSh3 = Number(div(totals.value.childSh3, state.settings.hotelDiv).toFixed(2));
+                        state.divOverrides.childSh4 = Number(div(totals.value.childSh4, state.settings.hotelDiv).toFixed(2));
+                    }
+                }, { deep: true, immediate: true });
 
                 const calcBlock = (base3, base4) => {
                     const markupPct = 1 + (state.settings.markup / 100);
@@ -463,14 +477,14 @@
                 };
 
                 const calc = computed(() => {
-                    const adBase3 = totals.value.tour + divTotals.value.transfer + divTotals.value.hotel3 + totals.value.meal3;
-                    const adBase4 = totals.value.tour + divTotals.value.transfer + divTotals.value.hotel4 + totals.value.meal4;
+                    const adBase3 = totals.value.tour + state.divOverrides.transfer + state.divOverrides.hotel3 + totals.value.meal3;
+                    const adBase4 = totals.value.tour + state.divOverrides.transfer + state.divOverrides.hotel4 + totals.value.meal4;
                     
-                    const exBase3 = totals.value.tour + divTotals.value.transfer + divTotals.value.childEx3 + totals.value.meal3;
-                    const exBase4 = totals.value.tour + divTotals.value.transfer + divTotals.value.childEx4 + totals.value.meal4;
+                    const exBase3 = totals.value.tour + state.divOverrides.transfer + state.divOverrides.childEx3 + totals.value.meal3;
+                    const exBase4 = totals.value.tour + state.divOverrides.transfer + state.divOverrides.childEx4 + totals.value.meal4;
                     
-                    const shBase3 = totals.value.tour + divTotals.value.transfer + divTotals.value.childSh3 + totals.value.meal3;
-                    const shBase4 = totals.value.tour + divTotals.value.transfer + divTotals.value.childSh4 + totals.value.meal4;
+                    const shBase3 = totals.value.tour + state.divOverrides.transfer + state.divOverrides.childSh3 + totals.value.meal3;
+                    const shBase4 = totals.value.tour + state.divOverrides.transfer + state.divOverrides.childSh4 + totals.value.meal4;
 
                     return {
                         adult: calcBlock(adBase3, adBase4),
@@ -525,7 +539,7 @@
                 };
 
                 return {
-                    state, addDay, removeDay, totals, divTotals, calc,
+                    state, addDay, removeDay, totals, calc,
                     exportJSON, importJSON, printDoc, formatCurrency
                 };
             }
