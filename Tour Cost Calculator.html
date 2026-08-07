@@ -380,15 +380,18 @@
             el.className = 'flex items-center justify-between bg-white p-2 rounded-md border';
             
             // Format display text
-            const text3 = `3*: ${city.hotel3Name} (${city.hotel3Price})`;
-            const text4 = `4*: ${city.hotel4Name} (${city.hotel4Price})`;
+            const total3 = city.hotel3Price * city.numberOfNights;
+            const total4 = city.hotel4Price * city.numberOfNights;
+            const text3 = `3*: ${city.hotel3Name} (${city.hotel3Price} THB x ${city.numberOfNights}N = ${total3} THB)`;
+            const text4 = `4*: ${city.hotel4Name} (${city.hotel4Price} THB x ${city.numberOfNights}N = ${total4} THB)`;
             
             el.innerHTML = `
                 <div class="flex items-center flex-grow overflow-hidden mr-2">
                     <input type="checkbox" id="city-${index}" class="h-4 w-4 mr-3 flex-shrink-0" onchange="toggleSelection('city', ${index})" ${city.selected ? 'checked' : ''}>
                     <label for="city-${index}" class="text-sm font-medium truncate">
-                        <strong>${city.name} (${city.numberOfNights}N)</strong><br>
-                        <span class="text-xs text-gray-600">${text3} | ${text4}</span>
+                        <strong>${city.name} (${city.numberOfNights} Nights)</strong><br>
+                        <span class="text-xs text-gray-600">${text3}</span><br>
+                        <span class="text-xs text-gray-600">${text4}</span>
                     </label>
                 </div>
                 <div class="flex-shrink-0">
