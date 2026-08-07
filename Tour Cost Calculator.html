@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Tour Cost Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .modal-backdrop {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 99;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            width: 90%;
+            max-width: 500px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen py-12">
+
+<div class="w-full max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-8 m-4">
+    <div class="flex items-center justify-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-800 text-center">Advanced Tour Cost Calculator</h1>
+        <span class="text-3xl ml-3">🧮</span>
+    </div>
+
+    <!-- Top Action Section -->
+    <div class="flex flex-col md:flex-row justify-center items-center gap-4 mb-8 pb-6 border-b border-gray-200">
+        <button onclick="document.getElementById('importFile').click()" class="py-2 px-6 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition">
+            Import Data
+        </button>
+        <input type="file" id="importFile" style="display: none;" accept=".json" onchange="handleImport(event)">
+        <button onclick="exportData()" class="py-2 px-6 bg-black text-white font-semibold rounded-lg shadow-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition">
+            Export Data
+        </button>
+        <div class="flex items-center">
+             <button onclick="document.getElementById('logoUpload').click()" class="py-2 px-6 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition">
+                Upload Logo
+            </button>
+            <input type="file" id="logoUpload" style="display: none;" accept="image/*" onchange="handleLogoUpload(event)">
+            <img id="logoPreview" src="" alt="Logo Preview" class="ml-4 h-10 w-auto" style="display: none;">
+        </div>
+    </div>
+
+    <!-- Input Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-6">
+        <!-- Left Column: Service Management -->
+        <div class="space-y-6 bg-gray-50 p-6 rounded-lg border">
+            <!-- Tour Management -->
+            <div>
+                <div class="flex justify-between items-center border-b pb-2 mb-4">
+                    <h2 class="text-xl font-semibold text-gray-700">Tour Management</h2>
+                    <span id="tourSelectionCount" class="text-sm font-medium text-gray-500"></span>
+                </div>
+                <input type="text" id="tourSearch" onkeyup="renderAll()" placeholder="Search tours..." class="w-full p-2 mb-4 border rounded-md">
+                <div id="tour-list-container" class="space-y-2 max-h-40 overflow-y-auto pr-2"></div>
+                <div class="flex gap-2 mt-4">
+                    <button onclick="openModal('tourModal')" class="w-full py-2 px-4 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition">Add New Tour</button>
+                    <button onclick="clearSelection('tour')" class="w-full py-2 px-4 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition">Clear Selection</button>
+                </div>
+            </div>
+             <!-- Transfer Management -->
+            <div>
+                <div class="flex justify-between items-center border-b pt-4 pb-2 mb-4">
+                    <h2 class="text-xl font-semibold text-gray-700">Transfer Management</h2>
+                    <span id="transferSelectionCount" class="text-sm font-medium text-gray-500"></span>
+                </div>
+                <input type="text" id="transferSearch" onkeyup="renderAll()" placeholder="Search transfers..." class="w-full p-2 mb-4 border rounded-md">
+                <div id="transfer-list-container" class="space-y-2 max-h-40 overflow-y-auto pr-2"></div>
+                <div class="flex gap-2 mt-4">
+                    <button onclick="openModal('transferModal')" class="w-full py-2 px-4 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition">Add New Transfer</button>
+                    <button onclick="clearSelection('transfer')" class="w-full py-2 px-4 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition">Clear Selection</button>
+                </div>
+            </div>
+            <!-- Hotel Management -->
+            <div>
+                <div class="flex justify-between items-center border-b pt-4 pb-2 mb-4">
+                    <h2 class="text-xl font-semibold text-gray-700">Hotel Management</h2>
+                    <span id="hotelSelectionCount" class="text-sm font-medium text-gray-500"></span>
+                </div>
+                <input type="text" id="hotelSearch" onkeyup="renderAll()" placeholder="Search hotels..." class="w-full p-2 mb-4 border rounded-md">
+                <div id="hotel-list-container" class="space-y-2 max-h-40 overflow-y-auto pr-2"></div>
+                <div class="flex gap-2 mt-4">
+                    <button onclick="openModal('hotelModal')" class="w-full py-2 px-4 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition">Add New Hotel</button>
+                    <button onclick="clearSelection('hotel')" class="w-full py-2 px-4 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition">Clear Selection</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Settings & Rates -->
+        <div class="space-y-4 bg-gray-50 p-6 rounded-lg border">
+             <h2 class="text-xl font-semibold text-gray-700 border-b pb-2">Calculation Settings</h2>
+            <div>
+                <label for="num_people_transfer" class="block text-sm font-medium text-gray-600 mb-1">Divide Total Transfer by (No. of People)</label>
+                <input type="number" id="num_people_transfer" class="w-full p-3 bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" placeholder="e.g., 2">
+            </div>
+            <div>
+                <label for="num_people_hotel" class="block text-sm font-medium text-gray-600 mb-1">Divide Total Hotel by (No. of People/Rooms)</label>
+                <input type="number" id="num_people_hotel" class="w-full p-3 bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" placeholder="e.g., 2">
+            </div>
+             <h2 class="text-xl font-semibold text-gray-700 border-b pt-4 pb-2">Pricing & Rates</h2>
+            <div>
+                <label for="markup" class="block text-sm font-medium text-gray-600 mb-1">Markup (%)</label>
+                <input type="number" id="markup" value="25" class="w-full p-3 bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+            </div>
+             <div>
+                <label for="lkr_rate" class="block text-sm font-medium text-gray-600 mb-1">LKR Rate (Multiply THB by)</label>
+                <input type="number" id="lkr_rate" value="10.0" step="0.01" class="w-full p-3 bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500">
+            </div>
+             <div>
+                <label for="usd_divisor" class="block text-sm font-medium text-gray-600 mb-1">USD Conversion (Divide THB by)</label>
+                <input type="number" id="usd_divisor" value="31" step="0.01" class="w-full p-3 bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500">
+            </div>
+            <h2 class="text-xl font-semibold text-gray-700 border-b pt-4 pb-2">Child Sharing Bed Inputs</h2>
+            <div>
+                <label for="hotel_nights_for_meal" class="block text-sm font-medium text-gray-600 mb-1">Number of Nights (for meal calculation)</label>
+                <input type="number" id="hotel_nights_for_meal" class="w-full p-3 bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500" placeholder="e.g., 3">
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label for="meal_price_3star" class="block text-sm font-medium text-gray-600 mb-1">3* Meal Price/Night</label>
+                    <input type="number" id="meal_price_3star" class="w-full p-3 bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500" placeholder="THB">
+                </div>
+                <div>
+                    <label for="meal_price_4star" class="block text-sm font-medium text-gray-600 mb-1">4* Meal Price/Night</label>
+                    <input type="number" id="meal_price_4star" class="w-full p-3 bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500" placeholder="THB">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manual Markup Overrides -->
+     <div class="bg-yellow-50 p-6 rounded-lg border border-yellow-200 mb-6">
+        <h2 class="text-xl font-semibold text-gray-700 border-b pb-2 mb-4">Manual Markup Overrides (THB)</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label for="adult_manual_markup" class="block text-sm font-medium text-gray-600 mb-1">Adult Markup (THB)</label>
+                <input type="number" id="adult_manual_markup" class="w-full p-3 bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500" placeholder="Leave blank for %">
+            </div>
+            <div>
+                <label for="child_extra_bed_manual_markup" class="block text-sm font-medium text-gray-600 mb-1">Child w/ Extra Bed Markup (THB)</label>
+                <input type="number" id="child_extra_bed_manual_markup" class="w-full p-3 bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500" placeholder="Leave blank for %">
+            </div>
+            <div>
+                <label for="child_sharing_manual_markup" class="block text-sm font-medium text-gray-600 mb-1">Child Sharing Markup (THB)</label>
+                <input type="number" id="child_sharing_manual_markup" class="w-full p-3 bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500" placeholder="Leave blank for %">
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex flex-col md:flex-row gap-4">
+        <button onclick="calculate()" class="w-full py-3 px-4 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-transform transform hover:scale-105">
+            Calculate All Prices
+        </button>
+        <button onclick="generateItinerary()" class="w-full py-3 px-4 bg-teal-600 text-white font-semibold rounded-lg shadow-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-transform transform hover:scale-105">
+            Create Itinerary
+        </button>
+    </div>
+
+
+    <!-- Results Section -->
+    <div id="results" class="mt-8 pt-6 border-t-2 border-dashed border-gray-200" style="display:none;">
+        <h2 class="text-2xl font-bold text-gray-800 text-center mb-6">Pricing Results (Options)</h2>
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+            <!-- 3 Star Option -->
+            <div class="bg-blue-50 border border-blue-200 p-4 rounded-lg">
+                <h3 class="text-xl font-bold text-blue-800 mb-4 text-center border-b pb-2">3-Star Package</h3>
+                <div class="space-y-4">
+                    <div class="bg-white p-3 rounded shadow-sm">
+                        <p class="font-bold text-gray-700">Adult</p>
+                        <p class="text-xs text-gray-500 mb-1">Markup: <span id="adult_markup_3star"></span></p>
+                        <p class="flex justify-between"><span>THB:</span><strong id="adult_thb_3star"></strong></p>
+                        <p class="flex justify-between"><span>LKR:</span><strong id="adult_lkr_3star" class="text-blue-700"></strong></p>
+                    </div>
+                    <div class="bg-white p-3 rounded shadow-sm">
+                        <p class="font-bold text-gray-700">Child (Extra Bed)</p>
+                        <p class="text-xs text-gray-500 mb-1">Markup: <span id="child_extra_markup_3star"></span></p>
+                        <p class="flex justify-between"><span>THB:</span><strong id="child_extra_thb_3star"></strong></p>
+                        <p class="flex justify-between"><span>LKR:</span><strong id="child_extra_lkr_3star" class="text-green-700"></strong></p>
+                    </div>
+                    <div class="bg-white p-3 rounded shadow-sm">
+                        <p class="font-bold text-gray-700">Child (Sharing Bed)</p>
+                        <p class="text-xs text-gray-500 mb-1">Markup: <span id="child_sharing_markup_3star"></span></p>
+                        <p class="flex justify-between"><span>THB:</span><strong id="child_sharing_thb_3star"></strong></p>
+                        <p class="flex justify-between"><span>LKR:</span><strong id="child_sharing_lkr_3star" class="text-purple-700"></strong></p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 4 Star Option -->
+            <div class="bg-amber-50 border border-amber-200 p-4 rounded-lg">
+                <h3 class="text-xl font-bold text-amber-800 mb-4 text-center border-b border-amber-200 pb-2">4-Star Package</h3>
+                <div class="space-y-4">
+                    <div class="bg-white p-3 rounded shadow-sm">
+                        <p class="font-bold text-gray-700">Adult</p>
+                        <p class="text-xs text-gray-500 mb-1">Markup: <span id="adult_markup_4star"></span></p>
+                        <p class="flex justify-between"><span>THB:</span><strong id="adult_thb_4star"></strong></p>
+                        <p class="flex justify-between"><span>LKR:</span><strong id="adult_lkr_4star" class="text-blue-700"></strong></p>
+                    </div>
+                    <div class="bg-white p-3 rounded shadow-sm">
+                        <p class="font-bold text-gray-700">Child (Extra Bed)</p>
+                        <p class="text-xs text-gray-500 mb-1">Markup: <span id="child_extra_markup_4star"></span></p>
+                        <p class="flex justify-between"><span>THB:</span><strong id="child_extra_thb_4star"></strong></p>
+                        <p class="flex justify-between"><span>LKR:</span><strong id="child_extra_lkr_4star" class="text-green-700"></strong></p>
+                    </div>
+                    <div class="bg-white p-3 rounded shadow-sm">
+                        <p class="font-bold text-gray-700">Child (Sharing Bed)</p>
+                        <p class="text-xs text-gray-500 mb-1">Markup: <span id="child_sharing_markup_4star"></span></p>
+                        <p class="flex justify-between"><span>THB:</span><strong id="child_sharing_thb_4star"></strong></p>
+                        <p class="flex justify-between"><span>LKR:</span><strong id="child_sharing_lkr_4star" class="text-purple-700"></strong></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Custom / Mixed Option -->
+            <div class="bg-gray-50 border border-gray-300 p-4 rounded-lg relative">
+                <div class="absolute top-0 right-0 bg-gray-200 text-xs px-2 py-1 rounded-bl-lg text-gray-600 font-bold">All Checked Hotels</div>
+                <h3 class="text-xl font-bold text-gray-800 mb-4 text-center border-b pb-2">Mixed Package</h3>
+                <div class="space-y-4">
+                    <div class="bg-white p-3 rounded shadow-sm">
+                        <p class="font-bold text-gray-700">Adult</p>
+                        <p class="text-xs text-gray-500 mb-1">Markup: <span id="adult_markup_mix"></span></p>
+                        <p class="flex justify-between"><span>THB:</span><strong id="adult_thb_mix"></strong></p>
+                        <p class="flex justify-between"><span>LKR:</span><strong id="adult_lkr_mix" class="text-blue-700"></strong></p>
+                    </div>
+                    <div class="bg-white p-3 rounded shadow-sm">
+                        <p class="font-bold text-gray-700">Child (Extra Bed)</p>
+                        <p class="text-xs text-gray-500 mb-1">Markup: <span id="child_extra_markup_mix"></span></p>
+                        <p class="flex justify-between"><span>THB:</span><strong id="child_extra_thb_mix"></strong></p>
+                        <p class="flex justify-between"><span>LKR:</span><strong id="child_extra_lkr_mix" class="text-green-700"></strong></p>
+                    </div>
+                    <div class="bg-white p-3 rounded shadow-sm">
+                        <p class="font-bold text-gray-700">Child (Sharing Bed)</p>
+                        <p class="text-xs text-gray-500 mb-1">Markup: <span id="child_sharing_markup_mix"></span></p>
+                        <p class="flex justify-between"><span>THB:</span><strong id="child_sharing_thb_mix"></strong></p>
+                        <p class="flex justify-between"><span>LKR:</span><strong id="child_sharing_lkr_mix" class="text-purple-700"></strong></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modals -->
+<div id="tourModal" class="modal-backdrop"><div class="modal-content"><h3 id="tourModalTitle" class="text-2xl font-bold mb-4">Add New Tour</h3><div class="space-y-4"><input type="text" id="newTourName" placeholder="Tour Name" class="w-full p-3 border rounded-md"><input type="number" id="newTourPrice" placeholder="Tour Price (THB)" class="w-full p-3 border rounded-md"><input type="number" id="newTourTransferPrice" placeholder="Specific Transfer Price (optional)" class="w-full p-3 border rounded-md"></div><div class="flex gap-4 mt-6"><button id="saveTourButton" onclick="saveTour()" class="flex-1 py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700">Add Tour</button><button onclick="closeModal('tourModal')" class="flex-1 py-2 px-4 bg-gray-300 rounded-md hover:bg-gray-400">Cancel</button></div></div></div>
+<div id="transferModal" class="modal-backdrop"><div class="modal-content"><h3 id="transferModalTitle" class="text-2xl font-bold mb-4">Add New Transfer</h3><div class="space-y-4"><input type="text" id="newTransferName" placeholder="Transfer Name" class="w-full p-3 border rounded-md"><input type="number" id="newTransferPrice" placeholder="Transfer Price (THB)" class="w-full p-3 border rounded-md"></div><div class="flex gap-4 mt-6"><button id="saveTransferButton" onclick="saveTransfer()" class="flex-1 py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700">Add Transfer</button><button onclick="closeModal('transferModal')" class="flex-1 py-2 px-4 bg-gray-300 rounded-md hover:bg-gray-400">Cancel</button></div></div></div>
+<div id="hotelModal" class="modal-backdrop"><div class="modal-content"><h3 id="hotelModalTitle" class="text-2xl font-bold mb-4">Add New Hotel</h3><div class="space-y-4">
+    <input type="text" id="newHotelName" placeholder="Hotel Name" class="w-full p-3 border rounded-md">
+    <select id="newHotelStar" class="w-full p-3 border rounded-md bg-white">
+        <option value="3">3 Star</option>
+        <option value="4">4 Star</option>
+        <option value="5">5 Star / Other</option>
+    </select>
+    <input type="number" id="newHotelPrice" placeholder="Price per Night (THB)" class="w-full p-3 border rounded-md">
+    <input type="number" id="newHotelNights" placeholder="Number of Nights" class="w-full p-3 border rounded-md">
+</div><div class="flex gap-4 mt-6"><button id="saveHotelButton" onclick="saveHotel()" class="flex-1 py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700">Add Hotel</button><button onclick="closeModal('hotelModal')" class="flex-1 py-2 px-4 bg-gray-300 rounded-md hover:bg-gray-400">Cancel</button></div></div></div>
+
+<!-- Notification element -->
+<div id="notification" class="fixed top-5 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg transition-opacity duration-300 opacity-0 z-50"></div>
+
+<script>
+    // --- STATE MANAGEMENT ---
+    let availableTours = [];
+    let availableTransfers = [];
+    let availableHotels = [];
+    let logoDataUrl = null;
+    const allInputIds = [
+        'num_people_transfer', 'num_people_hotel',
+        'markup', 'lkr_rate', 'usd_divisor', 'hotel_nights_for_meal', 'meal_price_3star', 'meal_price_4star',
+        'adult_manual_markup', 'child_extra_bed_manual_markup', 'child_sharing_manual_markup'
+    ];
+
+    // --- UI RENDERING ---
+    function renderTours() {
+        const container = document.getElementById('tour-list-container');
+        const searchTerm = document.getElementById('tourSearch').value.toLowerCase();
+        container.innerHTML = '';
+        const filteredTours = availableTours.filter(tour => tour.name.toLowerCase().includes(searchTerm));
+
+        const selectedCount = availableTours.filter(t => t.selected).length;
+        document.getElementById('tourSelectionCount').innerText = `(${selectedCount}/${availableTours.length} selected)`;
+
+        if (filteredTours.length === 0) {
+            container.innerHTML = `<p class="text-gray-500 text-sm">No matching tours found.</p>`;
+            return;
+        }
+        filteredTours.forEach(tour => {
+            const index = availableTours.findIndex(t => t === tour);
+            const el = document.createElement('div');
+            el.className = 'flex items-center justify-between bg-white p-2 rounded-md border';
+            const transferText = tour.transferPrice > 0 ? ` (+${tour.transferPrice} Transfer)` : '';
+            el.innerHTML = `
+                <div class="flex items-center flex-grow overflow-hidden mr-2">
+                    <input type="checkbox" id="tour-${index}" class="h-4 w-4 mr-3 flex-shrink-0" onchange="toggleSelection('tour', ${index})" ${tour.selected ? 'checked' : ''}>
+                    <label for="tour-${index}" class="text-sm font-medium truncate">${tour.name} - ${tour.price} THB${transferText}</label>
+                </div>
+                <div class="flex-shrink-0">
+                    <button onclick="openEditModal('tour', ${index})" class="text-blue-500 hover:text-blue-700 font-bold text-lg px-2">✎</button>
+                    <button onclick="removeItem('tour', ${index})" class="text-red-500 hover:text-red-700 font-bold text-lg px-2">&times;</button>
+                </div>
+            `;
+            container.appendChild(el);
+        });
+    }
+
+    function renderTransfers() {
+        const container = document.getElementById('transfer-list-container');
+        const searchTerm = document.getElementById('transferSearch').value.toLowerCase();
+        container.innerHTML = '';
+        const filteredTransfers = availableTransfers.filter(t => t.name.toLowerCase().includes(searchTerm));
+        
+        const selectedCount = availableTransfers.filter(t => t.selected).length;
+        document.getElementById('transferSelectionCount').innerText = `(${selectedCount}/${availableTransfers.length} selected)`;
+
+        if (filteredTransfers.length === 0) {
+            container.innerHTML = `<p class="text-gray-500 text-sm">No matching transfers found.</p>`;
+            return;
+        }
+        filteredTransfers.forEach(transfer => {
+            const index = availableTransfers.findIndex(t => t === transfer);
+            const el = document.createElement('div');
+            el.className = 'flex items-center justify-between bg-white p-2 rounded-md border';
+            el.innerHTML = `
+                <div class="flex items-center flex-grow overflow-hidden mr-2">
+                    <input type="checkbox" id="transfer-${index}" class="h-4 w-4 mr-3 flex-shrink-0" onchange="toggleSelection('transfer', ${index})" ${transfer.selected ? 'checked' : ''}>
+                    <label for="transfer-${index}" class="text-sm font-medium truncate">${transfer.name} - ${transfer.price} THB</label>
+                </div>
+                <div class="flex-shrink-0">
+                    <button onclick="openEditModal('transfer', ${index})" class="text-blue-500 hover:text-blue-700 font-bold text-lg px-2">✎</button>
+                    <button onclick="removeItem('transfer', ${index})" class="text-red-500 hover:text-red-700 font-bold text-lg px-2">&times;</button>
+                </div>
+            `;
+            container.appendChild(el);
+        });
+    }
+
+    function renderHotels() {
+        const container = document.getElementById('hotel-list-container');
+        const searchTerm = document.getElementById('hotelSearch').value.toLowerCase();
+        container.innerHTML = '';
+        const filteredHotels = availableHotels.filter(h => h.name.toLowerCase().includes(searchTerm));
+
+        const selectedCount = availableHotels.filter(h => h.selected).length;
+        document.getElementById('hotelSelectionCount').innerText = `(${selectedCount}/${availableHotels.length} selected)`;
+
+        if (filteredHotels.length === 0) {
+            container.innerHTML = `<p class="text-gray-500 text-sm">No matching hotels found.</p>`;
+            return;
+        }
+        filteredHotels.forEach(hotel => {
+            const index = availableHotels.findIndex(h => h === hotel);
+            const el = document.createElement('div');
+            el.className = 'flex items-center justify-between bg-white p-2 rounded-md border';
+            const total = hotel.pricePerNight * hotel.numberOfNights;
+            const starText = hotel.star === "3" ? "3*" : hotel.star === "4" ? "4*" : "5*";
+            el.innerHTML = `
+                <div class="flex items-center flex-grow overflow-hidden mr-2">
+                    <input type="checkbox" id="hotel-${index}" class="h-4 w-4 mr-3 flex-shrink-0" onchange="toggleSelection('hotel', ${index})" ${hotel.selected ? 'checked' : ''}>
+                    <label for="hotel-${index}" class="text-sm font-medium truncate"><span class="bg-gray-200 text-xs px-1 rounded mr-1">${starText}</span> ${hotel.name} (${hotel.numberOfNights}N) - ${total} THB</label>
+                </div>
+                <div class="flex-shrink-0">
+                    <button onclick="openEditModal('hotel', ${index})" class="text-blue-500 hover:text-blue-700 font-bold text-lg px-2">✎</button>
+                    <button onclick="removeItem('hotel', ${index})" class="text-red-500 hover:text-red-700 font-bold text-lg px-2">&times;</button>
+                </div>
+            `;
+            container.appendChild(el);
+        });
+    }
+
+    // --- MODAL & ITEM MANAGEMENT ---
+    function openModal(modalId) { document.getElementById(modalId).style.display = 'flex'; }
+    
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+        // Reset modal to "Add" mode
+        if (modalId === 'tourModal') {
+            document.getElementById('tourModalTitle').innerText = 'Add New Tour';
+            const saveButton = document.getElementById('saveTourButton');
+            saveButton.innerText = 'Add Tour';
+            saveButton.onclick = () => saveTour();
+            document.getElementById('newTourName').value = '';
+            document.getElementById('newTourPrice').value = '';
+            document.getElementById('newTourTransferPrice').value = '';
+        } else if (modalId === 'transferModal') {
+            document.getElementById('transferModalTitle').innerText = 'Add New Transfer';
+            const saveButton = document.getElementById('saveTransferButton');
+            saveButton.innerText = 'Add Transfer';
+            saveButton.onclick = () => saveTransfer();
+            document.getElementById('newTransferName').value = '';
+            document.getElementById('newTransferPrice').value = '';
+        } else if (modalId === 'hotelModal') {
+            document.getElementById('hotelModalTitle').innerText = 'Add New Hotel';
+            const saveButton = document.getElementById('saveHotelButton');
+            saveButton.innerText = 'Add Hotel';
+            saveButton.onclick = () => saveHotel();
+            document.getElementById('newHotelName').value = '';
+            document.getElementById('newHotelStar').value = '3';
+            document.getElementById('newHotelPrice').value = '';
+            document.getElementById('newHotelNights').value = '';
+        }
+    }
+
+    function openEditModal(type, index) {
+        if (type === 'tour') {
+            const tour = availableTours[index];
+            document.getElementById('newTourName').value = tour.name;
+            document.getElementById('newTourPrice').value = tour.price;
+            document.getElementById('newTourTransferPrice').value = tour.transferPrice;
+            document.getElementById('tourModalTitle').innerText = 'Edit Tour';
+            const saveButton = document.getElementById('saveTourButton');
+            saveButton.innerText = 'Save Changes';
+            saveButton.onclick = () => saveTour(index);
+            openModal('tourModal');
+        } else if (type === 'transfer') {
+            const transfer = availableTransfers[index];
+            document.getElementById('newTransferName').value = transfer.name;
+            document.getElementById('newTransferPrice').value = transfer.price;
+            document.getElementById('transferModalTitle').innerText = 'Edit Transfer';
+            const saveButton = document.getElementById('saveTransferButton');
+            saveButton.innerText = 'Save Changes';
+            saveButton.onclick = () => saveTransfer(index);
+            openModal('transferModal');
+        } else if (type === 'hotel') {
+            const hotel = availableHotels[index];
+            document.getElementById('newHotelName').value = hotel.name;
+            document.getElementById('newHotelStar').value = hotel.star || '3';
+            document.getElementById('newHotelPrice').value = hotel.pricePerNight;
+            document.getElementById('newHotelNights').value = hotel.numberOfNights;
+            document.getElementById('hotelModalTitle').innerText = 'Edit Hotel';
+            const saveButton = document.getElementById('saveHotelButton');
+            saveButton.innerText = 'Save Changes';
+            saveButton.onclick = () => saveHotel(index);
+            openModal('hotelModal');
+        }
+    }
+
+    function saveTour(index = null) {
+        const name = document.getElementById('newTourName').value;
+        const price = parseFloat(document.getElementById('newTourPrice').value) || 0;
+        const transferPrice = parseFloat(document.getElementById('newTourTransferPrice').value) || 0;
+        if (!name || price <= 0) {
+            showNotification("Please enter a valid tour name and price.", true);
+            return;
+        }
+        const tourData = { name, price, transferPrice };
+        if (index !== null) {
+            tourData.selected = availableTours[index].selected;
+            availableTours[index] = tourData;
+        } else {
+            tourData.selected = true;
+            availableTours.push(tourData);
+        }
+        closeModal('tourModal');
+        renderTours();
+    }
+    
+    function saveTransfer(index = null) {
+        const name = document.getElementById('newTransferName').value;
+        const price = parseFloat(document.getElementById('newTransferPrice').value) || 0;
+        if (!name || price <= 0) {
+            showNotification("Please enter a valid transfer name and price.", true);
+            return;
+        }
+        const transferData = { name, price };
+        if (index !== null) {
+            transferData.selected = availableTransfers[index].selected;
+            availableTransfers[index] = transferData;
+        } else {
+            transferData.selected = true;
+            availableTransfers.push(transferData);
+        }
+        closeModal('transferModal');
+        renderTransfers();
+    }
+
+    function saveHotel(index = null) {
+        const name = document.getElementById('newHotelName').value;
+        const star = document.getElementById('newHotelStar').value;
+        const pricePerNight = parseFloat(document.getElementById('newHotelPrice').value) || 0;
+        const numberOfNights = parseInt(document.getElementById('newHotelNights').value) || 0;
+        if (!name || pricePerNight <= 0 || numberOfNights <= 0) {
+            showNotification("Please enter a valid hotel name, price, and number of nights.", true);
+            return;
+        }
+        const hotelData = { name, star, pricePerNight, numberOfNights };
+        if (index !== null) {
+            hotelData.selected = availableHotels[index].selected;
+            availableHotels[index] = hotelData;
+        } else {
+            hotelData.selected = true;
+            availableHotels.push(hotelData);
+        }
+        closeModal('hotelModal');
+        renderHotels();
+    }
+    
+    function removeItem(type, index) {
+        if (type === 'tour') availableTours.splice(index, 1);
+        if (type === 'transfer') availableTransfers.splice(index, 1);
+        if (type === 'hotel') availableHotels.splice(index, 1);
+        renderAll();
+    }
+    
+    function toggleSelection(type, index) {
+        if (type === 'tour') availableTours[index].selected = !availableTours[index].selected;
+        if (type === 'transfer') availableTransfers[index].selected = !availableTransfers[index].selected;
+        if (type === 'hotel') availableHotels[index].selected = !availableHotels[index].selected;
+        renderAll();
+    }
+
+    function clearSelection(type) {
+        let listToClear;
+        if (type === 'tour') listToClear = availableTours;
+        if (type === 'transfer') listToClear = availableTransfers;
+        if (type === 'hotel') listToClear = availableHotels;
+
+        if (listToClear) {
+            listToClear.forEach(item => item.selected = false);
+            renderAll();
+        }
+    }
+
+    function renderAll() {
+        renderTours();
+        renderTransfers();
+        renderHotels();
+    }
+
+    // --- DATA & NOTIFICATIONS ---
+    function showNotification(message, isError = false) {
+        const notification = document.getElementById('notification');
+        notification.textContent = message;
+        notification.className = `fixed top-5 right-5 text-white py-2 px-4 rounded-lg shadow-lg transition-opacity duration-300 opacity-100 z-50 ${isError ? 'bg-red-500' : 'bg-green-500'}`;
+        setTimeout(() => { notification.style.opacity = '0'; }, 3000);
+    }
+
+    function handleLogoUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            logoDataUrl = e.target.result;
+            const preview = document.getElementById('logoPreview');
+            preview.src = logoDataUrl;
+            preview.style.display = 'block';
+            showNotification('Logo uploaded successfully!');
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function exportData() {
+        const data = {
+            services: {
+                tours: availableTours,
+                transfers: availableTransfers,
+                hotels: availableHotels
+            },
+            inputs: {},
+            logo: logoDataUrl
+        };
+        allInputIds.forEach(id => { data.inputs[id] = document.getElementById(id).value; });
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        downloadAnchorNode.setAttribute("download", `cost-data-${timestamp}.json`);
+        document.body.appendChild(downloadAnchorNode);
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+        showNotification('Data exported successfully!');
+    }
+
+    function handleImport(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = JSON.parse(e.target.result);
+                if (data.inputs) {
+                    allInputIds.forEach(id => {
+                        if (data.inputs.hasOwnProperty(id)) {
+                            document.getElementById(id).value = data.inputs[id];
+                        }
+                    });
+                }
+                if (data.services) {
+                    availableTours = data.services.tours || [];
+                    availableTransfers = data.services.transfers || [];
+                    availableHotels = data.services.hotels || [];
+                    document.getElementById('tourSearch').value = '';
+                    document.getElementById('transferSearch').value = '';
+                    document.getElementById('hotelSearch').value = '';
+                    renderAll();
+                }
+                if (data.logo) {
+                    logoDataUrl = data.logo;
+                    const preview = document.getElementById('logoPreview');
+                    preview.src = logoDataUrl;
+                    preview.style.display = 'block';
+                }
+                showNotification('Data imported successfully!');
+                document.getElementById('results').style.display = 'none';
+            } catch (error) {
+                showNotification("Error: Invalid file format.", true);
+            }
+        };
+        reader.readAsText(file);
+        event.target.value = '';
+    }
+
+    function generateItinerary() {
+        const selectedTours = availableTours.filter(item => item.selected);
+        const selectedTransfers = availableTransfers.filter(item => item.selected);
+        const selectedHotels = availableHotels.filter(item => item.selected);
+
+        let totalNights = selectedHotels.reduce((sum, hotel) => sum + hotel.numberOfNights, 0);
+        const totalDays = totalNights > 0 ? totalNights + 1 : selectedTours.length > 0 ? selectedTours.length + 1 : 1;
+        const packageTitle = `${String(totalNights).padStart(2, '0')}N ${String(totalDays).padStart(2, '0')}D Package`;
+
+        let inclusionsHtml = '<h3>Inclusions:</h3><ul>';
+        selectedHotels.forEach(h => {
+            inclusionsHtml += `<li>${h.numberOfNights} nights accommodation at ${h.name} with breakfast.</li>`;
+        });
+        selectedTransfers.forEach(t => {
+            inclusionsHtml += `<li>${t.name}.</li>`;
+        });
+        selectedTours.forEach(t => {
+            inclusionsHtml += `<li>${t.name}.</li>`;
+        });
+        inclusionsHtml += '</ul>';
+
+        let dayByDayHtml = '<h2>Itinerary</h2>';
+        let tourIndex = 0;
+        for (let i = 1; i <= totalDays; i++) {
+            dayByDayHtml += `
+                <div class="day-block" data-day="${i}">
+                    <div class="day-header">
+                        <h4>Day ${i}:</h4>
+                        <button class="remove-day-btn" onclick="removeDay(this)">Remove Day</button>
+                    </div>
+                    <ul class="activity-list">`;
+            
+            if (i === totalDays) {
+                dayByDayHtml += `<li>Breakfast at Hotel. <button class="remove-item-btn" onclick="removeItem(this)">×</button></li>`;
+                dayByDayHtml += `<li>12.00pm Checkout from Hotel <button class="remove-item-btn" onclick="removeItem(this)">×</button></li>`;
+                const departureTransfer = selectedTransfers.find(t => t.name.toLowerCase().includes('departure') || t.name.toLowerCase().includes('hotel to airport'));
+                if (departureTransfer) {
+                    dayByDayHtml += `<li>Private Transfer Bangkok Hotel to Bangkok Airport <button class="remove-item-btn" onclick="removeItem(this)">×</button></li>`;
+                }
+            } else if (i === 1) {
+                const arrivalTransfer = selectedTransfers.find(t => t.name.toLowerCase().includes('arrival') || t.name.toLowerCase().includes('airport to hotel'));
+                if (arrivalTransfer) dayByDayHtml += `<li>${arrivalTransfer.name} <button class="remove-item-btn" onclick="removeItem(this)">×</button></li>`;
+                if(selectedHotels.length > 0) dayByDayHtml += `<li>Check in at ${selectedHotels.map(h => h.name).join(' or ')}. <button class="remove-item-btn" onclick="removeItem(this)">×</button></li>`;
+                if (tourIndex < selectedTours.length) {
+                    dayByDayHtml += `<li>${selectedTours[tourIndex].name}. <button class="remove-item-btn" onclick="removeItem(this)">×</button></li>`;
+                    tourIndex++;
+                }
+                dayByDayHtml += `<li>Overnight at Hotel. <button class="remove-item-btn" onclick="removeItem(this)">×</button></li>`;
+            } else {
+                dayByDayHtml += `<li>Breakfast at Hotel. <button class="remove-item-btn" onclick="removeItem(this)">×</button></li>`;
+                if (tourIndex < selectedTours.length) {
+                    dayByDayHtml += `<li>${selectedTours[tourIndex].name}. <button class="remove-item-btn" onclick="removeItem(this)">×</button></li>`;
+                    tourIndex++;
+                } else {
+                     dayByDayHtml += `<li>Free for leisure. <button class="remove-item-btn" onclick="removeItem(this)">×</button></li>`;
+                }
+                dayByDayHtml += `<li>Overnight at Hotel. <button class="remove-item-btn" onclick="removeItem(this)">×</button></li>`;
+            }
+
+            dayByDayHtml += `</ul><div class="image-gallery"></div><button class="add-activity-btn" onclick="addActivity(this)">+ Add Activity</button><button class="add-image-btn" onclick="triggerImageUpload(this)">+ Add Image</button></div>`;
+        }
+        
+        const lkrAdult3 = document.getElementById('adult_lkr_3star').innerText || "N/A";
+        const lkrChildExtra3 = document.getElementById('child_extra_lkr_3star').innerText || "N/A";
+        const lkrChildSharing3 = document.getElementById('child_sharing_lkr_3star').innerText || "N/A";
+
+        const lkrAdult4 = document.getElementById('adult_lkr_4star').innerText || "N/A";
+        const lkrChildExtra4 = document.getElementById('child_extra_lkr_4star').innerText || "N/A";
+        const lkrChildSharing4 = document.getElementById('child_sharing_lkr_4star').innerText || "N/A";
+
+        const lkrAdultMix = document.getElementById('adult_lkr_mix').innerText || "N/A";
+        const lkrChildExtraMix = document.getElementById('child_extra_lkr_mix').innerText || "N/A";
+        const lkrChildSharingMix = document.getElementById('child_sharing_lkr_mix').innerText || "N/A";
+
+        const priceHtml = `
+            <div id="price-section" style="margin-top: 2rem; border-top: 1px solid #eee; padding-top: 1rem;">
+                <h3>Price Details (LKR per person):</h3>
+                <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                    <thead>
+                        <tr style="background-color: #f8f9fa;">
+                            <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Category</th>
+                            <th style="border: 1px solid #ddd; padding: 8px; text-align: right;">Adult</th>
+                            <th style="border: 1px solid #ddd; padding: 8px; text-align: right;">Child (Extra Bed)</th>
+                            <th style="border: 1px solid #ddd; padding: 8px; text-align: right;">Child (Sharing Bed)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="border: 1px solid #ddd; padding: 8px; font-weight: bold;">3-Star Package Option</td>
+                            <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${lkrAdult3}</td>
+                            <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${lkrChildExtra3}</td>
+                            <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${lkrChildSharing3}</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #ddd; padding: 8px; font-weight: bold;">4-Star Package Option</td>
+                            <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${lkrAdult4}</td>
+                            <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${lkrChildExtra4}</td>
+                            <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${lkrChildSharing4}</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #ddd; padding: 8px; font-weight: bold;">Mixed / Custom Option</td>
+                            <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${lkrAdultMix}</td>
+                            <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${lkrChildExtraMix}</td>
+                            <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${lkrChildSharingMix}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        `;
+        
+        const specialNotesHtml = `
+            <div id="special-notes-section" style="margin-top: 2rem; border-top: 1px solid #eee; padding-top: 1rem;">
+                <h3>Special Notes:</h3>
+                <ul>
+                    <li>Should you have any questions, please feel free to contact us. We do hope the above proposal has thoroughly covered your requirements.</li>
+                    <li>Please note that we are not holding any accommodation or services for you at this point. If you wish to proceed kindly confirm to us.</li>
+                    <li>Children below 3 years old and shorter than 90 cm will not be charged for our package (free of charge).</li>
+                    <li>Please note that above rates are valid for the mentioned time period only.</li>
+                    <li>Please note that above rates are subject to availability & change.</li>
+                    <li>We look forward to creating a memorable experience for you.</li>
+                </ul>
+                <h3 style="margin-top: 1.5rem;">This Package Can Be Customized!</h3>
+                <p>Let us know if there is anything you'd like to add or modify to suit your preferences. We are here to create the perfect tour for you!</p>
+            </div>
+        `;
+        
+        const exclusionsHtml = `
+            <div id="exclusions-section" style="margin-top: 1rem;">
+                <h3>Exclusions:</h3>
+                <ul>
+                    <li>Air fare</li>
+                    <li>Everything which is not mentioned in the program</li>
+                    <li>Thailand Visa</li>
+                </ul>
+            </div>
+        `;
+
+
+        const itineraryHtml = `
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <title>Generated Itinerary</title>
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"><\/script>
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"><\/script>
+                <style>
+                    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; margin: 0; padding: 0; background-color: #f4f4f4; }
+                    .toolbar-container { position: sticky; top: 0; z-index: 100; background-color: #f4f4f4; padding: 1rem; border-bottom: 1px solid #ccc; }
+                    #itinerary-container { max-width: 800px; margin: 2rem auto; border: 1px solid #ddd; padding: 2rem; background-color: white; }
+                    .controls { text-align: center; margin-bottom: 1rem; padding: 1rem; background-color: #e9e9e9; border-radius: 5px; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 1rem; }
+                    .controls button, .text-format-btn { background-color: #007bff; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; }
+                    .controls button:hover, .text-format-btn:hover { background-color: #0056b3; }
+                    .controls input[type="color"], .controls input[type="text"], .controls select { border: 1px solid #ccc; padding: 5px; border-radius: 5px; height: 38px; }
+                    .controls label { margin-left: 10px; margin-right: 5px; }
+                    #logo-container { text-align: center; margin-bottom: 2rem; }
+                    #logo { max-height: 100px; max-width: 250px; }
+                    h1, h2, h3, h4 { color: #333; }
+                    h1 { text-align: center; border-bottom: 2px solid #eee; padding-bottom: 1rem; margin-bottom: 2rem;}
+                    ul { list-style-type: '✔ '; padding-left: 1.5rem; }
+                    li { margin-bottom: 0.5rem; position: relative; padding-right: 20px; }
+                    .day-block { border-top: 1px dashed #ccc; margin-top: 1.5rem; padding-top: 1.5rem; }
+                    .day-header { display: flex; justify-content: space-between; align-items: center; padding: 0.25rem 0.5rem; border-radius: 5px; }
+                    .remove-day-btn, .add-activity-btn, .remove-item-btn, .add-image-btn { background: none; border: none; cursor: pointer; font-size: 1rem; }
+                    .remove-day-btn { background-color: #dc3545; color: white; padding: 5px 10px; border-radius: 5px; }
+                    .add-activity-btn, .add-image-btn { background-color: #28a745; color: white; padding: 5px 10px; border-radius: 5px; margin-top: 10px; margin-right: 5px;}
+                    .remove-item-btn { position: absolute; right: 0; top: 50%; transform: translateY(-50%); color: #dc3545; font-weight: bold; }
+                    .image-gallery { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+                    .image-gallery img { max-width: 150px; max-height: 150px; border-radius: 5px; border: 1px solid #ddd; }
+                    @media print { .toolbar-container, .remove-day-btn, .add-activity-btn, .remove-item-btn, .add-image-btn { display: none; } }
+                </style>
+            </head>
+            <body>
+                <div class="toolbar-container">
+                    <div class="controls">
+                        <button onclick="window.print()">Print</button>
+                        <button onclick="downloadPDF()">Download as PDF</button>
+                        <button onclick="addDay()">+ Add Day</button>
+                        <button id="undo-btn" onclick="undo()">Undo</button>
+                        <button id="redo-btn" onclick="redo()">Redo</button>
+                    </div>
+                    <div class="controls">
+                        <div style="display:flex; align-items:center; gap: 5px; border-left: 2px solid #ccc; padding-left: 1rem;">
+                            <button class="text-format-btn" onclick="formatDoc('bold')"><b>B</b></button>
+                            <button class="text-format-btn" onclick="formatDoc('italic')"><i>I</i></button>
+                            <button class="text-format-btn" onclick="formatDoc('underline')"><u>U</u></button>
+                            <select onchange="formatDoc('fontName', this.value)"><option>Font</option><option>Arial</option><option>Verdana</option><option>Times New Roman</option><option>Courier New</option></select>
+                            <label>Color:</label><input type="color" id="textColor" onchange="formatDoc('foreColor', this.value)">
+                            <label>Highlight:</label><input type="color" id="highlightColor" onchange="formatDoc('hiliteColor', this.value)">
+                            <button class="text-format-btn" onclick="formatDoc('insertImage', prompt('Enter image URL:'))">Image</button>
+                        </div>
+                        <div style="display:flex; align-items:center; gap: 5px; border-left: 2px solid #ccc; padding-left: 1rem;">
+                            <label>Header BG:</label><input type="color" id="headerBgColor" value="#d4edda">
+                            <label>Text Color:</label><input type="color" id="headerTextColor" value="#155724">
+                            <label>BG Image:</label><input type="file" id="headerBgImage" accept="image/*" onchange="applyHeaderBgImage(event)">
+                            <button onclick="applyStyles()">Apply Styles</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="itinerary-container" contenteditable="true">
+                    <div id="logo-container">${logoDataUrl ? `<img id="logo" src="${logoDataUrl}">` : ''}</div>
+                    <h1>${packageTitle}</h1>
+                    <div id="inclusions-section">${inclusionsHtml}</div>
+                    ${exclusionsHtml}
+                    <hr style="margin: 2rem 0;">
+                    <div id="day-by-day-section">${dayByDayHtml}</div>
+                    ${priceHtml}
+                    ${specialNotesHtml}
+                </div>
+                <script>
+                    const editor = document.getElementById('itinerary-container');
+                    const undoBtn = document.getElementById('undo-btn');
+                    const redoBtn = document.getElementById('redo-btn');
+                    let historyStack = [];
+                    let historyIndex = -1;
+
+                    function saveState() {
+                        if (historyIndex < historyStack.length - 1) {
+                            historyStack = historyStack.slice(0, historyIndex + 1);
+                        }
+                        historyStack.push(editor.innerHTML);
+                        historyIndex = historyStack.length - 1;
+                        updateUndoRedoButtons();
+                    }
+
+                    function undo() {
+                        if (historyIndex > 0) {
+                            historyIndex--;
+                            editor.innerHTML = historyStack[historyIndex];
+                            updateUndoRedoButtons();
+                        }
+                    }
+
+                    function redo() {
+                        if (historyIndex < historyStack.length - 1) {
+                            historyIndex++;
+                            editor.innerHTML = historyStack[historyIndex];
+                            updateUndoRedoButtons();
+                        }
+                    }
+
+                    function updateUndoRedoButtons() {
+                        undoBtn.disabled = historyIndex <= 0;
+                        redoBtn.disabled = historyIndex >= historyStack.length - 1;
+                    }
+
+                    editor.addEventListener('input', saveState, false);
+
+                    function downloadPDF() {
+                        const { jsPDF } = window.jspdf;
+                        const itineraryContainer = document.getElementById('itinerary-container');
+                        const buttonsToHide = itineraryContainer.querySelectorAll('.remove-day-btn, .add-activity-btn, .remove-item-btn, .add-image-btn');
+                        buttonsToHide.forEach(btn => btn.style.visibility = 'hidden');
+                        
+                        html2canvas(itineraryContainer, { scale: 2 }).then(canvas => {
+                            buttonsToHide.forEach(btn => btn.style.visibility = 'visible');
+                            const imgData = canvas.toDataURL('image/png');
+                            const pdf = new jsPDF('p', 'mm', 'a4');
+                            const pdfWidth = pdf.internal.pageSize.getWidth();
+                            const pdfHeight = pdf.internal.pageSize.getHeight();
+                            const canvasWidth = canvas.width;
+                            const canvasHeight = canvas.height;
+                            const ratio = canvasWidth / canvasHeight;
+                            const width = pdfWidth;
+                            const height = width / ratio;
+                            
+                            let position = 0;
+                            let heightLeft = height;
+
+                            if (height < pdfHeight) {
+                                pdf.addImage(imgData, 'PNG', 0, 0, width, height);
+                            } else {
+                                while(heightLeft > 0) {
+                                    pdf.addImage(imgData, 'PNG', 0, position, width, height);
+                                    heightLeft -= pdfHeight;
+                                    position -= pdfHeight;
+                                    if(heightLeft > 0) {
+                                        pdf.addPage();
+                                    }
+                                }
+                            }
+                            pdf.save('itinerary.pdf');
+                        }).catch(err => {
+                            buttonsToHide.forEach(btn => btn.style.visibility = 'visible');
+                            console.error("PDF generation failed:", err);
+                        });
+                    }
+
+                    function formatDoc(command, value = null) {
+                        document.execCommand(command, false, value);
+                        saveState();
+                    }
+
+                    function applyHeaderBgImage(event) {
+                        const file = event.target.files[0];
+                        if (!file) return;
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            const imageUrl = e.target.result;
+                            const headers = document.querySelectorAll('.day-header');
+                            headers.forEach(header => {
+                                header.style.backgroundImage = 'url(' + imageUrl + ')';
+                                header.style.backgroundSize = 'cover';
+                                header.style.backgroundPosition = 'center';
+                            });
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                    
+                    function applyStyles() {
+                        const bgColor = document.getElementById('headerBgColor').value;
+                        const textColor = document.getElementById('headerTextColor').value;
+                        const headers = document.querySelectorAll('.day-header');
+                        headers.forEach(header => {
+                            header.style.backgroundColor = bgColor;
+                            header.querySelector('h4').style.color = textColor;
+                        });
+                    }
+
+                    function addDay() {
+                        const dayContainer = document.getElementById('day-by-day-section');
+                        const dayCount = dayContainer.querySelectorAll('.day-block').length + 1;
+                        const newDay = document.createElement('div');
+                        newDay.className = 'day-block';
+                        newDay.dataset.day = dayCount;
+                        newDay.innerHTML = ' \
+                            <div class="day-header"> \
+                                <h4>Day ' + dayCount + ':</h4> \
+                                <button class="remove-day-btn" onclick="removeDay(this)">Remove Day</button> \
+                            </div> \
+                            <ul class="activity-list"> \
+                                <li>New Activity <button class="remove-item-btn" onclick="removeItem(this)">×</button></li> \
+                            </ul> \
+                            <div class="image-gallery"></div> \
+                            <button class="add-activity-btn" onclick="addActivity(this)">+ Add Activity</button> \
+                            <button class="add-image-btn" onclick="triggerImageUpload(this)">+ Add Image</button> \
+                        ';
+                        dayContainer.appendChild(newDay);
+                        applyStyles(); // Apply styles to new day
+                        saveState();
+                    }
+
+                    function removeDay(button) {
+                        button.closest('.day-block').remove();
+                        const dayBlocks = document.querySelectorAll('.day-block');
+                        dayBlocks.forEach((block, index) => {
+                            block.dataset.day = index + 1;
+                            block.querySelector('h4').innerText = 'Day ' + (index + 1) + ':';
+                        });
+                        saveState();
+                    }
+
+                    function addActivity(button) {
+                        const list = button.parentElement.querySelector('.activity-list');
+                        const newItem = document.createElement('li');
+                        newItem.innerHTML = 'New Activity <button class="remove-item-btn" onclick="removeItem(this)">×</button>';
+                        list.appendChild(newItem);
+                        saveState();
+                    }
+                    
+                    function removeItem(button) {
+                        button.parentElement.remove();
+                        saveState();
+                    }
+
+                    function triggerImageUpload(button) {
+                        const input = document.createElement('input');
+                        input.type = 'file';
+                        input.accept = 'image/*';
+                        input.multiple = true;
+                        input.onchange = (event) => {
+                            const gallery = button.parentElement.querySelector('.image-gallery');
+                            for (const file of event.target.files) {
+                                const reader = new FileReader();
+                                reader.onload = (e) => {
+                                    const img = document.createElement('img');
+                                    img.src = e.target.result;
+                                    gallery.appendChild(img);
+                                };
+                                reader.readAsDataURL(file);
+                            }
+                            setTimeout(saveState, 500); // Save state after images load
+                        };
+                        input.click();
+                    }
+                    
+                    document.addEventListener("DOMContentLoaded", () => {
+                        applyStyles();
+                        saveState();
+                    });
+                <\/script>
+            </body>
+            </html>
+        `;
+
+        const newWindow = window.open();
+        newWindow.document.write(itineraryHtml);
+        newWindow.document.close();
+    }
+
+
+    // --- MAIN CALCULATION ---
+    function calculate() {
+        // Helpers
+        const getNumber = (id, defaultValue = 0) => {
+            const value = parseFloat(document.getElementById(id).value);
+            return isNaN(value) || value < 0 ? defaultValue : value;
+        };
+        const getOptionalNumber = (id) => {
+            const value = parseFloat(document.getElementById(id).value);
+            return isNaN(value) ? null : value;
+        };
+        const formatCurrency = (amount, currency) => amount.toLocaleString('en-US', { style: 'currency', currency: currency, minimumFractionDigits: 2 });
+
+        // 1. Calculate common base costs (Tours, Transfers)
+        const selectedTourCost = availableTours.reduce((sum, tour) => tour.selected ? sum + tour.price : sum, 0);
+        const tourSpecificTransferCost = availableTours.reduce((sum, tour) => tour.selected ? sum + tour.transferPrice : sum, 0);
+        const selectedGeneralTransferCost = availableTransfers.reduce((sum, t) => t.selected ? sum + t.price : sum, 0);
+        const totalTransferCost = tourSpecificTransferCost + selectedGeneralTransferCost;
+        
+        // 2. Get settings
+        const numPeopleTransfer = getNumber('num_people_transfer', 1) || 1;
+        const numPeopleHotel = getNumber('num_people_hotel', 1) || 1;
+        const perPersonTransferCost = totalTransferCost / numPeopleTransfer;
+
+        const markupPercentValue = getNumber('markup', 0);
+        const markupPercent = markupPercentValue / 100;
+        const lkrRate = getNumber('lkr_rate', 10.0);
+        const usdDivisor = getNumber('usd_divisor', 31) || 1;
+        
+        const hotelNightsForMeal = getNumber('hotel_nights_for_meal', 0);
+        const mealPrice3 = getNumber('meal_price_3star', 0);
+        const mealPrice4 = getNumber('meal_price_4star', 0);
+        const mealPriceMix = Math.max(mealPrice3, mealPrice4); // Default mixed to higher
+
+        const manualMarkupAdult = getOptionalNumber('adult_manual_markup');
+        const manualMarkupChildExtraBed = getOptionalNumber('child_extra_bed_manual_markup');
+        const manualMarkupChildSharing = getOptionalNumber('child_sharing_manual_markup');
+
+        // 3. Separate Hotel Calculations
+        const hotels3 = availableHotels.filter(h => h.selected && h.star === "3");
+        const hotels4 = availableHotels.filter(h => h.selected && h.star === "4");
+        const hotelsAll = availableHotels.filter(h => h.selected);
+
+        const hotelCost3 = hotels3.reduce((sum, h) => sum + (h.pricePerNight * h.numberOfNights), 0) / numPeopleHotel;
+        const hotelCost4 = hotels4.reduce((sum, h) => sum + (h.pricePerNight * h.numberOfNights), 0) / numPeopleHotel;
+        const hotelCostMix = hotelsAll.reduce((sum, h) => sum + (h.pricePerNight * h.numberOfNights), 0) / numPeopleHotel;
+
+        // Function to calculate and render a package
+        const renderPackage = (suffix, hotelCost, mealPrice) => {
+            // ADULT
+            const subtotalAdult = selectedTourCost + perPersonTransferCost + hotelCost;
+            let markupAmountAdult = (manualMarkupAdult !== null) ? manualMarkupAdult : subtotalAdult * markupPercent;
+            const totalThbAdult = subtotalAdult + markupAmountAdult;
+            const adultMarkupDisplay = (manualMarkupAdult !== null) ? `+ ${formatCurrency(markupAmountAdult, 'THB')} (Manual)` : `+ ${formatCurrency(markupAmountAdult, 'THB')} (${markupPercentValue}%)`;
+
+            // CHILD W/ EXTRA BED
+            // Note: Currently uses Tour + Hotel (no transfer). If it should have transfer, add it here.
+            const subtotalChildExtraBed = selectedTourCost + hotelCost;
+            let markupAmountChildExtraBed = (manualMarkupChildExtraBed !== null) ? manualMarkupChildExtraBed : subtotalChildExtraBed * markupPercent;
+            const totalThbChildExtraBed = subtotalChildExtraBed + markupAmountChildExtraBed;
+            const childExtraBedMarkupDisplay = (manualMarkupChildExtraBed !== null) ? `+ ${formatCurrency(markupAmountChildExtraBed, 'THB')} (Manual)` : `+ ${formatCurrency(markupAmountChildExtraBed, 'THB')} (${markupPercentValue}%)`;
+
+            // CHILD SHARING
+            const totalMealCost = hotelNightsForMeal * mealPrice;
+            const subtotalChildSharing = selectedTourCost + totalMealCost;
+            let markupAmountChildSharing = (manualMarkupChildSharing !== null) ? manualMarkupChildSharing : subtotalChildSharing * markupPercent;
+            const totalThbChildSharing = subtotalChildSharing + markupAmountChildSharing;
+            const childSharingMarkupDisplay = (manualMarkupChildSharing !== null) ? `+ ${formatCurrency(markupAmountChildSharing, 'THB')} (Manual)` : `+ ${formatCurrency(markupAmountChildSharing, 'THB')} (${markupPercentValue}%)`;
+
+            // Render to DOM
+            document.getElementById(`adult_markup_${suffix}`).innerHTML = adultMarkupDisplay;
+            document.getElementById(`adult_thb_${suffix}`).innerText = formatCurrency(totalThbAdult, 'THB');
+            document.getElementById(`adult_lkr_${suffix}`).innerText = formatCurrency(totalThbAdult * lkrRate, 'LKR');
+
+            document.getElementById(`child_extra_markup_${suffix}`).innerHTML = childExtraBedMarkupDisplay;
+            document.getElementById(`child_extra_thb_${suffix}`).innerText = formatCurrency(totalThbChildExtraBed, 'THB');
+            document.getElementById(`child_extra_lkr_${suffix}`).innerText = formatCurrency(totalThbChildExtraBed * lkrRate, 'LKR');
+
+            document.getElementById(`child_sharing_markup_${suffix}`).innerHTML = childSharingMarkupDisplay;
+            document.getElementById(`child_sharing_thb_${suffix}`).innerText = formatCurrency(totalThbChildSharing, 'THB');
+            document.getElementById(`child_sharing_lkr_${suffix}`).innerText = formatCurrency(totalThbChildSharing * lkrRate, 'LKR');
+        };
+
+        // 4. Calculate all three
+        renderPackage('3star', hotelCost3, mealPrice3);
+        renderPackage('4star', hotelCost4, mealPrice4);
+        renderPackage('mix', hotelCostMix, mealPriceMix);
+
+        // 5. Display results section
+        document.getElementById('results').style.display = 'block';
+    }
+
+    // Initial render on page load
+    window.onload = () => {
+        renderAll();
+    };
+</script>
+
+</body>
+</html>
