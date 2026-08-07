@@ -745,6 +745,8 @@
     </div>
 
     <script>
+        // Capture original HTML BEFORE Vue mounts to allow saving locally
+        window.__ORIGINAL_HTML__ = "<!DOCTYPE html>\n<html lang=\"en\">\n" + document.documentElement.innerHTML + "\n</html>";
         const { createApp, ref, reactive, onMounted, onUnmounted, nextTick } = Vue;
 
         const app = createApp({
@@ -1004,34 +1006,45 @@
                 }
 
                 function saveHTML() {
-                    fetch(window.location.href)
-                        .then(res => res.text())
-                        .then(sourceHtml => {
-                            const startMarker = '// /* STATE_START */';
-                            const endMarker = '// /* STATE_END */';
-                            const startIndex = sourceHtml.indexOf(startMarker);
-                            const endIndex = sourceHtml.indexOf(endMarker);
+                    const processSave = (sourceHtml) => {
+                        const startMarker = '// /* STATE_START */';
+                        const endMarker = '// /* STATE_END */';
+                        const startIndex = sourceHtml.indexOf(startMarker);
+                        const endIndex = sourceHtml.indexOf(endMarker);
+                        
+                        if (startIndex !== -1 && endIndex !== -1) {
+                            const newStateCode = `const state = reactive(${JSON.stringify(state, null, 4)});`;
+                            const newHtml = sourceHtml.substring(0, startIndex + startMarker.length) + '\n                ' + newStateCode + '\n                ' + sourceHtml.substring(endIndex);
                             
-                            if (startIndex !== -1 && endIndex !== -1) {
-                                const newStateCode = `const state = reactive(${JSON.stringify(state, null, 4)});`;
-                                const newHtml = sourceHtml.substring(0, startIndex + startMarker.length) + '\n                ' + newStateCode + '\n                ' + sourceHtml.substring(endIndex);
-                                
-                                const blob = new Blob([newHtml], { type: 'text/html' });
-                                const url = URL.createObjectURL(blob);
-                                const a = document.createElement('a');
-                                a.href = url;
-                                a.download = 'Saved_Itinerary_Project.html';
-                                document.body.appendChild(a);
-                                a.click();
-                                document.body.removeChild(a);
-                                URL.revokeObjectURL(url);
-                            } else {
-                                alert("Could not save HTML properly due to missing markers.");
-                            }
+                            const blob = new Blob([newHtml], { type: 'text/html;charset=utf-8' });
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = 'Saved_Itinerary_Project.html';
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                            URL.revokeObjectURL(url);
+                        } else {
+                            alert("Could not save HTML properly due to missing markers.");
+                        }
+                    };
+
+                    // Try to fetch (works if hosted on a server)
+                    fetch(window.location.href)
+                        .then(res => {
+                            if (!res.ok) throw new Error("Network response was not ok");
+                            return res.text();
                         })
+                        .then(sourceHtml => processSave(sourceHtml))
                         .catch(err => {
-                            console.error("Save HTML Error", err);
-                            alert("Failed to save HTML.");
+                            console.warn("Fetch failed (likely local file). Falling back to cached HTML.", err);
+                            // Fallback to captured HTML
+                            if (window.__ORIGINAL_HTML__) {
+                                processSave(window.__ORIGINAL_HTML__);
+                            } else {
+                                alert("Failed to save HTML. Could not load original source.");
+                            }
                         });
                 }
 

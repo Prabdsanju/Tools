@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Group Tour Itinerary Builder | Sun Leisure World</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- html2pdf for exporting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Vue 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        sun: {
+                            green: '#106a37',
+                            orange: '#f29100',
+                            yellow: '#fbc116',
+                            blue: '#00539c'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Merriweather', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@300;400;700&display=swap');
+        
+        body { background-color: #f3f4f6; }
+
+        /* A4 Page styling for preview */
+        .a4-page {
+            width: 210mm;
+            min-height: 297mm;
+            background: white;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            margin: 0 auto;
+            position: relative;
+            box-sizing: border-box;
+            font-size: 11pt;
+            line-height: 1.5;
+            color: #333;
+        }
+        
+        .page-content { padding: 20mm; }
+        
+        .page-break { page-break-before: always; }
+
+        .timeline-dot { position: relative; }
+        .timeline-dot::before {
+            content: '';
+            position: absolute;
+            left: -19px;
+            top: 5px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #f29100;
+            border: 2px solid white;
+            box-shadow: 0 0 0 2px #106a37;
+        }
+        .timeline-line {
+            border-left: 2px dashed #cbd5e1;
+            padding-left: 1rem;
+        }
+
+        .header-bg {
+            background: linear-gradient(135deg, rgba(16,106,55,0.05) 0%, rgba(242,145,0,0.1) 100%);
+            border-bottom: 2px solid #106a37;
+        }
+        
+        .day-header {
+            background: #106a37;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 4px;
+            display: inline-block;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .review-card {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 15px;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* Edit Controls */
+        [contenteditable="true"] {
+            outline: none;
+            transition: background-color 0.2s;
+            border-radius: 4px;
+        }
+        
+        [contenteditable="true"]:hover {
+            background-color: rgba(0, 0, 0, 0.03);
+            box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
+        }
+
+        [contenteditable="true"]:focus {
+            background-color: rgba(255, 255, 200, 0.3);
+            box-shadow: 0 0 0 2px rgba(16, 106, 55, 0.2);
+        }
+        
+        .editable-image-container {
+            position: relative;
+            cursor: pointer;
+            overflow: hidden;
+        }
+        
+        .editable-image-container .edit-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .editable-image-container:hover .edit-overlay {
+            opacity: 1;
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        
+        .editable-image-container:hover .delete-btn,
+        .hover-group:hover > .delete-btn {
+            opacity: 1;
+        }
+
+        /* Action Bar */
+        .action-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(10px);
+            padding: 12px 24px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        /* Print formatting */
+        @media print {
+            .no-print, .edit-overlay, .delete-btn { display: none !important; }
+            .a4-page { box-shadow: none !important; margin: 0 !important; width: 100% !important; min-height: auto !important; height: auto !important; }
+            body, html { background: white !important; margin: 0 !important; padding: 0 !important; overflow: visible !important; height: auto !important; }
+            #app, .overflow-y-auto, .overflow-hidden { display: block !important; height: auto !important; overflow: visible !important; background: white !important; padding: 0 !important; position: static !important; }
+            [contenteditable="true"]:hover { background-color: transparent; box-shadow: none; }
+            @page { margin: 0; size: A4 portrait; }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 overflow-hidden">
+
+    <div id="app" class="flex h-screen w-full">
+        <!-- Hidden file inputs for uploads -->
+        <input type="file" ref="fileInput" @change="handleFileUpload" accept="image/*" class="hidden">
+        <input type="file" ref="jsonInput" @change="importJSON" accept=".json" class="hidden">
+
+        <!-- Sidebar -->
+        <div class="w-[400px] flex flex-col bg-white border-r border-gray-200 shadow-xl z-20 no-print flex-shrink-0" data-html2canvas-ignore>
+            <!-- Header -->
+            <div class="bg-gray-800 text-white p-4">
+                <p class="text-xs font-bold text-gray-400 mb-1">Itinerary Builder Mode</p>
+            </div>
+            <div class="bg-sun-green text-white p-5 flex items-center gap-3">
+                <i class="fas fa-edit text-2xl"></i>
+                <div>
+                    <h2 class="font-bold text-xl leading-tight">Itinerary Builder</h2>
+                    <p class="text-xs text-green-100 mt-1">Customize every detail of your tour</p>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="flex border-b border-gray-200 bg-gray-50 text-sm font-semibold">
+                <button class="flex-1 py-3 text-center border-b-2 transition" :class="state.activeTab === 'General' ? 'border-sun-green text-sun-green bg-white' : 'border-transparent text-gray-500 hover:text-gray-700'" @click="state.activeTab = 'General'">General</button>
+                <button class="flex-1 py-3 text-center border-b-2 transition" :class="state.activeTab === 'Design' ? 'border-sun-green text-sun-green bg-white' : 'border-transparent text-gray-500 hover:text-gray-700'" @click="state.activeTab = 'Design'">Design</button>
+                <button class="flex-1 py-3 text-center border-b-2 transition" :class="state.activeTab === 'Contact' ? 'border-sun-green text-sun-green bg-white' : 'border-transparent text-gray-500 hover:text-gray-700'" @click="state.activeTab = 'Contact'">Contact</button>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="flex-1 overflow-y-auto p-5">
+                <div class="bg-green-50 text-green-800 p-3 rounded text-sm mb-6 flex gap-2 items-start border border-green-100">
+                    <i class="fas fa-magic mt-1"></i>
+                    <p><strong>Pro Tip:</strong> Almost all text in the preview on the right can be edited directly by clicking on it! Try clicking the day descriptions, hotel options, or inclusions to customize them.</p>
+                </div>
+
+                <!-- General Tab -->
+                <div v-show="state.activeTab === 'General'" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Company Logo</label>
+                        <div class="flex gap-2 mb-2">
+                            <input type="text" v-model="state.logoUrl" class="flex-1 border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-sun-green" placeholder="Logo URL">
+                            <button @click="triggerUpload('logo')" class="bg-gray-100 border border-gray-300 rounded px-3 py-2 text-sm hover:bg-gray-200 whitespace-nowrap"><i class="fas fa-upload mr-1"></i> Upload</button>
+                        </div>
+                        <img v-if="state.logoUrl" :src="state.logoUrl" class="h-10 object-contain border border-gray-200 rounded p-1 bg-white">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Cover Image</label>
+                        <div class="flex gap-2 mb-2">
+                            <input type="text" v-model="state.headerBg" class="flex-1 border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-sun-green" placeholder="Background Image URL">
+                            <button @click="triggerUpload('headerBg')" class="bg-gray-100 border border-gray-300 rounded px-3 py-2 text-sm hover:bg-gray-200 whitespace-nowrap"><i class="fas fa-upload mr-1"></i> Upload</button>
+                        </div>
+                        <img v-if="state.headerBg" :src="state.headerBg" class="h-20 w-full object-cover border border-gray-200 rounded">
+                    </div>
+                </div>
+
+                <!-- Design Tab -->
+                <div v-show="state.activeTab === 'Design'" class="space-y-6">
+                    <div class="bg-orange-50 border border-orange-100 text-orange-800 p-3 rounded text-sm mb-4 flex gap-2 items-start">
+                        <i class="fas fa-info-square mt-1 text-sun-orange"></i>
+                        <p>Adjust the text spacing globally to match your preferred MS Word style.</p>
+                    </div>
+                    
+                    <h3 class="font-bold text-gray-800 text-lg mb-4">Text Spacing Options</h3>
+                    
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide">Line Spacing</label>
+                            <span class="text-xs font-bold text-blue-600">{{ state.design.lineSpacing }}</span>
+                        </div>
+                        <input type="range" v-model.number="state.design.lineSpacing" min="1.0" max="2.5" step="0.1" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                    </div>
+                    
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide">Letter Spacing</label>
+                            <span class="text-xs font-bold text-blue-600">{{ state.design.letterSpacing }}px</span>
+                        </div>
+                        <input type="range" v-model.number="state.design.letterSpacing" min="-1" max="5" step="0.5" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                    </div>
+                </div>
+
+                <!-- Contact Tab -->
+                <div v-show="state.activeTab === 'Contact'" class="space-y-4">
+                    <h3 class="font-bold text-gray-800 text-lg mb-2">Contact Information</h3>
+                    
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Address</label>
+                        <input type="text" v-model="state.contact.address" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-sun-green">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Tel</label>
+                        <input type="text" v-model="state.contact.tel" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-sun-green">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Hotline</label>
+                        <input type="text" v-model="state.contact.hotline" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-sun-green">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Email</label>
+                        <input type="email" v-model="state.contact.email" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-sun-green">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Facebook</label>
+                        <input type="url" v-model="state.contact.facebook" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-sun-green">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Instagram</label>
+                        <input type="url" v-model="state.contact.instagram" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-sun-green">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons Footer -->
+            <div class="p-4 bg-gray-50 border-t border-gray-200 flex flex-col gap-3">
+                <div class="flex gap-3">
+                    <button @click="exportJSON()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-3 rounded font-semibold text-sm transition flex items-center justify-center gap-2">
+                        <i class="fas fa-download"></i> Export JSON
+                    </button>
+                    <button @click="$refs.jsonInput.click()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-3 rounded font-semibold text-sm transition flex items-center justify-center gap-2">
+                        <i class="fas fa-folder-open"></i> Import JSON
+                    </button>
+                </div>
+                <button @click="saveHTML()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded font-semibold transition flex items-center justify-center gap-2">
+                    <i class="fas fa-save"></i> Save Project (Editable HTML)
+                </button>
+                <button @click="printDoc()" class="w-full bg-sun-green hover:bg-green-700 text-white py-2.5 px-4 rounded font-semibold shadow transition flex items-center justify-center gap-2" :disabled="isExporting">
+                    <i class="fas fa-print"></i> Download PDF / Print
+                </button>
+            </div>
+        </div>
+
+        <!-- The A4 Document Container -->
+        <div class="flex-1 overflow-y-auto p-10 bg-gray-200 flex justify-center">
+            <div class="a4-page" id="documentToExport" :style="{ lineHeight: state.design.lineSpacing, letterSpacing: state.design.letterSpacing + 'px' }">
+                
+                <!-- PAGE 1: Intro & Itinerary -->
+                <div class="page-content">
+                    
+                    <!-- Header Cover -->
+                    <div class="header-bg -mx-[20mm] -mt-[20mm] px-[20mm] pt-[20mm] pb-8 mb-6 rounded-t-lg relative overflow-hidden editable-image-container min-h-[200px]">
+                        <img v-if="state.headerBg" :src="state.headerBg" class="absolute inset-0 w-full h-full object-cover z-0" :style="getImgStyle('headerBg')">
+                        
+                        <!-- Overlay to make text readable if there's a background image -->
+                        <div v-if="state.headerBg" class="absolute inset-0 bg-white/70 z-0"></div>
+                        
+                        <div class="edit-overlay rounded-t-lg z-20 flex-col gap-1 !cursor-default !justify-start !items-end p-4" style="pointer-events: auto;">
+                            <div class="grid grid-cols-2 gap-1 bg-black bg-opacity-70 p-2 rounded-xl mb-1">
+                                <button @click.stop="adjustImg('headerBg', 's', 10)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-7 h-7 flex items-center justify-center"><i class="fas fa-plus"></i></button>
+                                <button @click.stop="adjustImg('headerBg', 's', -10)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-7 h-7 flex items-center justify-center"><i class="fas fa-minus"></i></button>
+                                <button @click.stop="adjustImg('headerBg', 'x', -5)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-7 h-7 flex items-center justify-center"><i class="fas fa-arrow-left"></i></button>
+                                <button @click.stop="adjustImg('headerBg', 'x', 5)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-7 h-7 flex items-center justify-center"><i class="fas fa-arrow-right"></i></button>
+                                <button @click.stop="adjustImg('headerBg', 'y', -5)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-7 h-7 flex items-center justify-center"><i class="fas fa-arrow-up"></i></button>
+                                <button @click.stop="adjustImg('headerBg', 'y', 5)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-7 h-7 flex items-center justify-center"><i class="fas fa-arrow-down"></i></button>
+                            </div>
+                            <div class="flex gap-1 px-2 justify-center">
+                                <button v-if="state.headerBg" @click.stop="state.headerBg = ''" class="bg-red-600 hover:bg-red-700 text-white rounded w-7 h-7 flex items-center justify-center" title="Remove Background"><i class="fas fa-trash text-xs"></i></button>
+                                <button @click.stop="triggerUpload('headerBg')" class="bg-blue-600 hover:bg-blue-700 text-white text-[10px] px-2 py-1 rounded">Upload Background Image</button>
+                            </div>
+                            <div class="flex gap-1 px-2 justify-center mt-1 pb-1 border-t border-gray-600 pt-1">
+                                <button @click.stop="state.headerAlign = 'left'" :class="['rounded px-2 py-1 text-xs', state.headerAlign === 'left' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800 hover:bg-white']"><i class="fas fa-align-left"></i></button>
+                                <button @click.stop="state.headerAlign = 'center'" :class="['rounded px-2 py-1 text-xs', state.headerAlign === 'center' || !state.headerAlign ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800 hover:bg-white']"><i class="fas fa-align-center"></i></button>
+                                <button @click.stop="state.headerAlign = 'right'" :class="['rounded px-2 py-1 text-xs', state.headerAlign === 'right' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800 hover:bg-white']"><i class="fas fa-align-right"></i></button>
+                            </div>
+                        </div>
+
+                        <div :class="['flex flex-col relative z-30 w-full', state.headerAlign === 'left' ? 'items-start text-left' : (state.headerAlign === 'right' ? 'items-end text-right' : 'items-center text-center')]">
+                            <div :class="['editable-image-container inline-block mb-4', state.headerAlign === 'left' ? 'mr-auto' : (state.headerAlign === 'right' ? 'ml-auto' : 'mx-auto')]" :style="{ height: (state.logoHeight || 64) + 'px' }" @click.stop="triggerUpload('logo')">
+                                <img :src="state.logoUrl" alt="Logo" :class="['h-full w-auto object-contain', state.headerAlign === 'left' ? 'mr-auto' : (state.headerAlign === 'right' ? 'ml-auto' : 'mx-auto')]" crossorigin="anonymous">
+                                <div class="edit-overlay flex-col justify-center items-center gap-1 rounded !cursor-default" style="pointer-events: auto;">
+                                    <div class="flex gap-1 mb-1">
+                                        <button @click.stop="state.logoHeight = (state.logoHeight || 64) + 10" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-6 h-6 flex items-center justify-center" title="Increase Size"><i class="fas fa-plus text-xs"></i></button>
+                                        <button @click.stop="state.logoHeight = Math.max(30, (state.logoHeight || 64) - 10)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-6 h-6 flex items-center justify-center" title="Decrease Size"><i class="fas fa-minus text-xs"></i></button>
+                                    </div>
+                                    <button @click.stop="triggerUpload('logo')" class="bg-blue-600 hover:bg-blue-700 text-white text-[10px] px-2 py-1 rounded">Change Logo</button>
+                                </div>
+                            </div>
+                            
+                            <h1 class="text-3xl font-bold text-sun-green mb-2 font-serif uppercase w-full" contenteditable="true" @blur="state.tourName = $event.target.innerText" v-html="state.tourName"></h1>
+                            
+                            <div :class="['flex items-center gap-3 mb-4 w-full', state.headerAlign === 'left' ? 'justify-start' : (state.headerAlign === 'right' ? 'justify-end' : 'justify-center')]">
+                                <span class="bg-sun-blue text-white px-3 py-1 rounded-full text-sm font-bold shadow-sm inline-block" contenteditable="true" @blur="state.texts.durationBadge = $event.target.innerHTML" v-html="state.texts.durationBadge"></span>
+                                <h2 class="text-xl text-sun-orange font-semibold" contenteditable="true" @blur="state.texts.dateBadge = $event.target.innerHTML" v-html="state.texts.dateBadge"></h2>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hero Images Grid -->
+                    <div class="mb-8">
+                        <div class="grid gap-2 mb-2" :style="{ gridTemplateColumns: `repeat(${Math.min(state.heroImages.length, 4)}, minmax(0, 1fr))` }">
+                            <div v-for="(img, idx) in state.heroImages" :key="idx" class="editable-image-container relative">
+                                <img :src="img" :class="['h-40 w-full rounded shadow-sm', getImgFitClass('hero-' + idx)]" crossorigin="anonymous" :style="getImgStyle('hero-' + idx)">
+                                <div class="edit-overlay rounded flex-col gap-1 !cursor-default" style="pointer-events: auto;">
+                                    <div class="flex flex-wrap justify-center gap-1 bg-black bg-opacity-70 p-2 rounded-xl mb-1 max-w-[140px]">
+                                        <button @click.stop="adjustImg('hero-' + idx, 's', 10)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-6 h-6 flex items-center justify-center"><i class="fas fa-search-plus text-xs"></i></button>
+                                        <button @click.stop="adjustImg('hero-' + idx, 's', -10)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-6 h-6 flex items-center justify-center"><i class="fas fa-search-minus text-xs"></i></button>
+                                        <button @click.stop="toggleFit('hero-' + idx)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-6 h-6 flex items-center justify-center" title="Toggle Fit/Cover"><i class="fas fa-expand text-xs"></i></button>
+                                        <button @click.stop="adjustImg('hero-' + idx, 'x', -5)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-6 h-6 flex items-center justify-center"><i class="fas fa-arrow-left text-xs"></i></button>
+                                        <button @click.stop="adjustImg('hero-' + idx, 'x', 5)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-6 h-6 flex items-center justify-center"><i class="fas fa-arrow-right text-xs"></i></button>
+                                        <button @click.stop="adjustImg('hero-' + idx, 'y', -5)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-6 h-6 flex items-center justify-center"><i class="fas fa-arrow-up text-xs"></i></button>
+                                        <button @click.stop="adjustImg('hero-' + idx, 'y', 5)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-6 h-6 flex items-center justify-center"><i class="fas fa-arrow-down text-xs"></i></button>
+                                    </div>
+                                    <div class="flex gap-1 w-full px-2 justify-center">
+                                        <button @click.stop="state.heroImages.splice(idx, 1)" class="bg-red-600 hover:bg-red-700 text-white rounded w-7 h-7 flex items-center justify-center"><i class="fas fa-trash"></i></button>
+                                        <button @click.stop="triggerUpload('hero', idx)" class="bg-blue-600 hover:bg-blue-700 text-white text-[10px] px-2 rounded flex-1">Upload</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="no-print text-sm text-sun-green font-semibold w-full border border-dashed border-sun-green py-2 rounded hover:bg-green-50" @click="addHeroImage()">
+                            <i class="fas fa-plus"></i> Add Hero Image
+                        </button>
+                    </div>
+
+                    <!-- Itinerary Details -->
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4 border-b-2 border-sun-green pb-2">Tour Itinerary</h3>
+                    
+                    <div class="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-100 relative hover-group">
+                        <h4 class="font-bold text-lg text-sun-green mb-2"><i class="fas fa-plane-arrival mr-2"></i>Departure Procedure:</h4>
+                        <div class="text-sm" contenteditable="true" @blur="state.texts.departureProcedure = $event.target.innerHTML" v-html="state.texts.departureProcedure"></div>
+                    </div>
+
+                    <!-- Timeline Loop -->
+                    <div class="pl-4 mt-6">
+                        <div v-for="(day, idx) in state.days" :key="day.id" class="timeline-line pb-6 hover-group relative" :style="idx === state.days.length - 1 ? 'border-left-color: transparent;' : ''">
+                            <div v-if="day.pageBreakBefore" class="html2pdf__page-break"></div>
+                            <!-- Day Page Break Toggle -->
+                            <button class="no-print absolute -top-8 right-16 text-xs bg-gray-200 hover:bg-gray-300 rounded px-2 py-1 text-gray-700 opacity-0 group-hover:opacity-100 transition" @click="day.pageBreakBefore = !day.pageBreakBefore" title="Toggle Page Break Before">
+                                <i class="fas fa-cut"></i> {{ day.pageBreakBefore ? 'Remove Page Break' : 'Add Page Break' }}
+                            </button>
+                            <!-- Day Delete Button -->
+                            <button class="delete-btn -right-10" @click="state.days.splice(idx, 1)" title="Remove Day"><i class="fas fa-trash text-xs"></i></button>
+
+                            <div class="timeline-dot flex items-center justify-between">
+                                <div>
+                                    <span class="day-header" :class="idx === state.days.length - 1 ? 'bg-sun-orange' : ''" contenteditable="true" @blur="day.header = $event.target.innerHTML" v-html="day.header"></span>
+                                    <span class="ml-3 text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded" contenteditable="true" @blur="day.date = $event.target.innerHTML" v-html="day.date"></span>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-2 text-gray-700 text-sm">
+                                <p class="mb-2 text-xs bg-orange-50 text-orange-800 border border-orange-200 inline-block px-2 py-1 rounded">
+                                    <strong><i class="fas fa-utensils mr-1"></i> Meal Plan:</strong> <span contenteditable="true" @blur="day.mealPlan = $event.target.innerHTML" v-html="day.mealPlan"></span>
+                                </p>
+                                
+                                <div contenteditable="true" class="space-y-2 mt-2 min-h-[40px]" @blur="day.description = $event.target.innerHTML" v-html="day.description"></div>
+                                
+                                <!-- Day Images -->
+                                <div class="mt-4">
+                                    <div class="grid grid-cols-2 gap-2 mb-2" v-if="day.images.length > 0">
+                                        <div v-for="(img, i) in day.images" :key="i" class="editable-image-container aspect-video relative">
+                                            <img :src="img" :class="['h-full w-full rounded border border-gray-200', getImgFitClass('day-' + day.id + '-' + i)]" crossorigin="anonymous" :style="getImgStyle('day-' + day.id + '-' + i)">
+                                            <div class="edit-overlay rounded flex-col gap-1 !cursor-default" style="pointer-events: auto;">
+                                                <div class="flex flex-wrap justify-center gap-1 bg-black bg-opacity-70 p-2 rounded-xl mb-1 max-w-[140px]">
+                                                    <button @click.stop="adjustImg('day-' + day.id + '-' + i, 's', 10)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-6 h-6 flex items-center justify-center"><i class="fas fa-search-plus text-xs"></i></button>
+                                                    <button @click.stop="adjustImg('day-' + day.id + '-' + i, 's', -10)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-6 h-6 flex items-center justify-center"><i class="fas fa-search-minus text-xs"></i></button>
+                                                    <button @click.stop="toggleFit('day-' + day.id + '-' + i)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-6 h-6 flex items-center justify-center" title="Toggle Fit/Cover"><i class="fas fa-expand text-xs"></i></button>
+                                                    <button @click.stop="adjustImg('day-' + day.id + '-' + i, 'x', -5)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-6 h-6 flex items-center justify-center"><i class="fas fa-arrow-left text-xs"></i></button>
+                                                    <button @click.stop="adjustImg('day-' + day.id + '-' + i, 'x', 5)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-6 h-6 flex items-center justify-center"><i class="fas fa-arrow-right text-xs"></i></button>
+                                                    <button @click.stop="adjustImg('day-' + day.id + '-' + i, 'y', -5)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-6 h-6 flex items-center justify-center"><i class="fas fa-arrow-up text-xs"></i></button>
+                                                    <button @click.stop="adjustImg('day-' + day.id + '-' + i, 'y', 5)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-6 h-6 flex items-center justify-center"><i class="fas fa-arrow-down text-xs"></i></button>
+                                                </div>
+                                                <div class="flex gap-1 w-full px-2 justify-center">
+                                                    <button @click.stop="day.images.splice(i, 1)" class="bg-red-600 hover:bg-red-700 text-white rounded w-7 h-7 flex items-center justify-center"><i class="fas fa-trash"></i></button>
+                                                    <button @click.stop="triggerUpload('dayImage', idx, i)" class="bg-blue-600 hover:bg-blue-700 text-white text-[10px] px-2 rounded flex-1">Upload</button>
+                                                    <button @click.stop="promptImageUrl('dayImage', idx, i)" class="bg-green-600 hover:bg-green-700 text-white text-[10px] px-2 rounded flex-1">URL</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button class="no-print text-xs text-blue-600 font-semibold" @click="addDayImage(idx)">
+                                        <i class="fas fa-plus"></i> Add Image to Day
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Add a decorative end marker if it's the last day -->
+                            <div v-if="idx === state.days.length - 1" class="text-center font-bold text-sun-green text-xl mt-8">***** Tour Ends *****</div>
+                        </div>
+
+                        <!-- Add Day Button -->
+                        <div class="no-print mt-4 pb-10">
+                            <button @click="addDay()" class="bg-gray-100 border border-gray-300 hover:bg-gray-200 text-gray-700 py-2 px-4 rounded-lg font-semibold transition w-full">
+                                <i class="fas fa-plus-circle text-sun-green mr-2"></i> Add New Day
+                            </button>
+                        </div>
+                    </div>
+                </div> <!-- End Page 1 Content -->
+
+                <!-- Page Break Adjustment 1 -->
+                <div class="no-print relative border-t-2 border-dashed border-red-300 my-8">
+                    <span class="absolute right-0 -top-4 bg-white border border-red-300 text-red-400 font-bold px-3 py-1 rounded-t-lg rounded-bl-lg text-xs">End of Page 1</span>
+                    <span class="absolute left-0 -top-4 bg-white border border-red-300 text-blue-500 font-bold px-3 py-1 rounded-t-lg rounded-br-lg text-xs">Start of Page 2</span>
+                </div>
+                <div class="no-print flex justify-center gap-2 mb-4">
+                    <button class="bg-white border border-blue-200 text-blue-600 rounded-full px-3 py-1 text-xs font-bold shadow-sm hover:bg-blue-50" @click="state.spacers.page1 -= 50">-50</button>
+                    <button class="bg-white border border-blue-200 text-blue-600 rounded-full px-3 py-1 text-xs font-bold shadow-sm hover:bg-blue-50" @click="state.spacers.page1 -= 20">-20</button>
+                    <button class="bg-white border border-blue-200 text-blue-600 rounded-full px-3 py-1 text-xs font-bold shadow-sm hover:bg-blue-50" @click="state.spacers.page1 += 20">+20</button>
+                    <button class="bg-white border border-blue-200 text-blue-600 rounded-full px-3 py-1 text-xs font-bold shadow-sm hover:bg-blue-50" @click="state.spacers.page1 += 50">+50</button>
+                    <button class="bg-blue-600 text-white rounded-full px-4 py-1 text-xs font-bold shadow-md hover:bg-blue-700 flex items-center gap-1 cursor-ns-resize" @mousedown="startDragSpacer($event, 'page1')" title="Drag up/down to adjust, or click to reset">
+                        <i class="fas fa-grip-lines"></i> {{ state.spacers.page1 }}px <i class="fas fa-grip-lines"></i>
+                    </button>
+                </div>
+                <div class="page-break"></div>
+                <div :style="{ marginTop: state.spacers.page1 + 'px' }"></div>
+
+                <!-- PAGE 2: Inclusions & Flight Details -->
+                <div class="page-content pt-10">
+                    
+                    <h3 class="text-2xl font-bold text-gray-800 mb-6 border-b-2 border-sun-green pb-2">Package Details</h3>
+
+                    <div class="grid grid-cols-2 gap-6 mb-8">
+                        <!-- Inclusions -->
+                        <div class="bg-green-50 p-5 rounded-lg border border-green-200 shadow-sm relative hover-group">
+                            <h4 class="font-bold text-sun-green text-lg mb-4"><i class="fas fa-check-circle mr-2"></i>Inclusions</h4>
+                            <div contenteditable="true" class="text-sm text-gray-700 min-h-[100px]" @blur="state.texts.inclusions = $event.target.innerHTML" v-html="state.texts.inclusions"></div>
+                        </div>
+                        
+                        <!-- Exclusions -->
+                        <div class="bg-red-50 p-5 rounded-lg border border-red-200 shadow-sm relative hover-group">
+                            <h4 class="font-bold text-red-600 text-lg mb-4"><i class="fas fa-times-circle mr-2"></i>Exclusions</h4>
+                            <div contenteditable="true" class="text-sm text-gray-700 min-h-[100px]" @blur="state.texts.exclusions = $event.target.innerHTML" v-html="state.texts.exclusions"></div>
+                        </div>
+                    </div>
+
+                    <!-- Flight Details -->
+                    <div class="border border-gray-200 rounded-lg p-5 bg-gray-50 shadow-sm relative hover-group mb-8">
+                        <h4 class="font-bold text-gray-800 text-lg mb-3"><i class="fas fa-plane-departure text-sun-blue mr-2"></i>Flight Details</h4>
+                        <div class="text-sm space-y-2 text-gray-700">
+                            <p><strong>Departure:</strong> <span contenteditable="true" @blur="state.texts.flightDeparture = $event.target.innerHTML" v-html="state.texts.flightDeparture"></span></p>
+                            <p><strong>Return:</strong> <span contenteditable="true" @blur="state.texts.flightReturn = $event.target.innerHTML" v-html="state.texts.flightReturn"></span></p>
+                            <p class="text-gray-500 mt-2 italic border-t pt-2" contenteditable="true" @blur="state.texts.flightNote = $event.target.innerHTML" v-html="state.texts.flightNote"></p>
+                        </div>
+                    </div>
+
+                    <!-- Pricing Details -->
+                    <div class="border border-gray-200 rounded-lg bg-white shadow-sm overflow-hidden relative hover-group">
+                        <h4 class="font-bold text-gray-800 text-lg mb-0 p-4 bg-gray-50 border-b border-gray-200"><i class="fas fa-tags text-sun-orange mr-2"></i>Price Breakdown (Per Person)</h4>
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-100 border-b border-gray-200 text-gray-700 text-sm">
+                                    <th class="py-2 px-4 font-bold">Category</th>
+                                    <th class="py-2 px-4 font-bold text-right">Per Person Price LKR</th>
+                                    <th class="py-2 px-2 font-bold w-10 text-center no-print"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(price, idx) in state.prices" :key="price.id" class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition">
+                                    <td class="py-2 px-4">
+                                        <input type="text" v-model="price.category" class="w-full bg-transparent border border-transparent hover:border-gray-200 outline-none focus:bg-blue-50 focus:ring-1 focus:ring-blue-500 rounded px-2 py-1 text-gray-800 font-medium text-sm transition" placeholder="Category (e.g. Adult)">
+                                    </td>
+                                    <td class="py-2 px-4">
+                                        <input type="text" v-model="price.amount" class="w-full bg-transparent border border-transparent hover:border-gray-200 outline-none focus:bg-blue-50 focus:ring-1 focus:ring-blue-500 rounded px-2 py-1 text-gray-800 font-bold text-right text-sm transition" placeholder="0.00">
+                                    </td>
+                                    <td class="py-2 px-2 text-center no-print">
+                                        <button @click="state.prices.splice(idx, 1)" class="text-red-400 hover:text-red-600 transition p-1 bg-red-50 hover:bg-red-100 rounded" title="Remove Price">
+                                            <i class="fas fa-trash text-xs"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                            <tfoot class="bg-gray-50 border-t border-gray-200" :class="{'no-print': !state.priceNote}">
+                                <tr>
+                                    <td colspan="3" class="py-2 px-4">
+                                        <input type="text" v-model="state.priceNote" class="w-full bg-transparent border-none outline-none focus:bg-blue-50 focus:ring-1 focus:ring-blue-500 rounded px-2 py-1 text-xs text-gray-500 italic transition" placeholder="Add a note about pricing...">
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                        <button class="no-print w-full py-2 bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-sun-blue transition text-sm font-semibold border-t border-gray-200" @click="addPriceRow()">
+                            <i class="fas fa-plus border border-dashed border-gray-400 rounded p-1"></i> Add Row
+                        </button>
+                    </div>
+
+                </div>
+
+                <!-- Page Break Adjustment 2 -->
+                <div class="no-print relative border-t-2 border-dashed border-red-300 my-8">
+                    <span class="absolute right-0 -top-4 bg-white border border-red-300 text-red-400 font-bold px-3 py-1 rounded-t-lg rounded-bl-lg text-xs">End of Page 2</span>
+                    <span class="absolute left-0 -top-4 bg-white border border-red-300 text-blue-500 font-bold px-3 py-1 rounded-t-lg rounded-br-lg text-xs">Start of Page 3</span>
+                </div>
+                <div class="no-print flex justify-center gap-2 mb-4">
+                    <button class="bg-white border border-blue-200 text-blue-600 rounded-full px-3 py-1 text-xs font-bold shadow-sm hover:bg-blue-50" @click="state.spacers.page2 -= 50">-50</button>
+                    <button class="bg-white border border-blue-200 text-blue-600 rounded-full px-3 py-1 text-xs font-bold shadow-sm hover:bg-blue-50" @click="state.spacers.page2 -= 20">-20</button>
+                    <button class="bg-white border border-blue-200 text-blue-600 rounded-full px-3 py-1 text-xs font-bold shadow-sm hover:bg-blue-50" @click="state.spacers.page2 += 20">+20</button>
+                    <button class="bg-white border border-blue-200 text-blue-600 rounded-full px-3 py-1 text-xs font-bold shadow-sm hover:bg-blue-50" @click="state.spacers.page2 += 50">+50</button>
+                    <button class="bg-blue-600 text-white rounded-full px-4 py-1 text-xs font-bold shadow-md hover:bg-blue-700 flex items-center gap-1 cursor-ns-resize" @mousedown="startDragSpacer($event, 'page2')" title="Drag up/down to adjust, or click to reset">
+                        <i class="fas fa-grip-lines"></i> {{ state.spacers.page2 }}px <i class="fas fa-grip-lines"></i>
+                    </button>
+                </div>
+                <div class="page-break"></div>
+                <div :style="{ marginTop: state.spacers.page2 + 'px' }"></div>
+
+                <!-- PAGE 3: Reviews & Images -->
+                <div class="page-content bg-[#f8fafc] h-full relative" style="min-height: 297mm;">
+                    <!-- Decor -->
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-sun-green opacity-5 rounded-bl-full z-0 pointer-events-none"></div>
+                    <div class="absolute bottom-0 left-0 w-48 h-48 bg-sun-orange opacity-5 rounded-tr-full z-0 pointer-events-none"></div>
+                    
+                    <div class="relative z-10 pt-4">
+                        
+                        <!-- Reviews -->
+                        <div>
+                            <div class="text-center mb-8">
+                                <h3 class="text-3xl font-bold text-sun-green mb-2">Our Satisfied Travelers</h3>
+                                <p class="text-gray-500 italic">Don't just take our word for it. Here is what our clients have to say!</p>
+                                <div class="w-16 h-1 bg-sun-orange mx-auto mt-4"></div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-6 mb-4">
+                                <div v-for="(review, idx) in state.reviews" :key="review.id" class="review-card shadow-sm hover-group relative">
+                                    <button class="delete-btn -top-2 -right-2" @click="state.reviews.splice(idx, 1)" title="Remove Review"><i class="fas fa-trash text-xs"></i></button>
+                                    
+                                    <div class="flex items-center gap-3 mb-3">
+                                        <div>
+                                            <h5 class="font-bold text-sm text-gray-800" contenteditable="true" @blur="review.name = $event.target.innerHTML" v-html="review.name"></h5>
+                                            <div class="text-sun-yellow text-xs"><i class="fas fa-star" v-for="i in 5"></i></div>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-gray-600 italic leading-relaxed" contenteditable="true" @blur="review.text = $event.target.innerHTML" v-html="review.text"></p>
+                                </div>
+                            </div>
+                            <button class="no-print text-sm text-sun-orange font-semibold py-2 w-full border border-dashed border-sun-orange rounded hover:bg-orange-50 mb-12" @click="addReview()">
+                                <i class="fas fa-plus"></i> Add Review Card
+                            </button>
+                        </div>
+
+                        <!-- Moments Gallery -->
+                        <div>
+                            <div class="text-center mb-8 mt-10 border-t border-gray-200 pt-8">
+                                <h3 class="text-2xl font-bold text-sun-green mb-2">Moments of Joyful Travelers</h3>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div v-for="(img, idx) in state.moments" :key="idx" class="editable-image-container h-44 relative">
+                                    <img :src="img" :class="['w-full h-full rounded-lg shadow-md border-2 border-white', getImgFitClass('moment-' + idx)]" crossorigin="anonymous" :style="getImgStyle('moment-' + idx)">
+                                    <div class="edit-overlay rounded-lg flex-col gap-1 !cursor-default" style="pointer-events: auto;">
+                                        <div class="flex flex-wrap justify-center gap-1 bg-black bg-opacity-70 p-2 rounded-xl mb-1 max-w-[140px]">
+                                            <button @click.stop="adjustImg('moment-' + idx, 's', 10)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-6 h-6 flex items-center justify-center"><i class="fas fa-search-plus text-xs"></i></button>
+                                            <button @click.stop="adjustImg('moment-' + idx, 's', -10)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-6 h-6 flex items-center justify-center"><i class="fas fa-search-minus text-xs"></i></button>
+                                            <button @click.stop="toggleFit('moment-' + idx)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-6 h-6 flex items-center justify-center" title="Toggle Fit/Cover"><i class="fas fa-expand text-xs"></i></button>
+                                            <button @click.stop="adjustImg('moment-' + idx, 'x', -5)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-6 h-6 flex items-center justify-center"><i class="fas fa-arrow-left text-xs"></i></button>
+                                            <button @click.stop="adjustImg('moment-' + idx, 'x', 5)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-6 h-6 flex items-center justify-center"><i class="fas fa-arrow-right text-xs"></i></button>
+                                            <button @click.stop="adjustImg('moment-' + idx, 'y', -5)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-6 h-6 flex items-center justify-center"><i class="fas fa-arrow-up text-xs"></i></button>
+                                            <button @click.stop="adjustImg('moment-' + idx, 'y', 5)" class="bg-gray-200 hover:bg-white text-gray-800 rounded w-6 h-6 flex items-center justify-center"><i class="fas fa-arrow-down text-xs"></i></button>
+                                        </div>
+                                        <div class="flex gap-1 w-full px-2 justify-center">
+                                            <button @click.stop="state.moments.splice(idx, 1)" class="bg-red-600 hover:bg-red-700 text-white rounded w-7 h-7 flex items-center justify-center"><i class="fas fa-trash"></i></button>
+                                            <button @click.stop="triggerUpload('moment', idx)" class="bg-blue-600 hover:bg-blue-700 text-white text-[10px] px-2 rounded flex-1">Upload</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="no-print text-sm text-sun-blue font-semibold py-2 w-full border border-dashed border-sun-blue rounded hover:bg-blue-50" @click="addMoment()">
+                                <i class="fas fa-plus"></i> Add Gallery Image
+                            </button>
+                        </div>
+
+                        <div class="mt-20 border-t border-gray-200 pt-8 pb-4 text-center">
+                            <h4 class="font-bold text-gray-800 text-lg mb-4">Contact Us</h4>
+                            <div class="flex flex-wrap justify-center gap-6 text-sm text-gray-600 mb-6">
+                                <div v-if="state.contact.address" class="flex items-center gap-2"><i class="fas fa-map-marker-alt text-sun-orange"></i> {{ state.contact.address }}</div>
+                                <div v-if="state.contact.tel" class="flex items-center gap-2"><i class="fas fa-phone-alt text-sun-orange"></i> {{ state.contact.tel }}</div>
+                                <div v-if="state.contact.hotline" class="flex items-center gap-2"><i class="fas fa-headset text-sun-orange"></i> {{ state.contact.hotline }}</div>
+                                <div v-if="state.contact.email" class="flex items-center gap-2"><i class="fas fa-envelope text-sun-orange"></i> {{ state.contact.email }}</div>
+                                <a v-if="state.contact.facebook" :href="state.contact.facebook" target="_blank" class="flex items-center gap-2 hover:text-blue-600 hover:underline transition"><i class="fab fa-facebook text-sun-blue"></i> {{ state.contact.facebook }}</a>
+                                <a v-if="state.contact.instagram" :href="state.contact.instagram" target="_blank" class="flex items-center gap-2 hover:text-pink-600 hover:underline transition"><i class="fab fa-instagram text-pink-600"></i> {{ state.contact.instagram }}</a>
+                            </div>
+                            <p class="text-xs text-gray-400">© 2026 Sun Leisure World. All rights reserved.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div> <!-- End Document -->
+        </div>
+        
+        <!-- Floating Rich Text Toolbar -->
+        <div v-show="showToolbar" id="rtf-toolbar" class="fixed bg-white shadow-lg border border-gray-200 rounded flex items-center px-1 py-1 gap-1 z-[9999] no-print transition-opacity duration-200" :style="{ top: toolbarPos.top, left: toolbarPos.left, transform: 'translateY(-100%)', marginTop: '-10px' }">
+            <button type="button" @mousedown.prevent="formatText('bold')" class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded font-bold text-gray-800 transition">B</button>
+            <button type="button" @mousedown.prevent="formatText('italic')" class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded italic font-serif text-gray-800 transition">I</button>
+            
+            <div class="relative w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded transition overflow-hidden group" title="Text Color">
+                <div class="w-4 h-4 rounded-full bg-gradient-to-tr from-green-400 via-blue-500 to-purple-500 shadow-sm pointer-events-none absolute z-10 group-hover:scale-110 transition-transform"></div>
+                <input type="color" @input="formatText('foreColor', $event.target.value)" class="absolute inset-0 w-12 h-12 opacity-0 cursor-pointer z-20 -top-2 -left-2">
+            </div>
+
+            <div class="h-5 w-px bg-gray-300 mx-1"></div>
+            
+            <button type="button" @mousedown.prevent="formatText('justifyLeft')" class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded text-gray-600 transition"><i class="fas fa-align-left text-xs"></i></button>
+            <button type="button" @mousedown.prevent="formatText('justifyCenter')" class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded text-gray-600 transition"><i class="fas fa-align-center text-xs"></i></button>
+            <button type="button" @mousedown.prevent="formatText('justifyRight')" class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded text-gray-600 transition"><i class="fas fa-align-right text-xs"></i></button>
+            
+            <div class="h-5 w-px bg-gray-300 mx-1"></div>
+            
+            <div class="relative w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded transition overflow-hidden group" title="Highlight Color">
+                <div class="w-4 h-4 rounded-full bg-sun-orange shadow-sm pointer-events-none absolute z-10 group-hover:scale-110 transition-transform"></div>
+                <input type="color" @input="formatText('hiliteColor', $event.target.value)" class="absolute inset-0 w-12 h-12 opacity-0 cursor-pointer z-20 -top-2 -left-2">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, reactive, onMounted, onUnmounted, nextTick } = Vue;
+
+        createApp({
+            setup() {
+                const fileInput = ref(null);
+                
+                // Track what we are uploading currently
+                const uploadContext = reactive({
+                    type: null,
+                    dayIndex: null,
+                    imageIndex: null
+                });
+
+                // Arrays are stored in state so we can dynamically loop them
+                // /* STATE_START */
+                const state = reactive({
+                    tourName: 'Sri Lanka Unveiled: A Journey Through Time & Nature',
+                    texts: {
+                        durationBadge: '5 Nights 6 Days',
+                        dateBadge: '23 - 28 August 2026',
+                        departureProcedure: `<ul>\n                                <li>Sun Leisure World's representative will meet you at Colombo Bandaranayake International Airport.</li>\n                                <li>You will get a briefing of the departure procedure & our representative will guide you in the process.</li>\n                            </ul>`,
+                        inclusions: `<ul class="list-disc pl-5 space-y-1.5">\n                                    <li>All mentioned tours & admission fees</li>\n                                    <li>Coral Island Tour by Speedboat</li>\n                                    <li>05 Nights at 3* hotel in Pattaya & BKK</li>\n                                </ul>`,
+                        exclusions: `<ul class="list-disc pl-5 space-y-1.5">\n                                    <li>Early check-in or late check-out</li>\n                                    <li>Personal expenses</li>\n                                    <li>Tips for guide & driver</li>\n                                </ul>`,
+                        flightDeparture: 'Colombo to Bangkok - FD 141 – CMB-DMK - 23:15-04:20(+1)',
+                        flightReturn: 'Bangkok to Colombo - FD 140 – DMK-CMB - 20:25-22:15',
+                        flightNote: 'Note: Meals + 20KG Baggage + 7KG Hand Luggage included.'
+                    },
+                    imagePos: {},
+                    spacers: { page1: 0, page2: 0 },
+                    design: { lineSpacing: 1.5, letterSpacing: 0 },
+                    contact: {
+                        address: 'No.70/17 Lucky Plaza, St Anthony\'s Mawatha, Colombo - 03, Sri Lanka.',
+                        tel: '077 887 7054 / 077 775 3191',
+                        hotline: '0117-911700',
+                        email: 'info@sunleisureworld.lk',
+                        facebook: 'https://web.facebook.com/sunleisureworldsrilanak',
+                        instagram: 'https://www.instagram.com/sun_leisure_world_sri_lanka_'
+                    },
+                    logoUrl: 'https://sunleisureworld.com/images/logo.png',
+                    logoHeight: 64,
+                    headerBg: '',
+                    headerAlign: 'center',
+                    heroImages: [
+                        'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+                        'https://images.unsplash.com/photo-1563492065599-3520f775eeed?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'
+                    ],
+                    days: [
+                        { id: Date.now(), images: ['https://images.unsplash.com/photo-1540420773420-3366772f4999?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'], pageBreakBefore: false, header: 'Day 01 – City Name', date: 'Date (e.g. 23/08)', mealPlan: 'Breakfast, Lunch', description: "Description of the day's activities goes here. You can type freely." },
+                        { id: Date.now()+1, images: [], pageBreakBefore: false, header: 'Day 02 – City Name', date: 'Date (e.g. 24/08)', mealPlan: 'Breakfast, Lunch', description: "Description of the day's activities goes here. You can type freely." }
+                    ],
+                    reviews: [
+                        { id: Date.now(), avatar: 'https://ui-avatars.com/api/?name=Ruklani&background=random', name: 'Traveler Name', text: '"Type the review here..."' },
+                        { id: Date.now()+1, avatar: 'https://ui-avatars.com/api/?name=Asanka&background=random', name: 'Traveler Name', text: '"Type the review here..."' }
+                    ],
+                    moments: [
+                        'https://images.unsplash.com/photo-1517400508447-f8dd518b86db?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+                        'https://images.unsplash.com/photo-1523482580672-f109ba8cb9be?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
+                    ],
+                    prices: [
+                        { id: Date.now(), category: 'Adult Price', amount: '' }
+                    ],
+                    priceNote: ''
+                });
+                // /* STATE_END */
+
+                const isExporting = ref(false);
+
+                function getImgStyle(key) {
+                    const pos = state.imagePos[key];
+                    if (!pos) return 'object-position: 50% 50%; transform: scale(1);';
+                    return `object-position: ${pos.x}% ${pos.y}%; transform: scale(${pos.s / 100});`;
+                }
+
+                function getImgFitClass(key) {
+                    const pos = state.imagePos[key];
+                    if (pos && pos.fit === 'contain') return 'object-contain bg-gray-50';
+                    return 'object-cover';
+                }
+
+                function toggleFit(key) {
+                    if (!state.imagePos[key]) {
+                        state.imagePos[key] = { x: 50, y: 50, s: 100, fit: 'cover' };
+                    }
+                    state.imagePos[key].fit = state.imagePos[key].fit === 'contain' ? 'cover' : 'contain';
+                }
+
+                function adjustImg(key, prop, amount) {
+                    if (!state.imagePos[key]) {
+                        state.imagePos[key] = { x: 50, y: 50, s: 100 };
+                    }
+                    const pos = state.imagePos[key];
+                    if (prop === 's') {
+                        pos.s = Math.max(10, pos.s + amount);
+                    } else if (prop === 'x') {
+                        pos.x += amount;
+                    } else if (prop === 'y') {
+                        pos.y += amount;
+                    }
+                }
+
+                // --- ARRAY MANAGEMENT ---
+                function addDay() {
+                    const idx = state.days.length + 1;
+                    state.days.push({ id: Date.now(), images: [], pageBreakBefore: false, header: 'Day ' + String(idx).padStart(2, '0') + ' – City Name', date: 'Date (e.g. 23/08)', mealPlan: 'Breakfast, Lunch', description: "Description of the day's activities goes here. You can type freely." });
+                }
+                function addHeroImage() {
+                    state.heroImages.push('https://placehold.co/600x400?text=Upload+Image');
+                }
+                function addDayImage(dayIdx) {
+                    state.days[dayIdx].images.push('https://placehold.co/600x400?text=Upload+Image');
+                }
+                function addReview() {
+                    state.reviews.push({ id: Date.now(), avatar: 'https://placehold.co/100x100?text=Avatar', name: 'Traveler Name', text: '"Type the review here..."' });
+                }
+                function addMoment() {
+                    state.moments.push('https://placehold.co/600x400?text=Upload+Image');
+                }
+                function addPriceRow() {
+                    state.prices.push({ id: Date.now(), category: '', amount: '' });
+                }
+
+                // --- UPLOAD LOGIC ---
+                function promptImageUrl(type, index1 = null, index2 = null) {
+                    const url = window.prompt("Enter the Image URL:");
+                    if (url && url.trim() !== '') {
+                        if (type === 'dayImage') {
+                            const day = state.days[index1];
+                            if (day && day.images) day.images.push(url);
+                        }
+                    }
+                }
+
+                function triggerUpload(type, index1 = null, index2 = null) {
+                    uploadContext.type = type;
+                    uploadContext.dayIndex = index1;
+                    uploadContext.imageIndex = index2;
+                    fileInput.value.click();
+                }
+
+                function handleFileUpload(event) {
+                    const file = event.target.files[0];
+                    if (!file) return;
+
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const base64Str = e.target.result;
+                        
+                        // Apply the uploaded image to the correct state property based on context
+                        if (uploadContext.type === 'logo') {
+                            state.logoUrl = base64Str;
+                        } else if (uploadContext.type === 'headerBg') {
+                            state.headerBg = base64Str;
+                        } else if (uploadContext.type === 'hero') {
+                            state.heroImages[uploadContext.dayIndex] = base64Str;
+                        } else if (uploadContext.type === 'dayImage') {
+                            state.days[uploadContext.dayIndex].images[uploadContext.imageIndex] = base64Str;
+                        } else if (uploadContext.type === 'review') {
+                            state.reviews[uploadContext.dayIndex].avatar = base64Str;
+                        } else if (uploadContext.type === 'moment') {
+                            state.moments[uploadContext.dayIndex] = base64Str;
+                        }
+                        
+                        // Reset input so the same file can be uploaded again if needed
+                        event.target.value = '';
+                    };
+                    reader.readAsDataURL(file);
+                }
+
+                // --- JSON & HTML SAVE ---
+                const jsonInput = ref(null);
+                
+                function exportJSON() {
+                    const exportData = {
+                        state: state
+                    };
+
+                    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportData, null, 2));
+                    const downloadAnchorNode = document.createElement('a');
+                    downloadAnchorNode.setAttribute("href", dataStr);
+                    downloadAnchorNode.setAttribute("download", "itinerary_project.json");
+                    document.body.appendChild(downloadAnchorNode);
+                    downloadAnchorNode.click();
+                    downloadAnchorNode.remove();
+                }
+
+                function importJSON(event) {
+                    const file = event.target.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        try {
+                            const importedData = JSON.parse(e.target.result);
+                            
+                            if (importedData.state) {
+                                // Fallback mapping for old JSONs that had contentData
+                                if (importedData.contentData && !importedData.state.texts) {
+                                    const c = importedData.contentData;
+                                    importedData.state.tourName = c[0] || importedData.state.tourName;
+                                    importedData.state.texts = {
+                                        durationBadge: c[1] || '5 Nights 6 Days',
+                                        dateBadge: c[2] || '23 - 28 August 2026',
+                                        departureProcedure: c[3] || '',
+                                        inclusions: c[c.length - 7] || '',
+                                        exclusions: c[c.length - 6] || '',
+                                        flightDeparture: c[c.length - 5] || '',
+                                        flightReturn: c[c.length - 4] || '',
+                                        flightNote: c[c.length - 3] || ''
+                                    };
+                                    // Try to recover days
+                                    let contentIdx = 4;
+                                    if (importedData.state.days) {
+                                        importedData.state.days.forEach(day => {
+                                            day.header = c[contentIdx++] || 'Day – City Name';
+                                            day.date = c[contentIdx++] || 'Date';
+                                            day.mealPlan = c[contentIdx++] || 'Breakfast, Lunch';
+                                            day.description = c[contentIdx++] || 'Description';
+                                        });
+                                    }
+                                }
+                                
+                                Object.assign(state, importedData.state);
+                            } else {
+                                // Fallback for older JSON exports
+                                Object.assign(state, importedData);
+                            }
+                        } catch (err) {
+                            alert("Invalid JSON file.");
+                        }
+                        event.target.value = '';
+                    };
+                    reader.readAsText(file);
+                }
+
+                function saveHTML() {
+                    fetch(window.location.href)
+                        .then(res => res.text())
+                        .then(sourceHtml => {
+                            const startMarker = '// /* STATE_START */';
+                            const endMarker = '// /* STATE_END */';
+                            const startIndex = sourceHtml.indexOf(startMarker);
+                            const endIndex = sourceHtml.indexOf(endMarker);
+                            
+                            if (startIndex !== -1 && endIndex !== -1) {
+                                const newStateCode = `const state = reactive(${JSON.stringify(state, null, 4)});`;
+                                const newHtml = sourceHtml.substring(0, startIndex + startMarker.length) + '\n                ' + newStateCode + '\n                ' + sourceHtml.substring(endIndex);
+                                
+                                const blob = new Blob([newHtml], { type: 'text/html' });
+                                const url = URL.createObjectURL(blob);
+                                const a = document.createElement('a');
+                                a.href = url;
+                                a.download = 'Saved_Itinerary_Project.html';
+                                document.body.appendChild(a);
+                                a.click();
+                                document.body.removeChild(a);
+                                URL.revokeObjectURL(url);
+                            } else {
+                                alert("Could not save HTML properly due to missing markers.");
+                            }
+                        })
+                        .catch(err => {
+                            console.error("Save HTML Error", err);
+                            alert("Failed to save HTML.");
+                        });
+                }
+
+                // --- EXPORT LOGIC ---
+                function printDoc() {
+                    window.print();
+                }
+
+                function exportPDF() {
+                    isExporting.value = true;
+                    const element = document.getElementById('documentToExport');
+                    const filename = `Group_Tour_Itinerary.pdf`;
+                    
+                    const opt = {
+                        margin:       0,
+                        filename:     filename,
+                        image:        { type: 'jpeg', quality: 0.98 },
+                        html2canvas:  { scale: 2, useCORS: true, logging: false },
+                        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                    };
+
+                    setTimeout(() => {
+                        html2pdf().set(opt).from(element).save().then(() => {
+                            isExporting.value = false;
+                        }).catch(err => {
+                            console.error("PDF generation failed:", err);
+                            alert("There was an issue generating the PDF. Make sure all images have loaded properly.");
+                            isExporting.value = false;
+                        });
+                    }, 100);
+                }
+
+                // --- DRAG SPACER LOGIC ---
+                let isDraggingSpacer = false;
+                let dragStartY = 0;
+                let dragStartValue = 0;
+                let activeSpacerKey = null;
+
+                function startDragSpacer(event, key) {
+                    isDraggingSpacer = false;
+                    dragStartY = event.clientY;
+                    dragStartValue = state.spacers[key];
+                    activeSpacerKey = key;
+                    
+                    document.addEventListener('mousemove', onDragSpacer);
+                    document.addEventListener('mouseup', stopDragSpacer);
+                }
+
+                function onDragSpacer(event) {
+                    const deltaY = event.clientY - dragStartY;
+                    if (Math.abs(deltaY) > 2) {
+                        isDraggingSpacer = true;
+                    }
+                    state.spacers[activeSpacerKey] = dragStartValue + deltaY;
+                }
+
+                function stopDragSpacer(event) {
+                    document.removeEventListener('mousemove', onDragSpacer);
+                    document.removeEventListener('mouseup', stopDragSpacer);
+                    if (!isDraggingSpacer) {
+                        // Was just a click, reset to 0
+                        state.spacers[activeSpacerKey] = 0;
+                    }
+                }
+
+                // --- RICH TEXT TOOLBAR LOGIC ---
+                const showToolbar = ref(false);
+                const toolbarPos = reactive({ top: '0px', left: '0px' });
+                let hideTimeout = null;
+
+                function formatText(command, value = null) {
+                    document.execCommand(command, false, value);
+                }
+
+                function handleFocusIn(e) {
+                    if (e.target.hasAttribute('contenteditable')) {
+                        clearTimeout(hideTimeout);
+                        showToolbar.value = true;
+                        setTimeout(() => {
+                            const rect = e.target.getBoundingClientRect();
+                            toolbarPos.top = (rect.top - 5) + 'px';
+                            toolbarPos.left = (rect.left) + 'px'; 
+                        }, 10);
+                    }
+                }
+
+                function handleFocusOut(e) {
+                    hideTimeout = setTimeout(() => {
+                        if (document.activeElement && !document.activeElement.hasAttribute('contenteditable') && !document.activeElement.closest('#rtf-toolbar')) {
+                            showToolbar.value = false;
+                        }
+                    }, 200);
+                }
+
+                onMounted(() => {
+                    document.addEventListener('focusin', handleFocusIn);
+                    document.addEventListener('focusout', handleFocusOut);
+                });
+                onUnmounted(() => {
+                    document.removeEventListener('focusin', handleFocusIn);
+                    document.removeEventListener('focusout', handleFocusOut);
+                });
+
+                return {
+                    getImgStyle,
+                    adjustImg,
+                    state,
+                    isExporting,
+                    fileInput,
+                    addDay,
+                    addHeroImage,
+                    addDayImage,
+                    addReview,
+                    addMoment,
+                    addPriceRow,
+                    triggerUpload,
+                    handleFileUpload,
+                    printDoc,
+                    exportPDF,
+                    promptImageUrl,
+                    jsonInput,
+                    exportJSON,
+                    importJSON,
+                    saveHTML,
+                    startDragSpacer,
+                    showToolbar,
+                    toolbarPos,
+                    formatText,
+                    getImgFitClass,
+                    toggleFit
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
