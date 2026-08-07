@@ -166,7 +166,7 @@
     <!-- Results Section -->
     <div id="results" class="mt-8 pt-6 border-t-2 border-dashed border-gray-200" style="display:none;">
         <h2 class="text-2xl font-bold text-gray-800 text-center mb-6">Pricing Results (Options)</h2>
-        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
             <!-- 3 Star Option -->
             <div class="bg-blue-50 border border-blue-200 p-4 rounded-lg">
                 <h3 class="text-xl font-bold text-blue-800 mb-4 text-center border-b pb-2">3-Star Package</h3>
@@ -213,6 +213,30 @@
                         <p class="text-xs text-gray-500 mb-1">Markup: <span id="child_sharing_markup_4star"></span></p>
                         <p class="flex justify-between"><span>THB:</span><strong id="child_sharing_thb_4star"></strong></p>
                         <p class="flex justify-between"><span>LKR:</span><strong id="child_sharing_lkr_4star" class="text-purple-700"></strong></p>
+                    </div>
+                </div>
+            </div>
+            <!-- 5 Star Option -->
+            <div class="bg-purple-50 border border-purple-200 p-4 rounded-lg">
+                <h3 class="text-xl font-bold text-purple-800 mb-4 text-center border-b border-purple-200 pb-2">5-Star Package</h3>
+                <div class="space-y-4">
+                    <div class="bg-white p-3 rounded shadow-sm">
+                        <p class="font-bold text-gray-700">Adult</p>
+                        <p class="text-xs text-gray-500 mb-1">Markup: <span id="adult_markup_5star"></span></p>
+                        <p class="flex justify-between"><span>THB:</span><strong id="adult_thb_5star"></strong></p>
+                        <p class="flex justify-between"><span>LKR:</span><strong id="adult_lkr_5star" class="text-blue-700"></strong></p>
+                    </div>
+                    <div class="bg-white p-3 rounded shadow-sm">
+                        <p class="font-bold text-gray-700">Child (Extra Bed)</p>
+                        <p class="text-xs text-gray-500 mb-1">Markup: <span id="child_extra_markup_5star"></span></p>
+                        <p class="flex justify-between"><span>THB:</span><strong id="child_extra_thb_5star"></strong></p>
+                        <p class="flex justify-between"><span>LKR:</span><strong id="child_extra_lkr_5star" class="text-green-700"></strong></p>
+                    </div>
+                    <div class="bg-white p-3 rounded shadow-sm">
+                        <p class="font-bold text-gray-700">Child (Sharing Bed)</p>
+                        <p class="text-xs text-gray-500 mb-1">Markup: <span id="child_sharing_markup_5star"></span></p>
+                        <p class="flex justify-between"><span>THB:</span><strong id="child_sharing_thb_5star"></strong></p>
+                        <p class="flex justify-between"><span>LKR:</span><strong id="child_sharing_lkr_5star" class="text-purple-700"></strong></p>
                     </div>
                 </div>
             </div>
@@ -268,11 +292,20 @@
             <input type="number" id="newCity4StarMeal" placeholder="Child Meal Price/Night (THB)" class="w-full p-2 border rounded-md">
         </div>
     </div>
+    <div class="border p-3 rounded-md bg-purple-50">
+        <label class="block text-sm font-bold text-purple-800 mb-2">5-Star Option</label>
+        <input type="text" id="newCity5StarName" placeholder="5* Hotel Name" class="w-full p-2 border rounded-md mb-2">
+        <div class="flex gap-2">
+            <input type="number" id="newCity5StarPrice" placeholder="Hotel Price/Night (THB)" class="w-full p-2 border rounded-md">
+            <input type="number" id="newCity5StarMeal" placeholder="Child Meal Price/Night (THB)" class="w-full p-2 border rounded-md">
+        </div>
+    </div>
     <div class="border p-3 rounded-md bg-gray-50">
         <label class="block text-sm font-bold text-gray-800 mb-2">Mixed Package Preference</label>
         <select id="newCityMixPref" class="w-full p-2 border rounded-md">
             <option value="3">Use 3-Star Hotel</option>
             <option value="4">Use 4-Star Hotel</option>
+            <option value="5">Use 5-Star Hotel</option>
         </select>
     </div>
 </div><div class="flex gap-4 mt-6"><button id="saveCityButton" onclick="saveCity()" class="flex-1 py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700">Add City</button><button onclick="closeModal('cityModal')" class="flex-1 py-2 px-4 bg-gray-300 rounded-md hover:bg-gray-400">Cancel</button></div></div></div>
@@ -373,21 +406,24 @@
             const index = availableCities.findIndex(c => c === city);
             const el = document.createElement('div');
             el.className = 'flex items-center justify-between bg-white p-2 rounded-md border';
-            // Format display text
             const total3 = city.hotel3Price * city.numberOfNights;
             const total4 = city.hotel4Price * city.numberOfNights;
+            const total5 = city.hotel5Price * city.numberOfNights;
             const total3Meal = (city.hotel3Meal || 0) * city.numberOfNights;
             const total4Meal = (city.hotel4Meal || 0) * city.numberOfNights;
+            const total5Meal = (city.hotel5Meal || 0) * city.numberOfNights;
             const text3 = `3*: ${city.hotel3Name} (Hotel: ${city.hotel3Price}x${city.numberOfNights}N=${total3}) | Meal: ${city.hotel3Meal || 0}x${city.numberOfNights}N=${total3Meal}`;
             const text4 = `4*: ${city.hotel4Name} (Hotel: ${city.hotel4Price}x${city.numberOfNights}N=${total4}) | Meal: ${city.hotel4Meal || 0}x${city.numberOfNights}N=${total4Meal}`;
+            const text5 = `5*: ${city.hotel5Name} (Hotel: ${city.hotel5Price}x${city.numberOfNights}N=${total5}) | Meal: ${city.hotel5Meal || 0}x${city.numberOfNights}N=${total5Meal}`;
             
             el.innerHTML = `
                 <div class="flex items-center flex-grow overflow-hidden mr-2">
                     <input type="checkbox" id="city-${index}" class="h-4 w-4 mr-3 flex-shrink-0" onchange="toggleSelection('city', ${index})" ${city.selected ? 'checked' : ''}>
                     <label for="city-${index}" class="text-sm font-medium truncate">
                         <strong>${city.name} (${city.numberOfNights} Nights)</strong><br>
-                        <span class="text-xs text-gray-600">${text3}</span><br>
-                        <span class="text-xs text-gray-600">${text4}</span>
+                        <span class="text-xs text-blue-600">${text3}</span><br>
+                        <span class="text-xs text-amber-600">${text4}</span><br>
+                        <span class="text-xs text-purple-600">${text5}</span>
                     </label>
                 </div>
                 <div class="flex-shrink-0">
@@ -433,6 +469,9 @@
             document.getElementById('newCity4StarName').value = '';
             document.getElementById('newCity4StarPrice').value = '';
             document.getElementById('newCity4StarMeal').value = '';
+            document.getElementById('newCity5StarName').value = '';
+            document.getElementById('newCity5StarPrice').value = '';
+            document.getElementById('newCity5StarMeal').value = '';
             document.getElementById('newCityMixPref').value = '3';
         }
     }
@@ -467,6 +506,9 @@
             document.getElementById('newCity4StarName').value = city.hotel4Name;
             document.getElementById('newCity4StarPrice').value = city.hotel4Price;
             document.getElementById('newCity4StarMeal').value = city.hotel4Meal;
+            document.getElementById('newCity5StarName').value = city.hotel5Name || '';
+            document.getElementById('newCity5StarPrice').value = city.hotel5Price || '';
+            document.getElementById('newCity5StarMeal').value = city.hotel5Meal || '';
             document.getElementById('newCityMixPref').value = city.mixPref;
             document.getElementById('cityModalTitle').innerText = 'Edit City Stay';
             const saveButton = document.getElementById('saveCityButton');
@@ -524,14 +566,17 @@
         const hotel4Name = document.getElementById('newCity4StarName').value;
         const hotel4Price = parseFloat(document.getElementById('newCity4StarPrice').value) || 0;
         const hotel4Meal = parseFloat(document.getElementById('newCity4StarMeal').value) || 0;
+        const hotel5Name = document.getElementById('newCity5StarName').value;
+        const hotel5Price = parseFloat(document.getElementById('newCity5StarPrice').value) || 0;
+        const hotel5Meal = parseFloat(document.getElementById('newCity5StarMeal').value) || 0;
         const mixPref = document.getElementById('newCityMixPref').value;
         
-        if (!name || numberOfNights <= 0 || !hotel3Name || hotel3Price <= 0 || !hotel4Name || hotel4Price <= 0) {
+        if (!name || numberOfNights <= 0 || !hotel3Name || hotel3Price <= 0 || !hotel4Name || hotel4Price <= 0 || !hotel5Name || hotel5Price <= 0) {
             showNotification("Please fill in all city and hotel details correctly.", true);
             return;
         }
         
-        const cityData = { name, numberOfNights, hotel3Name, hotel3Price, hotel3Meal, hotel4Name, hotel4Price, hotel4Meal, mixPref };
+        const cityData = { name, numberOfNights, hotel3Name, hotel3Price, hotel3Meal, hotel4Name, hotel4Price, hotel4Meal, hotel5Name, hotel5Price, hotel5Meal, mixPref };
         
         if (index !== null) {
             cityData.selected = availableCities[index].selected;
@@ -1098,15 +1143,21 @@
 
         const hotelCost3 = selectedCities.reduce((sum, c) => sum + (c.hotel3Price * c.numberOfNights), 0) / numPeopleHotel;
         const hotelCost4 = selectedCities.reduce((sum, c) => sum + (c.hotel4Price * c.numberOfNights), 0) / numPeopleHotel;
+        const hotelCost5 = selectedCities.reduce((sum, c) => sum + (c.hotel5Price * c.numberOfNights), 0) / numPeopleHotel;
         const hotelCostMix = selectedCities.reduce((sum, c) => {
-            const preferredPrice = c.mixPref === "4" ? c.hotel4Price : c.hotel3Price;
+            let preferredPrice = c.hotel3Price;
+            if (c.mixPref === "4") preferredPrice = c.hotel4Price;
+            if (c.mixPref === "5") preferredPrice = c.hotel5Price;
             return sum + (preferredPrice * c.numberOfNights);
         }, 0) / numPeopleHotel;
 
         const totalMealCost3 = selectedCities.reduce((sum, c) => sum + ((c.hotel3Meal || 0) * c.numberOfNights), 0);
         const totalMealCost4 = selectedCities.reduce((sum, c) => sum + ((c.hotel4Meal || 0) * c.numberOfNights), 0);
+        const totalMealCost5 = selectedCities.reduce((sum, c) => sum + ((c.hotel5Meal || 0) * c.numberOfNights), 0);
         const totalMealCostMix = selectedCities.reduce((sum, c) => {
-            const preferredMealPrice = c.mixPref === "4" ? (c.hotel4Meal || 0) : (c.hotel3Meal || 0);
+            let preferredMealPrice = c.hotel3Meal || 0;
+            if (c.mixPref === "4") preferredMealPrice = c.hotel4Meal || 0;
+            if (c.mixPref === "5") preferredMealPrice = c.hotel5Meal || 0;
             return sum + (preferredMealPrice * c.numberOfNights);
         }, 0);
 
@@ -1144,9 +1195,10 @@
             document.getElementById(`child_sharing_lkr_${suffix}`).innerText = formatCurrency(totalThbChildSharing * lkrRate, 'LKR');
         };
 
-        // 4. Calculate all three
+        // 4. Calculate all four
         renderPackage('3star', hotelCost3, totalMealCost3);
         renderPackage('4star', hotelCost4, totalMealCost4);
+        renderPackage('5star', hotelCost5, totalMealCost5);
         renderPackage('mix', hotelCostMix, totalMealCostMix);
 
         // 5. Display results section
