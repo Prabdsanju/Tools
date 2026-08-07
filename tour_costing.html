@@ -412,9 +412,9 @@
             const total3Meal = (city.hotel3Meal || 0) * city.numberOfNights;
             const total4Meal = (city.hotel4Meal || 0) * city.numberOfNights;
             const total5Meal = (city.hotel5Meal || 0) * city.numberOfNights;
-            const text3 = `3*: ${city.hotel3Name} (Hotel: ${city.hotel3Price}x${city.numberOfNights}N=${total3}) | Meal: ${city.hotel3Meal || 0}x${city.numberOfNights}N=${total3Meal}`;
-            const text4 = `4*: ${city.hotel4Name} (Hotel: ${city.hotel4Price}x${city.numberOfNights}N=${total4}) | Meal: ${city.hotel4Meal || 0}x${city.numberOfNights}N=${total4Meal}`;
-            const text5 = `5*: ${city.hotel5Name} (Hotel: ${city.hotel5Price}x${city.numberOfNights}N=${total5}) | Meal: ${city.hotel5Meal || 0}x${city.numberOfNights}N=${total5Meal}`;
+            const text3 = city.hotel3Name ? `3*: ${city.hotel3Name} (Hotel: ${city.hotel3Price}x${city.numberOfNights}N=${total3}) | Meal: ${city.hotel3Meal || 0}x${city.numberOfNights}N=${total3Meal}` : `3*: -`;
+            const text4 = city.hotel4Name ? `4*: ${city.hotel4Name} (Hotel: ${city.hotel4Price}x${city.numberOfNights}N=${total4}) | Meal: ${city.hotel4Meal || 0}x${city.numberOfNights}N=${total4Meal}` : `4*: -`;
+            const text5 = city.hotel5Name ? `5*: ${city.hotel5Name} (Hotel: ${city.hotel5Price}x${city.numberOfNights}N=${total5}) | Meal: ${city.hotel5Meal || 0}x${city.numberOfNights}N=${total5Meal}` : `5*: -`;
             
             el.innerHTML = `
                 <div class="flex items-center flex-grow overflow-hidden mr-2">
@@ -571,8 +571,13 @@
         const hotel5Meal = parseFloat(document.getElementById('newCity5StarMeal').value) || 0;
         const mixPref = document.getElementById('newCityMixPref').value;
         
-        if (!name || numberOfNights <= 0 || !hotel3Name || hotel3Price <= 0 || !hotel4Name || hotel4Price <= 0 || !hotel5Name || hotel5Price <= 0) {
-            showNotification("Please fill in all city and hotel details correctly.", true);
+        if (!name || numberOfNights <= 0) {
+            showNotification("Please provide a City Name and Number of Nights.", true);
+            return;
+        }
+        
+        if (!hotel3Name && !hotel4Name && !hotel5Name) {
+            showNotification("Please provide at least one hotel option (3*, 4*, or 5*).", true);
             return;
         }
         
