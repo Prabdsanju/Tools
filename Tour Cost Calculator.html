@@ -512,24 +512,30 @@
         renderTransfers();
     }
 
-    function saveHotel(index = null) {
-        const name = document.getElementById('newHotelName').value;
-        const star = document.getElementById('newHotelStar').value;
-        const pricePerNight = parseFloat(document.getElementById('newHotelPrice').value) || 0;
-        const numberOfNights = parseInt(document.getElementById('newHotelNights').value) || 0;
-        if (!name || pricePerNight <= 0 || numberOfNights <= 0) {
-            showNotification("Please enter a valid hotel name, price, and number of nights.", true);
+    function saveCity(index = null) {
+        const name = document.getElementById('newCityName').value;
+        const numberOfNights = parseInt(document.getElementById('newCityNights').value) || 0;
+        const hotel3Name = document.getElementById('newCity3StarName').value;
+        const hotel3Price = parseFloat(document.getElementById('newCity3StarPrice').value) || 0;
+        const hotel4Name = document.getElementById('newCity4StarName').value;
+        const hotel4Price = parseFloat(document.getElementById('newCity4StarPrice').value) || 0;
+        const mixPref = document.getElementById('newCityMixPref').value;
+        
+        if (!name || numberOfNights <= 0 || !hotel3Name || hotel3Price <= 0 || !hotel4Name || hotel4Price <= 0) {
+            showNotification("Please fill in all city and hotel details correctly.", true);
             return;
         }
-        const hotelData = { name, star, pricePerNight, numberOfNights };
+        
+        const cityData = { name, numberOfNights, hotel3Name, hotel3Price, hotel4Name, hotel4Price, mixPref };
+        
         if (index !== null) {
-            hotelData.selected = availableHotels[index].selected;
-            availableHotels[index] = hotelData;
+            cityData.selected = availableCities[index].selected;
+            availableCities[index] = cityData;
         } else {
-            hotelData.selected = true;
-            availableHotels.push(hotelData);
+            cityData.selected = true;
+            availableCities.push(cityData);
         }
-        closeModal('hotelModal');
+        closeModal('cityModal');
         renderCities();
     }
     
