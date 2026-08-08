@@ -253,6 +253,14 @@
                         <p class="flex justify-between"><span>LKR:</span><strong id="child_sharing_lkr_3star" class="text-purple-700"></strong></p>
                         <p class="flex justify-between mt-1 pt-1 border-t border-gray-100"><span>Final LKR:</span><strong id="child_sharing_final_lkr_3star" class="text-red-600"></strong></p>
                     </div>
+                    <div class="bg-blue-100 p-3 rounded border border-blue-300 mt-2">
+                        <p class="text-xs font-bold text-blue-800 mb-2">⚙ Adjust Final Price (LKR +/-)</p>
+                        <div class="grid grid-cols-3 gap-2">
+                            <div><label class="text-xs text-gray-600">Adult</label><input type="number" id="adjust_adult_3star" class="w-full p-1 border rounded text-sm text-center" placeholder="0" onchange="calculate()"></div>
+                            <div><label class="text-xs text-gray-600">Child EB</label><input type="number" id="adjust_child_extra_3star" class="w-full p-1 border rounded text-sm text-center" placeholder="0" onchange="calculate()"></div>
+                            <div><label class="text-xs text-gray-600">Child SB</label><input type="number" id="adjust_child_sharing_3star" class="w-full p-1 border rounded text-sm text-center" placeholder="0" onchange="calculate()"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
             
@@ -284,9 +292,16 @@
                         <p class="flex justify-between"><span>LKR:</span><strong id="child_sharing_lkr_4star" class="text-purple-700"></strong></p>
                         <p class="flex justify-between mt-1 pt-1 border-t border-gray-100"><span>Final LKR:</span><strong id="child_sharing_final_lkr_4star" class="text-red-600"></strong></p>
                     </div>
+                    <div class="bg-amber-100 p-3 rounded border border-amber-300 mt-2">
+                        <p class="text-xs font-bold text-amber-800 mb-2">⚙ Adjust Final Price (LKR +/-)</p>
+                        <div class="grid grid-cols-3 gap-2">
+                            <div><label class="text-xs text-gray-600">Adult</label><input type="number" id="adjust_adult_4star" class="w-full p-1 border rounded text-sm text-center" placeholder="0" onchange="calculate()"></div>
+                            <div><label class="text-xs text-gray-600">Child EB</label><input type="number" id="adjust_child_extra_4star" class="w-full p-1 border rounded text-sm text-center" placeholder="0" onchange="calculate()"></div>
+                            <div><label class="text-xs text-gray-600">Child SB</label><input type="number" id="adjust_child_sharing_4star" class="w-full p-1 border rounded text-sm text-center" placeholder="0" onchange="calculate()"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <!-- 5 Star Option -->
             <div id="result_card_5star" class="bg-purple-50 border border-purple-200 p-4 rounded-lg">
                 <h3 class="text-xl font-bold text-purple-800 mb-4 text-center border-b border-purple-200 pb-2">5-Star Package</h3>
                 <div class="space-y-4">
@@ -314,10 +329,16 @@
                         <p class="flex justify-between"><span>LKR:</span><strong id="child_sharing_lkr_5star" class="text-purple-700"></strong></p>
                         <p class="flex justify-between mt-1 pt-1 border-t border-gray-100"><span>Final LKR:</span><strong id="child_sharing_final_lkr_5star" class="text-red-600"></strong></p>
                     </div>
+                    <div class="bg-purple-100 p-3 rounded border border-purple-300 mt-2">
+                        <p class="text-xs font-bold text-purple-800 mb-2">⚙ Adjust Final Price (LKR +/-)</p>
+                        <div class="grid grid-cols-3 gap-2">
+                            <div><label class="text-xs text-gray-600">Adult</label><input type="number" id="adjust_adult_5star" class="w-full p-1 border rounded text-sm text-center" placeholder="0" onchange="calculate()"></div>
+                            <div><label class="text-xs text-gray-600">Child EB</label><input type="number" id="adjust_child_extra_5star" class="w-full p-1 border rounded text-sm text-center" placeholder="0" onchange="calculate()"></div>
+                            <div><label class="text-xs text-gray-600">Child SB</label><input type="number" id="adjust_child_sharing_5star" class="w-full p-1 border rounded text-sm text-center" placeholder="0" onchange="calculate()"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            <!-- Custom / Mixed Option -->
             <div id="result_card_mix" class="bg-gray-50 border border-gray-300 p-4 rounded-lg relative">
                 <div class="absolute top-0 right-0 bg-gray-200 text-xs px-2 py-1 rounded-bl-lg text-gray-600 font-bold">All Checked Hotels</div>
                 <h3 id="mix_package_title" class="text-xl font-bold text-gray-800 mb-4 text-center border-b pb-2">Mixed Package</h3>
@@ -345,6 +366,14 @@
                         <p class="flex justify-between"><span>USD:</span><strong id="child_sharing_usd_mix" class="text-gray-700"></strong></p>
                         <p class="flex justify-between"><span>LKR:</span><strong id="child_sharing_lkr_mix" class="text-purple-700"></strong></p>
                         <p class="flex justify-between mt-1 pt-1 border-t border-gray-100"><span>Final LKR:</span><strong id="child_sharing_final_lkr_mix" class="text-red-600"></strong></p>
+                    </div>
+                    <div class="bg-gray-200 p-3 rounded border border-gray-400 mt-2">
+                        <p class="text-xs font-bold text-gray-800 mb-2">⚙ Adjust Final Price (LKR +/-)</p>
+                        <div class="grid grid-cols-3 gap-2">
+                            <div><label class="text-xs text-gray-600">Adult</label><input type="number" id="adjust_adult_mix" class="w-full p-1 border rounded text-sm text-center" placeholder="0" onchange="calculate()"></div>
+                            <div><label class="text-xs text-gray-600">Child EB</label><input type="number" id="adjust_child_extra_mix" class="w-full p-1 border rounded text-sm text-center" placeholder="0" onchange="calculate()"></div>
+                            <div><label class="text-xs text-gray-600">Child SB</label><input type="number" id="adjust_child_sharing_mix" class="w-full p-1 border rounded text-sm text-center" placeholder="0" onchange="calculate()"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1639,6 +1668,11 @@
 
         // Function to calculate and render a package
         const renderPackage = (suffix, hotelCost, totalMealCost) => {
+            // Read per-package adjustments
+            const adjustAdult = parseFloat(document.getElementById(`adjust_adult_${suffix}`)?.value) || 0;
+            const adjustChildExtra = parseFloat(document.getElementById(`adjust_child_extra_${suffix}`)?.value) || 0;
+            const adjustChildSharing = parseFloat(document.getElementById(`adjust_child_sharing_${suffix}`)?.value) || 0;
+
             // ADULT
             const subtotalAdult = selectedTourCost + perPersonTransferCost + hotelCost + addonCostPerAdult;
             let markupAmountAdult = (manualMarkupAdult !== null) ? manualMarkupAdult : subtotalAdult * markupPercent;
@@ -1664,7 +1698,7 @@
             if (document.getElementById(`adult_usd_${suffix}`)) document.getElementById(`adult_usd_${suffix}`).innerText = formatCurrency(usdAdult, 'USD');
             let lkrAdult = totalThbAdult * lkrRate;
             document.getElementById(`adult_lkr_${suffix}`).innerText = formatCurrency(lkrAdult, 'LKR');
-            let finalLkrAdult = Math.ceil(lkrAdult / 100) * 100 + 1000;
+            let finalLkrAdult = Math.ceil(lkrAdult / 100) * 100 + 1000 + adjustAdult;
             if (document.getElementById(`adult_final_lkr_${suffix}`)) document.getElementById(`adult_final_lkr_${suffix}`).innerText = formatCurrency(finalLkrAdult, 'LKR');
 
             document.getElementById(`child_extra_markup_${suffix}`).innerHTML = childExtraBedMarkupDisplay;
@@ -1673,7 +1707,7 @@
             if (document.getElementById(`child_extra_usd_${suffix}`)) document.getElementById(`child_extra_usd_${suffix}`).innerText = formatCurrency(usdChildExtra, 'USD');
             let lkrChildExtra = totalThbChildExtraBed * lkrRate;
             document.getElementById(`child_extra_lkr_${suffix}`).innerText = formatCurrency(lkrChildExtra, 'LKR');
-            let finalLkrChildExtra = Math.ceil(lkrChildExtra / 100) * 100 + 1000;
+            let finalLkrChildExtra = Math.ceil(lkrChildExtra / 100) * 100 + 1000 + adjustChildExtra;
             if (document.getElementById(`child_final_lkr_${suffix}`)) document.getElementById(`child_final_lkr_${suffix}`).innerText = formatCurrency(finalLkrChildExtra, 'LKR');
 
             document.getElementById(`child_sharing_markup_${suffix}`).innerHTML = childSharingMarkupDisplay;
@@ -1682,7 +1716,7 @@
             if (document.getElementById(`child_sharing_usd_${suffix}`)) document.getElementById(`child_sharing_usd_${suffix}`).innerText = formatCurrency(usdChildSharing, 'USD');
             let lkrChildSharing = totalThbChildSharing * lkrRate;
             document.getElementById(`child_sharing_lkr_${suffix}`).innerText = formatCurrency(lkrChildSharing, 'LKR');
-            let finalLkrChildSharing = Math.ceil(lkrChildSharing / 100) * 100 + 1000;
+            let finalLkrChildSharing = Math.ceil(lkrChildSharing / 100) * 100 + 1000 + adjustChildSharing;
             if (document.getElementById(`child_sharing_final_lkr_${suffix}`)) document.getElementById(`child_sharing_final_lkr_${suffix}`).innerText = formatCurrency(finalLkrChildSharing, 'LKR');
         };
 
