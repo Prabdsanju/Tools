@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Database Manager - Sun Leisure World</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen font-sans">
+    <div id="app" class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-8 bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800"><i class="fas fa-database text-blue-600 mr-2"></i> Master Database Manager</h1>
+                <p class="text-gray-500 mt-1">Manage your centralized inventory of Hotels, Tours, and Transfers for Auto-Fill.</p>
+            </div>
+            <div class="flex gap-3">
+                <button @click="exportDatabase" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium transition-colors border border-gray-300">
+                    <i class="fas fa-file-export mr-2"></i>Export JSON
+                </button>
+                <label class="px-4 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 font-medium transition-colors border border-blue-200 cursor-pointer">
+                    <i class="fas fa-file-import mr-2"></i>Import JSON
+                    <input type="file" @change="importDatabase" accept=".json" class="hidden">
+                </label>
+                <button @click="saveToBrowser" class="px-5 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-bold shadow-md transition-colors">
+                    <i class="fas fa-save mr-2"></i>Save Database
+                </button>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="flex space-x-2 mb-6">
+            <button @click="activeTab = 'hotels'" :class="['px-6 py-3 rounded-lg font-bold transition-colors', activeTab === 'hotels' ? 'bg-blue-600 text-white shadow-md' : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200']">
+                <i class="fas fa-hotel mr-2"></i>Hotels ({{ hotels.length }})
+            </button>
+            <button @click="activeTab = 'tours'" :class="['px-6 py-3 rounded-lg font-bold transition-colors', activeTab === 'tours' ? 'bg-purple-600 text-white shadow-md' : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200']">
+                <i class="fas fa-map-marked-alt mr-2"></i>Tours & Activities ({{ tours.length }})
+            </button>
+            <button @click="activeTab = 'transfers'" :class="['px-6 py-3 rounded-lg font-bold transition-colors', activeTab === 'transfers' ? 'bg-orange-600 text-white shadow-md' : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200']">
+                <i class="fas fa-car mr-2"></i>Transfers ({{ transfers.length }})
+            </button>
+            <button @click="activeTab = 'extras'" :class="['px-6 py-3 rounded-lg font-bold transition-colors', activeTab === 'extras' ? 'bg-indigo-600 text-white shadow-md' : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200']">
+                <i class="fas fa-star mr-2"></i>Extras ({{ extras.length }})
+            </button>
+        </div>
+
+        <!-- Notification -->
+        <div v-if="notification" :class="['mb-6 p-4 rounded-lg font-medium shadow-sm transition-all', notification.type === 'success' ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-red-100 text-red-800 border border-red-200']">
+            <i :class="['fas mr-2', notification.type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle']"></i>
+            {{ notification.message }}
+        </div>
+
+        <!-- HOTELS TAB -->
+        <div v-show="activeTab === 'hotels'" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="p-6 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
+                <div class="relative w-96">
+                    <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                    <input type="text" v-model="searchHotels" placeholder="Search hotels by name or city..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <button @click="openModal('hotel')" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium">
+                    <i class="fas fa-plus mr-2"></i>Add Hotel
+                </button>
+            </div>
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-100 text-gray-600 text-sm uppercase tracking-wider">
+                        <th class="p-4 border-b">Hotel Name</th>
+                        <th class="p-4 border-b">City/Location</th>
+                        <th class="p-4 border-b">Star Rating</th>
+                        <th class="p-4 border-b">Room Price (THB)</th>
+                        <th class="p-4 border-b">Meal Price (THB)</th>
+                        <th class="p-4 border-b text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(hotel, index) in filteredHotels" :key="hotel.id" class="border-b hover:bg-gray-50 transition-colors">
+                        <td class="p-4 font-bold text-gray-800">{{ hotel.name }}</td>
+                        <td class="p-4 text-gray-600">{{ hotel.location }}</td>
+                        <td class="p-4 text-gray-600">
+                            <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs font-bold">{{ hotel.star }} Star</span>
+                        </td>
+                        <td class="p-4 text-gray-800">{{ hotel.price }}</td>
+                        <td class="p-4 text-gray-800">{{ hotel.mealPrice || 0 }}</td>
+                        <td class="p-4 text-right">
+                            <button @click="editItem('hotel', hotel.id)" class="text-blue-500 hover:text-blue-700 mr-3"><i class="fas fa-edit"></i></button>
+                            <button @click="deleteItem('hotel', hotel.id)" class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                    <tr v-if="filteredHotels.length === 0">
+                        <td colspan="6" class="p-8 text-center text-gray-500">No hotels found. Add some to build your database!</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- TOURS TAB -->
+        <div v-show="activeTab === 'tours'" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="p-6 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
+                <div class="relative w-96">
+                    <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                    <input type="text" v-model="searchTours" placeholder="Search tours..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                </div>
+                <button @click="openModal('tour')" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium">
+                    <i class="fas fa-plus mr-2"></i>Add Tour
+                </button>
+            </div>
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-100 text-gray-600 text-sm uppercase tracking-wider">
+                        <th class="p-4 border-b">Tour Name</th>
+                        <th class="p-4 border-b">City/Location</th>
+                        <th class="p-4 border-b">Join Transfer (THB/pax)</th>
+                        <th class="p-4 border-b">Ticket Only (THB/pax)</th>
+                        <th class="p-4 border-b">Private Car (THB/veh)</th>
+                        <th class="p-4 border-b">Private Van (THB/veh)</th>
+                        <th class="p-4 border-b">Private Bus (THB/veh)</th>
+                        <th class="p-4 border-b text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="tour in filteredTours" :key="tour.id" class="border-b hover:bg-gray-50 transition-colors">
+                        <td class="p-4 font-bold text-gray-800">{{ tour.name }}</td>
+                        <td class="p-4 text-gray-600">{{ tour.location || '-' }}</td>
+                        <td class="p-4 text-gray-800">{{ tour.joinPrice || 0 }}</td>
+                        <td class="p-4 text-gray-800">{{ tour.ticketOnlyPrice || 0 }}</td>
+                        <td class="p-4 text-gray-800">{{ tour.privateCarPrice || 0 }}</td>
+                        <td class="p-4 text-gray-800">{{ tour.privateVanPrice || 0 }}</td>
+                        <td class="p-4 text-gray-800">{{ tour.privateBusPrice || 0 }}</td>
+                        <td class="p-4 text-right">
+                            <button @click="editItem('tour', tour.id)" class="text-blue-500 hover:text-blue-700 mr-3"><i class="fas fa-edit"></i></button>
+                            <button @click="deleteItem('tour', tour.id)" class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                    <tr v-if="filteredTours.length === 0">
+                        <td colspan="8" class="p-8 text-center text-gray-500">No tours found.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- TRANSFERS TAB -->
+        <div v-show="activeTab === 'transfers'" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="p-6 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
+                <div class="relative w-96">
+                    <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                    <input type="text" v-model="searchTransfers" placeholder="Search transfers..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:outline-none">
+                </div>
+                <button @click="openModal('transfer')" class="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 font-medium">
+                    <i class="fas fa-plus mr-2"></i>Add Transfer
+                </button>
+            </div>
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-100 text-gray-600 text-sm uppercase tracking-wider">
+                        <th class="p-4 border-b">Transfer Name/Route</th>
+                        <th class="p-4 border-b">Location (Optional)</th>
+                        <th class="p-4 border-b">Car Price (THB)</th>
+                        <th class="p-4 border-b">Van Price (THB)</th>
+                        <th class="p-4 border-b">Bus Price (THB)</th>
+                        <th class="p-4 border-b text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="transfer in filteredTransfers" :key="transfer.id" class="border-b hover:bg-gray-50 transition-colors">
+                        <td class="p-4 font-bold text-gray-800">{{ transfer.name }}</td>
+                        <td class="p-4 text-gray-600">{{ transfer.location || '-' }}</td>
+                        <td class="p-4 text-gray-800">{{ transfer.carPrice || transfer.price || 0 }}</td>
+                        <td class="p-4 text-gray-800">{{ transfer.vanPrice || 0 }}</td>
+                        <td class="p-4 text-gray-800">{{ transfer.busPrice || 0 }}</td>
+                        <td class="p-4 text-right">
+                            <button @click="editItem('transfer', transfer.id)" class="text-blue-500 hover:text-blue-700 mr-3"><i class="fas fa-edit"></i></button>
+                            <button @click="deleteItem('transfer', transfer.id)" class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                    <tr v-if="filteredTransfers.length === 0">
+                        <td colspan="6" class="p-8 text-center text-gray-500">No transfers found.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- EXTRAS TAB -->
+        <div v-show="activeTab === 'extras'" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="p-6 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
+                <div class="relative w-96">
+                    <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                    <input type="text" v-model="searchExtras" placeholder="Search extra services..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                </div>
+                <button @click="openModal('extra')" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium">
+                    <i class="fas fa-plus mr-2"></i>Add Extra Service
+                </button>
+            </div>
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-100 text-gray-600 text-sm uppercase tracking-wider">
+                        <th class="p-4 border-b">Service Name</th>
+                        <th class="p-4 border-b">Type</th>
+                        <th class="p-4 border-b">Price / Fee (THB)</th>
+                        <th class="p-4 border-b text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="extra in filteredExtras" :key="extra.id" class="border-b hover:bg-gray-50 transition-colors">
+                        <td class="p-4 font-bold text-gray-800">{{ extra.name }}</td>
+                        <td class="p-4 text-gray-600">
+                            <span class="bg-gray-200 text-gray-800 px-2 py-1 rounded text-xs font-bold">{{ extra.serviceType }}</span>
+                        </td>
+                        <td class="p-4 text-gray-800">{{ extra.price }}</td>
+                        <td class="p-4 text-right">
+                            <button @click="editItem('extra', extra.id)" class="text-blue-500 hover:text-blue-700 mr-3"><i class="fas fa-edit"></i></button>
+                            <button @click="deleteItem('extra', extra.id)" class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                    <tr v-if="filteredExtras.length === 0">
+                        <td colspan="4" class="p-8 text-center text-gray-500">No extra services found.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- MODALS -->
+        <!-- Overlay -->
+        <div v-if="modal.show" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <!-- Modal Content -->
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-full">
+                <!-- Header -->
+                <div :class="['p-4 border-b text-white font-bold flex justify-between items-center', modalHeaderClass]">
+                    <h3 class="text-lg">{{ modalTitle }}</h3>
+                    <button @click="closeModal" class="text-white hover:text-gray-200 transition-colors text-xl leading-none">&times;</button>
+                </div>
+                
+                <!-- Body -->
+                <div class="p-6 overflow-y-auto">
+                    <!-- Common Fields -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Name <span class="text-red-500">*</span></label>
+                        <input type="text" v-model="modal.data.name" placeholder="Enter name..." class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Location / City</label>
+                        <input type="text" v-model="modal.data.location" placeholder="e.g. Bangkok, Pattaya..." class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+
+                    <!-- Hotel Specific -->
+                    <template v-if="modal.type === 'hotel'">
+                        <div class="mb-4">
+                            <label class="block text-sm font-bold text-gray-700 mb-1">Star Rating</label>
+                            <select v-model="modal.data.star" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                <option value="3">3-Star</option>
+                                <option value="4">4-Star</option>
+                                <option value="5">5-Star</option>
+                            </select>
+                        </div>
+                        <div class="flex gap-4 mb-4">
+                            <div class="flex-1">
+                                <label class="block text-sm font-bold text-gray-700 mb-1">Room Price (THB) <span class="text-red-500">*</span></label>
+                                <input type="number" v-model="modal.data.price" placeholder="Per night..." class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            </div>
+                            <div class="flex-1">
+                                <label class="block text-sm font-bold text-gray-700 mb-1">Meal Price (THB)</label>
+                                <input type="number" v-model="modal.data.mealPrice" placeholder="Optional..." class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- Tour Specific -->
+                    <template v-if="modal.type === 'tour'">
+                        <div class="flex gap-4 mb-4">
+                            <div class="flex-1">
+                                <label class="block text-sm font-bold text-gray-700 mb-1">Join Transfer (THB/pax)</label>
+                                <input type="number" v-model="modal.data.joinPrice" placeholder="Bundle price..." class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            </div>
+                            <div class="flex-1">
+                                <label class="block text-sm font-bold text-gray-700 mb-1">Ticket Only (THB/pax)</label>
+                                <input type="number" v-model="modal.data.ticketOnlyPrice" placeholder="Ticket price..." class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            </div>
+                        </div>
+                        <div class="flex gap-4 mb-4">
+                            <div class="flex-1">
+                                <label class="block text-sm font-bold text-gray-700 mb-1">Private Car (THB/veh)</label>
+                                <input type="number" v-model="modal.data.privateCarPrice" placeholder="Car transport..." class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            </div>
+                            <div class="flex-1">
+                                <label class="block text-sm font-bold text-gray-700 mb-1">Private Van (THB/veh)</label>
+                                <input type="number" v-model="modal.data.privateVanPrice" placeholder="Van transport..." class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            </div>
+                            <div class="flex-1">
+                                <label class="block text-sm font-bold text-gray-700 mb-1">Private Bus (THB/veh)</label>
+                                <input type="number" v-model="modal.data.privateBusPrice" placeholder="Bus transport..." class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- Transfer Specific -->
+                    <template v-if="modal.type === 'transfer'">
+                        <div class="flex gap-4 mb-4">
+                            <div class="flex-1">
+                                <label class="block text-sm font-bold text-gray-700 mb-1">Car Price (THB)</label>
+                                <input type="number" v-model="modal.data.carPrice" placeholder="Car transport..." class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            </div>
+                            <div class="flex-1">
+                                <label class="block text-sm font-bold text-gray-700 mb-1">Van Price (THB)</label>
+                                <input type="number" v-model="modal.data.vanPrice" placeholder="Van transport..." class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            </div>
+                            <div class="flex-1">
+                                <label class="block text-sm font-bold text-gray-700 mb-1">Bus Price (THB)</label>
+                                <input type="number" v-model="modal.data.busPrice" placeholder="Bus transport..." class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- Extra Specific -->
+                    <template v-if="modal.type === 'extra'">
+                        <div class="mb-4">
+                            <label class="block text-sm font-bold text-gray-700 mb-1">Service Type</label>
+                            <select v-model="modal.data.serviceType" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                                <option value="Guide">Tour Guide</option>
+                                <option value="Water">Water Bottles</option>
+                                <option value="Meal">Additional Meal</option>
+                            </select>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-bold text-gray-700 mb-1">Price / Fee (THB) <span class="text-red-500">*</span></label>
+                            <input type="number" v-model="modal.data.price" placeholder="Enter standard price..." class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        </div>
+                    </template>
+                </div>
+                
+                <!-- Footer -->
+                <div class="p-4 bg-gray-50 border-t flex justify-end gap-3">
+                    <button @click="closeModal" class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded hover:bg-gray-100 font-medium transition-colors">Cancel</button>
+                    <button @click="saveItem" :class="['px-6 py-2 text-white rounded font-bold shadow-sm transition-colors', modalSubmitClass]">
+                        {{ modal.isEdit ? 'Update' : 'Save' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, computed, onMounted } = Vue;
+
+        createApp({
+            setup() {
+                const LOCAL_STORAGE_KEY = 'SLW_Master_Inventory';
+                
+                // State
+                const activeTab = ref('hotels');
+                const hotels = ref([]);
+                const tours = ref([]);
+                const transfers = ref([]);
+                const extras = ref([]);
+                
+                const searchHotels = ref('');
+                const searchTours = ref('');
+                const searchTransfers = ref('');
+                const searchExtras = ref('');
+                
+                const notification = ref(null);
+                
+                const modal = ref({
+                    show: false,
+                    type: 'hotel',
+                    isEdit: false,
+                    editId: null,
+                    data: {}
+                });
+
+                // Load initial data
+                onMounted(async () => {
+                    try {
+                        const response = await fetch('./master_db.json?t=' + new Date().getTime());
+                        if (response.ok) {
+                            const parsed = await response.json();
+                            hotels.value = parsed.hotels || [];
+                            tours.value = parsed.tours || [];
+                            transfers.value = parsed.transfers || [];
+                            extras.value = parsed.extras || [];
+                            return; // Stop here if successfully fetched
+                        }
+                    } catch(e) {
+                        console.log("master_db.json not found via fetch. Falling back to local storage.");
+                    }
+
+                    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+                    if (saved) {
+                        try {
+                            const parsed = JSON.parse(saved);
+                            hotels.value = parsed.hotels || [];
+                            tours.value = parsed.tours || [];
+                            transfers.value = parsed.transfers || [];
+                            extras.value = parsed.extras || [];
+                        } catch(e) {
+                            console.error('Failed to parse saved database');
+                        }
+                    }
+                });
+
+                // Computed Properties
+                const filteredHotels = computed(() => {
+                    const q = searchHotels.value.toLowerCase();
+                    return hotels.value.filter(h => h.name.toLowerCase().includes(q) || (h.location && h.location.toLowerCase().includes(q)));
+                });
+                
+                const filteredTours = computed(() => {
+                    const q = searchTours.value.toLowerCase();
+                    return tours.value.filter(t => t.name.toLowerCase().includes(q) || (t.location && t.location.toLowerCase().includes(q)));
+                });
+                
+                const filteredTransfers = computed(() => {
+                    const q = searchTransfers.value.toLowerCase();
+                    return transfers.value.filter(t => t.name.toLowerCase().includes(q) || (t.location && t.location.toLowerCase().includes(q)));
+                });
+                
+                const filteredExtras = computed(() => {
+                    const q = searchExtras.value.toLowerCase();
+                    return extras.value.filter(e => e.name.toLowerCase().includes(q) || e.serviceType.toLowerCase().includes(q));
+                });
+
+                const modalTitle = computed(() => {
+                    const action = modal.value.isEdit ? 'Edit' : 'Add New';
+                    const item = modal.value.type.charAt(0).toUpperCase() + modal.value.type.slice(1);
+                    return `${action} ${item}`;
+                });
+                
+                const modalHeaderClass = computed(() => {
+                    if (modal.value.type === 'hotel') return 'bg-blue-600';
+                    if (modal.value.type === 'tour') return 'bg-purple-600';
+                    if (modal.value.type === 'transfer') return 'bg-orange-600';
+                    return 'bg-indigo-600';
+                });
+                
+                const modalSubmitClass = computed(() => {
+                    if (modal.value.type === 'hotel') return 'bg-blue-600 hover:bg-blue-700';
+                    if (modal.value.type === 'tour') return 'bg-purple-600 hover:bg-purple-700';
+                    if (modal.value.type === 'transfer') return 'bg-orange-600 hover:bg-orange-700';
+                    return 'bg-indigo-600 hover:bg-indigo-700';
+                });
+
+                // Methods
+                const showNotify = (message, type = 'success') => {
+                    notification.value = { message, type };
+                    setTimeout(() => { notification.value = null; }, 3000);
+                };
+
+                const saveToBrowser = () => {
+                    const data = {
+                        hotels: hotels.value,
+                        tours: tours.value,
+                        transfers: transfers.value,
+                        extras: extras.value
+                    };
+                    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
+                    showNotify('Database successfully saved to browser local storage!');
+                };
+
+                const exportDatabase = () => {
+                    const data = {
+                        hotels: hotels.value,
+                        tours: tours.value,
+                        transfers: transfers.value,
+                        extras: extras.value
+                    };
+                    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
+                    const dlNode = document.createElement('a');
+                    dlNode.setAttribute("href", dataStr);
+                    dlNode.setAttribute("download", `master-database-${new Date().toISOString().split('T')[0]}.json`);
+                    document.body.appendChild(dlNode);
+                    dlNode.click();
+                    dlNode.remove();
+                    showNotify('Database exported as JSON file!');
+                };
+
+                const importDatabase = (event) => {
+                    const file = event.target.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        try {
+                            const parsed = JSON.parse(e.target.result);
+                            if(parsed.hotels) hotels.value = parsed.hotels;
+                            if(parsed.tours) tours.value = parsed.tours;
+                            if(parsed.transfers) transfers.value = parsed.transfers;
+                            if(parsed.extras) extras.value = parsed.extras;
+                            saveToBrowser();
+                            showNotify('Database imported successfully!');
+                        } catch (error) {
+                            showNotify('Failed to import data. Invalid JSON file.', 'error');
+                        }
+                    };
+                    reader.readAsText(file);
+                };
+
+                const getInitialData = (type) => {
+                    if (type === 'hotel') return { name: '', location: '', star: '3', price: null, mealPrice: null };
+                    if (type === 'tour') return { name: '', location: '', joinPrice: null, ticketOnlyPrice: null, privateCarPrice: null, privateVanPrice: null, privateBusPrice: null };
+                    if (type === 'transfer') return { name: '', location: '', carPrice: null, vanPrice: null, busPrice: null };
+                    if (type === 'extra') return { name: '', serviceType: 'Guide', price: null };
+                    return {};
+                };
+
+                const openModal = (type) => {
+                    modal.value.type = type;
+                    modal.value.isEdit = false;
+                    modal.value.editId = null;
+                    modal.value.data = getInitialData(type);
+                    modal.value.show = true;
+                };
+
+                const editItem = (type, id) => {
+                    modal.value.type = type;
+                    modal.value.isEdit = true;
+                    modal.value.editId = id;
+                    
+                    let list = type === 'hotel' ? hotels.value : (type === 'tour' ? tours.value : (type === 'transfer' ? transfers.value : extras.value));
+                    const item = list.find(i => i.id === id);
+                    modal.value.data = JSON.parse(JSON.stringify(item)); // deep copy
+                    modal.value.show = true;
+                };
+
+                const deleteItem = (type, id) => {
+                    if(!confirm('Are you sure you want to delete this item?')) return;
+                    
+                    if (type === 'hotel') {
+                        hotels.value = hotels.value.filter(i => i.id !== id);
+                    } else if (type === 'tour') {
+                        tours.value = tours.value.filter(i => i.id !== id);
+                    } else if (type === 'transfer') {
+                        transfers.value = transfers.value.filter(i => i.id !== id);
+                    } else {
+                        extras.value = extras.value.filter(i => i.id !== id);
+                    }
+                    saveToBrowser();
+                    showNotify('Item deleted successfully!');
+                };
+
+                const closeModal = () => {
+                    modal.value.show = false;
+                };
+
+                const saveItem = () => {
+                    if (!modal.value.data.name || (modal.value.type !== 'tour' && modal.value.type !== 'transfer' && !modal.value.data.price)) {
+                        alert("Please fill in all required fields.");
+                        return;
+                    }
+
+                    const data = { ...modal.value.data };
+                    if (data.price !== undefined) data.price = Number(data.price);
+                    if (data.mealPrice) data.mealPrice = Number(data.mealPrice);
+                    if (data.joinPrice) data.joinPrice = Number(data.joinPrice);
+                    if (data.ticketOnlyPrice) data.ticketOnlyPrice = Number(data.ticketOnlyPrice);
+                    if (data.privateCarPrice) data.privateCarPrice = Number(data.privateCarPrice);
+                    if (data.privateVanPrice) data.privateVanPrice = Number(data.privateVanPrice);
+                    if (data.privateBusPrice) data.privateBusPrice = Number(data.privateBusPrice);
+                    if (data.carPrice) data.carPrice = Number(data.carPrice);
+                    if (data.vanPrice) data.vanPrice = Number(data.vanPrice);
+                    if (data.busPrice) data.busPrice = Number(data.busPrice);
+
+                    if (modal.value.type === 'hotel') {
+                        if (modal.value.isEdit) {
+                            const idx = hotels.value.findIndex(i => i.id === modal.value.editId);
+                            hotels.value[idx] = data;
+                        } else {
+                            data.id = 'h_' + Date.now();
+                            hotels.value.push(data);
+                        }
+                    } else if (modal.value.type === 'tour') {
+                        if (modal.value.isEdit) {
+                            const idx = tours.value.findIndex(i => i.id === modal.value.editId);
+                            tours.value[idx] = data;
+                        } else {
+                            data.id = 't_' + Date.now();
+                            tours.value.push(data);
+                        }
+                    } else if (modal.value.type === 'transfer') {
+                        if (modal.value.isEdit) {
+                            const idx = transfers.value.findIndex(i => i.id === modal.value.editId);
+                            transfers.value[idx] = data;
+                        } else {
+                            data.id = 'tr_' + Date.now();
+                            transfers.value.push(data);
+                        }
+                    } else if (modal.value.type === 'extra') {
+                        if (modal.value.isEdit) {
+                            const idx = extras.value.findIndex(i => i.id === modal.value.editId);
+                            extras.value[idx] = data;
+                        } else {
+                            data.id = 'ex_' + Date.now();
+                            extras.value.push(data);
+                        }
+                    }
+
+                    saveToBrowser();
+                    closeModal();
+                };
+
+                return {
+                    activeTab, hotels, tours, transfers, extras,
+                    searchHotels, searchTours, searchTransfers, searchExtras,
+                    filteredHotels, filteredTours, filteredTransfers, filteredExtras,
+                    notification, modal, modalTitle, modalHeaderClass, modalSubmitClass,
+                    openModal, editItem, deleteItem, closeModal, saveItem,
+                    saveToBrowser, exportDatabase, importDatabase
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

@@ -42,12 +42,17 @@
     <!-- Top Action Section -->
     <div class="flex flex-col md:flex-row justify-center items-center gap-4 mb-8 pb-6 border-b border-gray-200">
         <button onclick="document.getElementById('importFile').click()" class="py-2 px-6 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition">
-            Import Data
+            Import Project
         </button>
         <input type="file" id="importFile" style="display: none;" accept=".json" onchange="handleImport(event)">
         <button onclick="exportData()" class="py-2 px-6 bg-black text-white font-semibold rounded-lg shadow-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition">
-            Export Data
+            Export Project
         </button>
+        <div class="border-l border-gray-300 h-10 mx-2"></div>
+        <button onclick="document.getElementById('importMasterDbFile').click()" class="py-2 px-6 bg-purple-600 text-white font-semibold rounded-lg shadow-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition">
+            Import Master DB JSON
+        </button>
+        <input type="file" id="importMasterDbFile" style="display: none;" accept=".json" onchange="importMasterDatabase(event)">
         <div class="flex items-center">
              <button onclick="document.getElementById('logoUpload').click()" class="py-2 px-6 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition">
                 Upload Logo
@@ -152,6 +157,59 @@
         </div>
     </div>
 
+    <!-- Additional Services -->
+    <div class="bg-indigo-50 p-6 rounded-lg border border-indigo-200 mb-6">
+        <h2 class="text-xl font-semibold text-gray-700 border-b pb-2 mb-4">Additional Services (Optional)</h2>
+        <p class="text-sm text-indigo-700 mb-4">These total costs are divided by the Adult Count (No. of People Hotel) and added to the Adult per-person base cost before markup.</p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Guide -->
+            <div class="bg-white p-3 rounded shadow-sm border border-indigo-100">
+                <label class="block font-bold text-gray-700 mb-2 border-b pb-1">Tour Guide</label>
+                <div class="flex gap-2">
+                    <div class="flex-1">
+                        <label class="block text-xs text-gray-500 mb-1">Fee per Day (THB)</label>
+                        <select id="guideDbSelect" onchange="fillExtraFromDb('guide')" class="w-full text-xs p-1 mb-1 border border-indigo-200 rounded bg-indigo-50"><option value="">- Load -</option></select>
+                        <input type="number" id="guide_price_per_day" class="w-full p-2 border rounded focus:ring-2 focus:ring-indigo-500" placeholder="e.g. 2000">
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-xs text-gray-500 mb-1">Number of Days</label>
+                        <input type="number" id="guide_days" class="w-full p-2 border rounded focus:ring-2 focus:ring-indigo-500" placeholder="e.g. 3">
+                    </div>
+                </div>
+            </div>
+            <!-- Water -->
+            <div class="bg-white p-3 rounded shadow-sm border border-indigo-100">
+                <label class="block font-bold text-gray-700 mb-2 border-b pb-1">Water Bottles (Group)</label>
+                <div class="flex gap-2">
+                    <div class="flex-1">
+                        <label class="block text-xs text-gray-500 mb-1">Total Cost / Day (THB)</label>
+                        <select id="waterDbSelect" onchange="fillExtraFromDb('water')" class="w-full text-xs p-1 mb-1 border border-indigo-200 rounded bg-indigo-50"><option value="">- Load -</option></select>
+                        <input type="number" id="water_price_per_day" class="w-full p-2 border rounded focus:ring-2 focus:ring-indigo-500" placeholder="e.g. 100">
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-xs text-gray-500 mb-1">Number of Days</label>
+                        <input type="number" id="water_days" class="w-full p-2 border rounded focus:ring-2 focus:ring-indigo-500" placeholder="e.g. 3">
+                    </div>
+                </div>
+            </div>
+            <!-- Meals -->
+            <div class="bg-white p-3 rounded shadow-sm border border-indigo-100">
+                <label class="block font-bold text-gray-700 mb-2 border-b pb-1">Additional Meals (Group)</label>
+                <div class="flex gap-2">
+                    <div class="flex-1">
+                        <label class="block text-xs text-gray-500 mb-1">Total Cost / Day (THB)</label>
+                        <select id="mealDbSelect" onchange="fillExtraFromDb('meal')" class="w-full text-xs p-1 mb-1 border border-indigo-200 rounded bg-indigo-50"><option value="">- Load -</option></select>
+                        <input type="number" id="meal_price_per_day" class="w-full p-2 border rounded focus:ring-2 focus:ring-indigo-500" placeholder="e.g. 1500">
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-xs text-gray-500 mb-1">Number of Days</label>
+                        <input type="number" id="meal_days" class="w-full p-2 border rounded focus:ring-2 focus:ring-indigo-500" placeholder="e.g. 2">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Action Buttons -->
     <div class="flex flex-col md:flex-row gap-4">
         <button onclick="calculate()" class="w-full py-3 px-4 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-transform transform hover:scale-105">
@@ -175,19 +233,25 @@
                         <p class="font-bold text-gray-700">Adult</p>
                         <p class="text-xs text-gray-500 mb-1">Markup: <span id="adult_markup_3star"></span></p>
                         <p class="flex justify-between"><span>THB:</span><strong id="adult_thb_3star"></strong></p>
+                        <p class="flex justify-between"><span>USD:</span><strong id="adult_usd_3star" class="text-gray-700"></strong></p>
                         <p class="flex justify-between"><span>LKR:</span><strong id="adult_lkr_3star" class="text-blue-700"></strong></p>
+                        <p class="flex justify-between mt-1 pt-1 border-t border-gray-100"><span>Final LKR:</span><strong id="adult_final_lkr_3star" class="text-red-600"></strong></p>
                     </div>
                     <div class="bg-white p-3 rounded shadow-sm">
                         <p class="font-bold text-gray-700">Child (Extra Bed)</p>
                         <p class="text-xs text-gray-500 mb-1">Markup: <span id="child_extra_markup_3star"></span></p>
                         <p class="flex justify-between"><span>THB:</span><strong id="child_extra_thb_3star"></strong></p>
+                        <p class="flex justify-between"><span>USD:</span><strong id="child_extra_usd_3star" class="text-gray-700"></strong></p>
                         <p class="flex justify-between"><span>LKR:</span><strong id="child_extra_lkr_3star" class="text-green-700"></strong></p>
+                        <p class="flex justify-between mt-1 pt-1 border-t border-gray-100"><span>Final LKR:</span><strong id="child_final_lkr_3star" class="text-red-600"></strong></p>
                     </div>
                     <div class="bg-white p-3 rounded shadow-sm">
                         <p class="font-bold text-gray-700">Child (Sharing Bed)</p>
                         <p class="text-xs text-gray-500 mb-1">Markup: <span id="child_sharing_markup_3star"></span></p>
                         <p class="flex justify-between"><span>THB:</span><strong id="child_sharing_thb_3star"></strong></p>
+                        <p class="flex justify-between"><span>USD:</span><strong id="child_sharing_usd_3star" class="text-gray-700"></strong></p>
                         <p class="flex justify-between"><span>LKR:</span><strong id="child_sharing_lkr_3star" class="text-purple-700"></strong></p>
+                        <p class="flex justify-between mt-1 pt-1 border-t border-gray-100"><span>Final LKR:</span><strong id="child_sharing_final_lkr_3star" class="text-red-600"></strong></p>
                     </div>
                 </div>
             </div>
@@ -200,19 +264,25 @@
                         <p class="font-bold text-gray-700">Adult</p>
                         <p class="text-xs text-gray-500 mb-1">Markup: <span id="adult_markup_4star"></span></p>
                         <p class="flex justify-between"><span>THB:</span><strong id="adult_thb_4star"></strong></p>
+                        <p class="flex justify-between"><span>USD:</span><strong id="adult_usd_4star" class="text-gray-700"></strong></p>
                         <p class="flex justify-between"><span>LKR:</span><strong id="adult_lkr_4star" class="text-blue-700"></strong></p>
+                        <p class="flex justify-between mt-1 pt-1 border-t border-gray-100"><span>Final LKR:</span><strong id="adult_final_lkr_4star" class="text-red-600"></strong></p>
                     </div>
                     <div class="bg-white p-3 rounded shadow-sm">
                         <p class="font-bold text-gray-700">Child (Extra Bed)</p>
                         <p class="text-xs text-gray-500 mb-1">Markup: <span id="child_extra_markup_4star"></span></p>
                         <p class="flex justify-between"><span>THB:</span><strong id="child_extra_thb_4star"></strong></p>
+                        <p class="flex justify-between"><span>USD:</span><strong id="child_extra_usd_4star" class="text-gray-700"></strong></p>
                         <p class="flex justify-between"><span>LKR:</span><strong id="child_extra_lkr_4star" class="text-green-700"></strong></p>
+                        <p class="flex justify-between mt-1 pt-1 border-t border-gray-100"><span>Final LKR:</span><strong id="child_final_lkr_4star" class="text-red-600"></strong></p>
                     </div>
                     <div class="bg-white p-3 rounded shadow-sm">
                         <p class="font-bold text-gray-700">Child (Sharing Bed)</p>
                         <p class="text-xs text-gray-500 mb-1">Markup: <span id="child_sharing_markup_4star"></span></p>
                         <p class="flex justify-between"><span>THB:</span><strong id="child_sharing_thb_4star"></strong></p>
+                        <p class="flex justify-between"><span>USD:</span><strong id="child_sharing_usd_4star" class="text-gray-700"></strong></p>
                         <p class="flex justify-between"><span>LKR:</span><strong id="child_sharing_lkr_4star" class="text-purple-700"></strong></p>
+                        <p class="flex justify-between mt-1 pt-1 border-t border-gray-100"><span>Final LKR:</span><strong id="child_sharing_final_lkr_4star" class="text-red-600"></strong></p>
                     </div>
                 </div>
             </div>
@@ -224,19 +294,25 @@
                         <p class="font-bold text-gray-700">Adult</p>
                         <p class="text-xs text-gray-500 mb-1">Markup: <span id="adult_markup_5star"></span></p>
                         <p class="flex justify-between"><span>THB:</span><strong id="adult_thb_5star"></strong></p>
+                        <p class="flex justify-between"><span>USD:</span><strong id="adult_usd_5star" class="text-gray-700"></strong></p>
                         <p class="flex justify-between"><span>LKR:</span><strong id="adult_lkr_5star" class="text-blue-700"></strong></p>
+                        <p class="flex justify-between mt-1 pt-1 border-t border-gray-100"><span>Final LKR:</span><strong id="adult_final_lkr_5star" class="text-red-600"></strong></p>
                     </div>
                     <div class="bg-white p-3 rounded shadow-sm">
                         <p class="font-bold text-gray-700">Child (Extra Bed)</p>
                         <p class="text-xs text-gray-500 mb-1">Markup: <span id="child_extra_markup_5star"></span></p>
                         <p class="flex justify-between"><span>THB:</span><strong id="child_extra_thb_5star"></strong></p>
+                        <p class="flex justify-between"><span>USD:</span><strong id="child_extra_usd_5star" class="text-gray-700"></strong></p>
                         <p class="flex justify-between"><span>LKR:</span><strong id="child_extra_lkr_5star" class="text-green-700"></strong></p>
+                        <p class="flex justify-between mt-1 pt-1 border-t border-gray-100"><span>Final LKR:</span><strong id="child_final_lkr_5star" class="text-red-600"></strong></p>
                     </div>
                     <div class="bg-white p-3 rounded shadow-sm">
                         <p class="font-bold text-gray-700">Child (Sharing Bed)</p>
                         <p class="text-xs text-gray-500 mb-1">Markup: <span id="child_sharing_markup_5star"></span></p>
                         <p class="flex justify-between"><span>THB:</span><strong id="child_sharing_thb_5star"></strong></p>
+                        <p class="flex justify-between"><span>USD:</span><strong id="child_sharing_usd_5star" class="text-gray-700"></strong></p>
                         <p class="flex justify-between"><span>LKR:</span><strong id="child_sharing_lkr_5star" class="text-purple-700"></strong></p>
+                        <p class="flex justify-between mt-1 pt-1 border-t border-gray-100"><span>Final LKR:</span><strong id="child_sharing_final_lkr_5star" class="text-red-600"></strong></p>
                     </div>
                 </div>
             </div>
@@ -244,25 +320,31 @@
             <!-- Custom / Mixed Option -->
             <div id="result_card_mix" class="bg-gray-50 border border-gray-300 p-4 rounded-lg relative">
                 <div class="absolute top-0 right-0 bg-gray-200 text-xs px-2 py-1 rounded-bl-lg text-gray-600 font-bold">All Checked Hotels</div>
-                <h3 class="text-xl font-bold text-gray-800 mb-4 text-center border-b pb-2">Mixed Package</h3>
+                <h3 id="mix_package_title" class="text-xl font-bold text-gray-800 mb-4 text-center border-b pb-2">Mixed Package</h3>
                 <div class="space-y-4">
                     <div class="bg-white p-3 rounded shadow-sm">
                         <p class="font-bold text-gray-700">Adult</p>
                         <p class="text-xs text-gray-500 mb-1">Markup: <span id="adult_markup_mix"></span></p>
                         <p class="flex justify-between"><span>THB:</span><strong id="adult_thb_mix"></strong></p>
+                        <p class="flex justify-between"><span>USD:</span><strong id="adult_usd_mix" class="text-gray-700"></strong></p>
                         <p class="flex justify-between"><span>LKR:</span><strong id="adult_lkr_mix" class="text-blue-700"></strong></p>
+                        <p class="flex justify-between mt-1 pt-1 border-t border-gray-100"><span>Final LKR:</span><strong id="adult_final_lkr_mix" class="text-red-600"></strong></p>
                     </div>
                     <div class="bg-white p-3 rounded shadow-sm">
                         <p class="font-bold text-gray-700">Child (Extra Bed)</p>
                         <p class="text-xs text-gray-500 mb-1">Markup: <span id="child_extra_markup_mix"></span></p>
                         <p class="flex justify-between"><span>THB:</span><strong id="child_extra_thb_mix"></strong></p>
+                        <p class="flex justify-between"><span>USD:</span><strong id="child_extra_usd_mix" class="text-gray-700"></strong></p>
                         <p class="flex justify-between"><span>LKR:</span><strong id="child_extra_lkr_mix" class="text-green-700"></strong></p>
+                        <p class="flex justify-between mt-1 pt-1 border-t border-gray-100"><span>Final LKR:</span><strong id="child_final_lkr_mix" class="text-red-600"></strong></p>
                     </div>
                     <div class="bg-white p-3 rounded shadow-sm">
                         <p class="font-bold text-gray-700">Child (Sharing Bed)</p>
                         <p class="text-xs text-gray-500 mb-1">Markup: <span id="child_sharing_markup_mix"></span></p>
                         <p class="flex justify-between"><span>THB:</span><strong id="child_sharing_thb_mix"></strong></p>
+                        <p class="flex justify-between"><span>USD:</span><strong id="child_sharing_usd_mix" class="text-gray-700"></strong></p>
                         <p class="flex justify-between"><span>LKR:</span><strong id="child_sharing_lkr_mix" class="text-purple-700"></strong></p>
+                        <p class="flex justify-between mt-1 pt-1 border-t border-gray-100"><span>Final LKR:</span><strong id="child_sharing_final_lkr_mix" class="text-red-600"></strong></p>
                     </div>
                 </div>
             </div>
@@ -271,14 +353,42 @@
 </div>
 
 <!-- Modals -->
-<div id="tourModal" class="modal-backdrop"><div class="modal-content"><h3 id="tourModalTitle" class="text-2xl font-bold mb-4">Add New Tour</h3><div class="space-y-4"><input type="text" id="newTourName" placeholder="Tour Name" class="w-full p-3 border rounded-md"><input type="number" id="newTourPrice" placeholder="Tour Price (THB)" class="w-full p-3 border rounded-md"><input type="number" id="newTourTransferPrice" placeholder="Specific Transfer Price (optional)" class="w-full p-3 border rounded-md"></div><div class="flex gap-4 mt-6"><button id="saveTourButton" onclick="saveTour()" class="flex-1 py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700">Add Tour</button><button onclick="closeModal('tourModal')" class="flex-1 py-2 px-4 bg-gray-300 rounded-md hover:bg-gray-400">Cancel</button></div></div></div>
-<div id="transferModal" class="modal-backdrop"><div class="modal-content"><h3 id="transferModalTitle" class="text-2xl font-bold mb-4">Add New Transfer</h3><div class="space-y-4"><input type="text" id="newTransferName" placeholder="Transfer Name" class="w-full p-3 border rounded-md"><input type="number" id="newTransferPrice" placeholder="Transfer Price (THB)" class="w-full p-3 border rounded-md"></div><div class="flex gap-4 mt-6"><button id="saveTransferButton" onclick="saveTransfer()" class="flex-1 py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700">Add Transfer</button><button onclick="closeModal('transferModal')" class="flex-1 py-2 px-4 bg-gray-300 rounded-md hover:bg-gray-400">Cancel</button></div></div></div>
+<div id="tourModal" class="modal-backdrop"><div class="modal-content"><h3 id="tourModalTitle" class="text-2xl font-bold mb-4">Add New Tour</h3>
+<select id="tourCityFilter" onchange="populateDbDropdowns()" class="w-full p-2 border border-gray-300 rounded-md mb-2 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+    <option value="">-- All Cities --</option>
+</select>
+<select id="tourDbSelect" onchange="fillTourFromDb()" class="w-full p-2 border border-purple-300 rounded-md mb-4 bg-purple-50 text-purple-900 font-bold focus:outline-none focus:ring-2 focus:ring-purple-500">
+    <option value="">-- Select from Master Database --</option>
+</select>
+<div class="space-y-4"><input type="text" id="newTourName" placeholder="Tour Name" class="w-full p-3 border rounded-md"><input type="number" id="newTourPrice" placeholder="Per Person Price (THB) [Join or Ticket]" class="w-full p-3 border rounded-md"><input type="number" id="newTourTransferPrice" placeholder="Fixed Transfer Price (THB) [Private]" class="w-full p-3 border rounded-md"></div><div class="flex gap-4 mt-6"><button id="saveTourButton" onclick="saveTour()" class="flex-1 py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700">Add Tour</button><button onclick="closeModal('tourModal')" class="flex-1 py-2 px-4 bg-gray-300 rounded-md hover:bg-gray-400">Cancel</button></div></div></div>
+<div id="transferModal" class="modal-backdrop"><div class="modal-content"><h3 id="transferModalTitle" class="text-2xl font-bold mb-4">Add New Transfer</h3>
+<select id="transferCityFilter" onchange="populateDbDropdowns()" class="w-full p-2 border border-gray-300 rounded-md mb-2 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+    <option value="">-- All Cities --</option>
+</select>
+<select id="transferDbSelect" onchange="fillTransferFromDb()" class="w-full p-2 border border-orange-300 rounded-md mb-4 bg-orange-50 text-orange-900 font-bold focus:outline-none focus:ring-2 focus:ring-orange-500">
+    <option value="">-- Select from Master Database --</option>
+</select>
+<div class="space-y-4"><input type="text" id="newTransferName" placeholder="Transfer Name" class="w-full p-3 border rounded-md"><input type="number" id="newTransferPrice" placeholder="Transfer Price (THB)" class="w-full p-3 border rounded-md"></div><div class="flex gap-4 mt-6"><button id="saveTransferButton" onclick="saveTransfer()" class="flex-1 py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700">Add Transfer</button><button onclick="closeModal('transferModal')" class="flex-1 py-2 px-4 bg-gray-300 rounded-md hover:bg-gray-400">Cancel</button></div></div></div>
 <div id="cityModal" class="modal-backdrop"><div class="modal-content overflow-y-auto max-h-[90vh]"><h3 id="cityModalTitle" class="text-2xl font-bold mb-4">Add New City Stay</h3><div class="space-y-4">
+    <label class="block text-sm font-bold text-gray-600 mb-1">Select City from Database (or type manually below)</label>
+    <select id="cityNameDbSelect" onchange="fillCityNameFromDb()" class="w-full p-2 border border-teal-300 rounded-md mb-2 bg-teal-50 text-teal-900 font-bold focus:outline-none focus:ring-2 focus:ring-teal-500">
+        <option value="">-- Select City from Database --</option>
+    </select>
     <input type="text" id="newCityName" placeholder="City Name (e.g. Bangkok)" class="w-full p-3 border rounded-md font-bold bg-gray-50">
-    <input type="number" id="newCityNights" placeholder="Number of Nights" class="w-full p-3 border rounded-md">
+    <div class="flex items-center mt-2 mb-2">
+        <input type="checkbox" id="newCityIsSplit" onchange="toggleCitySplit()" class="h-4 w-4 mr-2">
+        <label for="newCityIsSplit" class="text-sm font-bold text-gray-700">Split Nights (Different hotels in same city)</label>
+    </div>
+    <div id="newCityNightsContainer">
+        <input type="number" id="newCityNights" placeholder="Total Number of Nights" class="w-full p-3 border rounded-md">
+    </div>
     <div class="border p-3 rounded-md bg-blue-50">
         <label class="block text-sm font-bold text-blue-800 mb-2">3-Star Option</label>
+        <select id="city3StarDbSelect" onchange="fillHotelFromDb(3)" class="w-full p-2 border border-blue-300 rounded-md mb-2 bg-white text-sm">
+            <option value="">-- Search 3* Database --</option>
+        </select>
         <input type="text" id="newCity3StarName" placeholder="3* Hotel Name" class="w-full p-2 border rounded-md mb-2">
+        <input type="number" id="newCity3StarNights" placeholder="Nights in 3* (if split)" class="w-full p-2 border rounded-md mb-2 hidden split-night-input">
         <div class="flex gap-2">
             <input type="number" id="newCity3StarPrice" placeholder="Hotel Price/Night (THB)" class="w-full p-2 border rounded-md">
             <input type="number" id="newCity3StarMeal" placeholder="Child Meal Price/Night (THB)" class="w-full p-2 border rounded-md">
@@ -286,26 +396,35 @@
     </div>
     <div class="border p-3 rounded-md bg-amber-50">
         <label class="block text-sm font-bold text-amber-800 mb-2">4-Star Option</label>
+        <select id="city4StarDbSelect" onchange="fillHotelFromDb(4)" class="w-full p-2 border border-amber-300 rounded-md mb-2 bg-white text-sm">
+            <option value="">-- Search 4* Database --</option>
+        </select>
         <input type="text" id="newCity4StarName" placeholder="4* Hotel Name" class="w-full p-2 border rounded-md mb-2">
+        <input type="number" id="newCity4StarNights" placeholder="Nights in 4* (if split)" class="w-full p-2 border rounded-md mb-2 hidden split-night-input">
         <div class="flex gap-2">
             <input type="number" id="newCity4StarPrice" placeholder="Hotel Price/Night (THB)" class="w-full p-2 border rounded-md">
             <input type="number" id="newCity4StarMeal" placeholder="Child Meal Price/Night (THB)" class="w-full p-2 border rounded-md">
         </div>
     </div>
     <div class="border p-3 rounded-md bg-purple-50">
-        <label class="block text-sm font-bold text-purple-800 mb-2">5-Star Option</label>
+        <label class="block text-sm font-bold text-purple-800 mb-2">5-Star Option (Optional)</label>
+        <select id="city5StarDbSelect" onchange="fillHotelFromDb(5)" class="w-full p-2 border border-purple-300 rounded-md mb-2 bg-white text-sm">
+            <option value="">-- Search 5* Database --</option>
+        </select>
         <input type="text" id="newCity5StarName" placeholder="5* Hotel Name" class="w-full p-2 border rounded-md mb-2">
+        <input type="number" id="newCity5StarNights" placeholder="Nights in 5* (if split)" class="w-full p-2 border rounded-md mb-2 hidden split-night-input">
         <div class="flex gap-2">
             <input type="number" id="newCity5StarPrice" placeholder="Hotel Price/Night (THB)" class="w-full p-2 border rounded-md">
             <input type="number" id="newCity5StarMeal" placeholder="Child Meal Price/Night (THB)" class="w-full p-2 border rounded-md">
         </div>
     </div>
-    <div class="border p-3 rounded-md bg-gray-50">
+    <div class="border p-3 rounded-md bg-gray-50" id="mixPrefContainer">
         <label class="block text-sm font-bold text-gray-800 mb-2">Mixed Package Preference</label>
         <select id="newCityMixPref" class="w-full p-2 border rounded-md">
-            <option value="3">Use 3-Star Hotel</option>
+            <option value="3">Use 3-Star Hotel (Default)</option>
             <option value="4">Use 4-Star Hotel</option>
             <option value="5">Use 5-Star Hotel</option>
+            <option value="none">None (Disable Mixed Package)</option>
         </select>
     </div>
 </div><div class="flex gap-4 mt-6"><button id="saveCityButton" onclick="saveCity()" class="flex-1 py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700">Add City</button><button onclick="closeModal('cityModal')" class="flex-1 py-2 px-4 bg-gray-300 rounded-md hover:bg-gray-400">Cancel</button></div></div></div>
@@ -321,9 +440,278 @@
     let logoDataUrl = null;
     const allInputIds = [
         'num_people_transfer', 'num_people_hotel',
-        'markup', 'lkr_rate', 'usd_divisor', 'hotel_nights_for_meal', 'meal_price_3star', 'meal_price_4star',
-        'adult_manual_markup', 'child_extra_bed_manual_markup', 'child_sharing_manual_markup'
+        'markup', 'lkr_rate', 'usd_divisor',
+        'adult_manual_markup', 'child_extra_bed_manual_markup', 'child_sharing_manual_markup',
+        'guide_price_per_day', 'guide_days',
+        'water_price_per_day', 'water_days',
+        'meal_price_per_day', 'meal_days'
     ];
+
+    // --- DATABASE INTEGRATION ---
+    let masterDb = { hotels: [], tours: [], transfers: [], extras: [] };
+
+    async function loadMasterDatabase() {
+        let fetchedDb = { hotels: [], tours: [], transfers: [], extras: [] };
+        try {
+            const response = await fetch('./master_db.json?t=' + new Date().getTime());
+            if (response.ok) {
+                const data = await response.json();
+                fetchedDb = { 
+                    hotels: data.hotels || [], 
+                    tours: data.tours || [], 
+                    transfers: data.transfers || [], 
+                    extras: data.extras || [] 
+                };
+            }
+        } catch(e) {
+            console.log("master_db.json not found via fetch.");
+        }
+
+        const saved = localStorage.getItem('SLW_Master_Inventory');
+        if (saved) {
+            try {
+                const localDb = JSON.parse(saved);
+                masterDb = {
+                    hotels: localDb.hotels || fetchedDb.hotels,
+                    tours: localDb.tours || fetchedDb.tours,
+                    transfers: localDb.transfers || fetchedDb.transfers,
+                    extras: localDb.extras || fetchedDb.extras
+                };
+            } catch(e) {
+                console.error('Failed to parse local database');
+                masterDb = fetchedDb;
+            }
+        } else {
+            masterDb = fetchedDb;
+        }
+        
+        populateDbDropdowns();
+    }
+
+    function importMasterDatabase(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const parsed = JSON.parse(e.target.result);
+                // Ensure it's a valid master DB format
+                if (parsed.hotels || parsed.tours || parsed.transfers) {
+                    masterDb = { 
+                        hotels: parsed.hotels || [], 
+                        tours: parsed.tours || [], 
+                        transfers: parsed.transfers || [], 
+                        extras: parsed.extras || [] 
+                    };
+                    localStorage.setItem('SLW_Master_Inventory', JSON.stringify(masterDb));
+                    populateDbDropdowns();
+                    
+                    const notif = document.getElementById('notification');
+                    notif.innerText = "Master Database Imported Successfully!";
+                    notif.className = "fixed top-5 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg transition-opacity duration-300 opacity-100 z-50";
+                    setTimeout(() => { notif.className = "fixed top-5 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg transition-opacity duration-300 opacity-0 z-50"; }, 3000);
+                }
+            } catch(err) {
+                alert("Failed to parse Master Database JSON.");
+            }
+        };
+        reader.readAsText(file);
+        event.target.value = ''; // Reset input
+    }
+
+    function populateCityFilters() {
+        const tourCities = [...new Set((masterDb.tours || []).map(t => t.location).filter(Boolean))].sort();
+        const transferCities = [...new Set((masterDb.transfers || []).map(t => t.location).filter(Boolean))].sort();
+        
+        const tourFilterSelect = document.getElementById('tourCityFilter');
+        if (tourFilterSelect) {
+            const currentVal = tourFilterSelect.value;
+            let html = '<option value="">-- All Cities --</option>';
+            tourCities.forEach(c => html += `<option value="${c}">${c}</option>`);
+            tourFilterSelect.innerHTML = html;
+            tourFilterSelect.value = currentVal;
+        }
+
+        const transferFilterSelect = document.getElementById('transferCityFilter');
+        if (transferFilterSelect) {
+            const currentVal = transferFilterSelect.value;
+            let html = '<option value="">-- All Cities --</option>';
+            transferCities.forEach(c => html += `<option value="${c}">${c}</option>`);
+            transferFilterSelect.innerHTML = html;
+            transferFilterSelect.value = currentVal;
+        }
+    }
+
+    function populateDbDropdowns() {
+        populateCityFilters();
+
+        const selectedTourCity = document.getElementById('tourCityFilter') ? document.getElementById('tourCityFilter').value : '';
+        const selectedTransferCity = document.getElementById('transferCityFilter') ? document.getElementById('transferCityFilter').value : '';
+
+        // Tours
+        const tourSelect = document.getElementById('tourDbSelect');
+        if (tourSelect) {
+            let html = '<option value="">-- Select from Master Database --</option>';
+            (masterDb.tours || [])
+                .filter(t => !selectedTourCity || t.location === selectedTourCity)
+                .forEach(t => {
+                if (t.joinPrice) {
+                    const data = { type: 'join', name: t.name + ' (Join Tour)', price: t.joinPrice, transfer: 0 };
+                    html += `<option value='${JSON.stringify(data)}'>${t.name} (Join Tour) - ${t.joinPrice} THB</option>`;
+                }
+                if (t.ticketOnlyPrice || t.privateCarPrice || t.privateVanPrice || t.privateBusPrice || t.privateTransferPrice) {
+                    if (t.privateCarPrice || (!t.privateVanPrice && !t.privateBusPrice && t.privateTransferPrice)) {
+                        const carPrice = t.privateCarPrice || t.privateTransferPrice || 0;
+                        const data = { type: 'private', name: t.name + ' (Private - Car)', price: t.ticketOnlyPrice || 0, transfer: carPrice };
+                        html += `<option value='${JSON.stringify(data)}'>${t.name} (Private - Car) - Ticket: ${t.ticketOnlyPrice || 0}, Transfer: ${carPrice}</option>`;
+                    }
+                    if (t.privateVanPrice) {
+                        const data = { type: 'private', name: t.name + ' (Private - Van)', price: t.ticketOnlyPrice || 0, transfer: t.privateVanPrice };
+                        html += `<option value='${JSON.stringify(data)}'>${t.name} (Private - Van) - Ticket: ${t.ticketOnlyPrice || 0}, Transfer: ${t.privateVanPrice}</option>`;
+                    }
+                    if (t.privateBusPrice) {
+                        const data = { type: 'private', name: t.name + ' (Private - Bus)', price: t.ticketOnlyPrice || 0, transfer: t.privateBusPrice };
+                        html += `<option value='${JSON.stringify(data)}'>${t.name} (Private - Bus) - Ticket: ${t.ticketOnlyPrice || 0}, Transfer: ${t.privateBusPrice}</option>`;
+                    }
+                }
+            });
+            tourSelect.innerHTML = html;
+        }
+
+        // Transfers
+        const transferSelect = document.getElementById('transferDbSelect');
+        if (transferSelect) {
+            let html = '<option value="">-- Select from Master Database --</option>';
+            (masterDb.transfers || [])
+                .filter(t => !selectedTransferCity || t.location === selectedTransferCity)
+                .forEach(t => {
+                if (t.carPrice || (!t.vanPrice && !t.busPrice && t.price)) {
+                    const price = t.carPrice || t.price || 0;
+                    const name = t.name + (t.vehicleType && t.vehicleType !== 'Any' ? ` (${t.vehicleType})` : ' (Car)');
+                    const data = { name: name, price: price };
+                    html += `<option value='${JSON.stringify(data)}'>${name} - ${price} THB</option>`;
+                }
+                if (t.vanPrice) {
+                    const name = t.name + ' (Van)';
+                    const data = { name: name, price: t.vanPrice };
+                    html += `<option value='${JSON.stringify(data)}'>${name} - ${t.vanPrice} THB</option>`;
+                }
+                if (t.busPrice) {
+                    const name = t.name + ' (Bus)';
+                    const data = { name: name, price: t.busPrice };
+                    html += `<option value='${JSON.stringify(data)}'>${name} - ${t.busPrice} THB</option>`;
+                }
+            });
+            transferSelect.innerHTML = html;
+        }
+
+        // Hotels
+        [3, 4, 5].forEach(star => {
+            const select = document.getElementById('city' + star + 'StarDbSelect');
+            if (select) {
+                let html = `<option value="">-- Search ${star}* Database --</option>`;
+                (masterDb.hotels || []).filter(h => parseInt(h.star) === star).forEach(h => {
+                    const data = { name: h.name, price: h.price, meal: h.mealPrice || 0 };
+                    const locText = h.location ? ` [${h.location}]` : '';
+                    html += `<option value='${JSON.stringify(data)}'>${h.name}${locText} - ${h.price} THB</option>`;
+                });
+                select.innerHTML = html;
+            }
+        });
+
+        // City Names dropdown (unique city/location names from hotels)
+        const cityNameSelect = document.getElementById('cityNameDbSelect');
+        if (cityNameSelect) {
+            const hotelLocations = (masterDb.hotels || []).map(h => (h.location || '').trim()).filter(Boolean);
+            const tourLocations = (masterDb.tours || []).map(t => (t.location || '').trim()).filter(Boolean);
+            const transferLocations = (masterDb.transfers || []).map(t => (t.location || '').trim()).filter(Boolean);
+            const allCities = [...new Set([...hotelLocations, ...tourLocations, ...transferLocations])].sort();
+            let html = '<option value="">-- Select City from Database --</option>';
+            allCities.forEach(c => html += `<option value="${c}">${c}</option>`);
+            cityNameSelect.innerHTML = html;
+        }
+
+        // Extras
+        const populateExtra = (id, type) => {
+            const select = document.getElementById(id);
+            if (select) {
+                let html = `<option value="">- Load -</option>`;
+                (masterDb.extras || []).filter(e => e.serviceType === type).forEach(e => {
+                    html += `<option value='${e.price}'>${e.name} - ${e.price}</option>`;
+                });
+                select.innerHTML = html;
+            }
+        };
+        populateExtra('guideDbSelect', 'Guide');
+        populateExtra('waterDbSelect', 'Water');
+        populateExtra('mealDbSelect', 'Meal');
+    }
+
+    function fillExtraFromDb(type) {
+        const select = document.getElementById(type + 'DbSelect');
+        if (!select || !select.value) return;
+        document.getElementById(type + '_price_per_day').value = select.value;
+        if (typeof saveState === 'function') saveState();
+    }
+
+    function fillCityNameFromDb() {
+        const select = document.getElementById('cityNameDbSelect');
+        if (!select || !select.value) return;
+        const cityName = select.value;
+        document.getElementById('newCityName').value = cityName;
+
+        // Auto-fill hotel dropdowns for matching city
+        [3, 4, 5].forEach(star => {
+            const hotelSelect = document.getElementById('city' + star + 'StarDbSelect');
+            if (!hotelSelect) return;
+            const matchingHotel = (masterDb.hotels || []).find(h => parseInt(h.star) === star && (h.location || '').trim() === cityName);
+            if (matchingHotel) {
+                const data = { name: matchingHotel.name, price: matchingHotel.price, meal: matchingHotel.mealPrice || 0 };
+                // Find and select the matching option
+                for (let i = 0; i < hotelSelect.options.length; i++) {
+                    try {
+                        const optData = JSON.parse(hotelSelect.options[i].value);
+                        if (optData.name === matchingHotel.name && optData.price === matchingHotel.price) {
+                            hotelSelect.selectedIndex = i;
+                            fillHotelFromDb(star);
+                            break;
+                        }
+                    } catch(e) {}
+                }
+            }
+        });
+    }
+    function fillTourFromDb() {
+        const select = document.getElementById('tourDbSelect');
+        if (!select.value) return;
+        try {
+            const data = JSON.parse(select.value);
+            document.getElementById('newTourName').value = data.name;
+            document.getElementById('newTourPrice').value = data.price;
+            document.getElementById('newTourTransferPrice').value = data.transfer;
+        } catch(e) {}
+    }
+
+    function fillTransferFromDb() {
+        const select = document.getElementById('transferDbSelect');
+        if (!select.value) return;
+        try {
+            const data = JSON.parse(select.value);
+            document.getElementById('newTransferName').value = data.name;
+            document.getElementById('newTransferPrice').value = data.price;
+        } catch(e) {}
+    }
+
+    function fillHotelFromDb(star) {
+        const select = document.getElementById('city' + star + 'StarDbSelect');
+        if (!select.value) return;
+        try {
+            const data = JSON.parse(select.value);
+            document.getElementById('newCity' + star + 'StarName').value = data.name;
+            document.getElementById('newCity' + star + 'StarPrice').value = data.price;
+            document.getElementById('newCity' + star + 'StarMeal').value = data.meal;
+        } catch(e) {}
+    }
 
     // --- UI RENDERING ---
     function renderTours() {
@@ -406,15 +794,21 @@
             const index = availableCities.findIndex(c => c === city);
             const el = document.createElement('div');
             el.className = 'flex items-center justify-between bg-white p-2 rounded-md border';
-            const total3 = city.hotel3Price * city.numberOfNights;
-            const total4 = city.hotel4Price * city.numberOfNights;
-            const total5 = city.hotel5Price * city.numberOfNights;
-            const total3Meal = (city.hotel3Meal || 0) * city.numberOfNights;
-            const total4Meal = (city.hotel4Meal || 0) * city.numberOfNights;
-            const total5Meal = (city.hotel5Meal || 0) * city.numberOfNights;
-            const text3 = city.hotel3Name ? `3*: ${city.hotel3Name} (Hotel: ${city.hotel3Price}x${city.numberOfNights}N=${total3}) | Meal: ${city.hotel3Meal || 0}x${city.numberOfNights}N=${total3Meal}` : `3*: -`;
-            const text4 = city.hotel4Name ? `4*: ${city.hotel4Name} (Hotel: ${city.hotel4Price}x${city.numberOfNights}N=${total4}) | Meal: ${city.hotel4Meal || 0}x${city.numberOfNights}N=${total4Meal}` : `4*: -`;
-            const text5 = city.hotel5Name ? `5*: ${city.hotel5Name} (Hotel: ${city.hotel5Price}x${city.numberOfNights}N=${total5}) | Meal: ${city.hotel5Meal || 0}x${city.numberOfNights}N=${total5Meal}` : `5*: -`;
+            const total3 = city.isSplit ? city.hotel3Price * city.hotel3Nights : city.hotel3Price * city.numberOfNights;
+            const total4 = city.isSplit ? city.hotel4Price * city.hotel4Nights : city.hotel4Price * city.numberOfNights;
+            const total5 = city.isSplit ? city.hotel5Price * city.hotel5Nights : city.hotel5Price * city.numberOfNights;
+            
+            const n3 = city.isSplit ? city.hotel3Nights : city.numberOfNights;
+            const n4 = city.isSplit ? city.hotel4Nights : city.numberOfNights;
+            const n5 = city.isSplit ? city.hotel5Nights : city.numberOfNights;
+
+            const total3Meal = (city.hotel3Meal || 0) * n3;
+            const total4Meal = (city.hotel4Meal || 0) * n4;
+            const total5Meal = (city.hotel5Meal || 0) * n5;
+            
+            const text3 = city.hotel3Name ? `3*: ${city.hotel3Name} (Hotel: ${city.hotel3Price}x${n3}N=${total3}) | Meal: ${city.hotel3Meal || 0}x${n3}N=${total3Meal}` : `3*: -`;
+            const text4 = city.hotel4Name ? `4*: ${city.hotel4Name} (Hotel: ${city.hotel4Price}x${n4}N=${total4}) | Meal: ${city.hotel4Meal || 0}x${n4}N=${total4Meal}` : `4*: -`;
+            const text5 = city.hotel5Name ? `5*: ${city.hotel5Name} (Hotel: ${city.hotel5Price}x${n5}N=${total5}) | Meal: ${city.hotel5Meal || 0}x${n5}N=${total5Meal}` : `5*: -`;
             
             el.innerHTML = `
                 <div class="flex items-center flex-grow overflow-hidden mr-2">
@@ -436,6 +830,17 @@
     }
 
     // --- MODAL & ITEM MANAGEMENT ---
+    function toggleCitySplit() {
+        const isSplit = document.getElementById('newCityIsSplit').checked;
+        document.getElementById('newCityNightsContainer').style.display = isSplit ? 'none' : 'block';
+        document.getElementById('mixPrefContainer').style.display = isSplit ? 'none' : 'block';
+        const splitInputs = document.querySelectorAll('.split-night-input');
+        splitInputs.forEach(el => {
+            if (isSplit) el.classList.remove('hidden');
+            else el.classList.add('hidden');
+        });
+    }
+
     function openModal(modalId) { document.getElementById(modalId).style.display = 'flex'; }
     
     function closeModal(modalId) {
@@ -461,8 +866,14 @@
             const saveButton = document.getElementById('saveCityButton');
             saveButton.innerText = 'Add City';
             saveButton.onclick = () => saveCity();
+            document.getElementById('cityNameDbSelect').value = '';
             document.getElementById('newCityName').value = '';
             document.getElementById('newCityNights').value = '';
+            document.getElementById('newCityIsSplit').checked = false;
+            document.getElementById('newCity3StarNights').value = '';
+            document.getElementById('newCity4StarNights').value = '';
+            document.getElementById('newCity5StarNights').value = '';
+            toggleCitySplit();
             document.getElementById('newCity3StarName').value = '';
             document.getElementById('newCity3StarPrice').value = '';
             document.getElementById('newCity3StarMeal').value = '';
@@ -499,7 +910,19 @@
         } else if (type === 'city') {
             const city = availableCities[index];
             document.getElementById('newCityName').value = city.name;
-            document.getElementById('newCityNights').value = city.numberOfNights;
+            
+            if (city.isSplit) {
+                document.getElementById('newCityIsSplit').checked = true;
+                document.getElementById('newCity3StarNights').value = city.hotel3Nights || '';
+                document.getElementById('newCity4StarNights').value = city.hotel4Nights || '';
+                document.getElementById('newCity5StarNights').value = city.hotel5Nights || '';
+            } else {
+                document.getElementById('newCityIsSplit').checked = false;
+                document.getElementById('newCityNights').value = city.numberOfNights;
+                document.getElementById('newCityMixPref').value = city.mixPref || '3';
+            }
+            toggleCitySplit();
+
             document.getElementById('newCity3StarName').value = city.hotel3Name;
             document.getElementById('newCity3StarPrice').value = city.hotel3Price;
             document.getElementById('newCity3StarMeal').value = city.hotel3Meal;
@@ -509,7 +932,6 @@
             document.getElementById('newCity5StarName').value = city.hotel5Name || '';
             document.getElementById('newCity5StarPrice').value = city.hotel5Price || '';
             document.getElementById('newCity5StarMeal').value = city.hotel5Meal || '';
-            document.getElementById('newCityMixPref').value = city.mixPref;
             document.getElementById('cityModalTitle').innerText = 'Edit City Stay';
             const saveButton = document.getElementById('saveCityButton');
             saveButton.innerText = 'Save Changes';
@@ -559,7 +981,23 @@
 
     function saveCity(index = null) {
         const name = document.getElementById('newCityName').value;
-        const numberOfNights = parseInt(document.getElementById('newCityNights').value) || 0;
+        const isSplit = document.getElementById('newCityIsSplit').checked;
+        
+        let numberOfNights, hotel3Nights, hotel4Nights, hotel5Nights, mixPref;
+        if (isSplit) {
+            hotel3Nights = parseInt(document.getElementById('newCity3StarNights').value) || 0;
+            hotel4Nights = parseInt(document.getElementById('newCity4StarNights').value) || 0;
+            hotel5Nights = parseInt(document.getElementById('newCity5StarNights').value) || 0;
+            numberOfNights = hotel3Nights + hotel4Nights + hotel5Nights;
+            mixPref = 'split';
+        } else {
+            numberOfNights = parseInt(document.getElementById('newCityNights').value) || 0;
+            hotel3Nights = numberOfNights;
+            hotel4Nights = numberOfNights;
+            hotel5Nights = numberOfNights;
+            mixPref = document.getElementById('newCityMixPref').value;
+        }
+
         const hotel3Name = document.getElementById('newCity3StarName').value;
         const hotel3Price = parseFloat(document.getElementById('newCity3StarPrice').value) || 0;
         const hotel3Meal = parseFloat(document.getElementById('newCity3StarMeal').value) || 0;
@@ -569,10 +1007,9 @@
         const hotel5Name = document.getElementById('newCity5StarName').value;
         const hotel5Price = parseFloat(document.getElementById('newCity5StarPrice').value) || 0;
         const hotel5Meal = parseFloat(document.getElementById('newCity5StarMeal').value) || 0;
-        const mixPref = document.getElementById('newCityMixPref').value;
         
         if (!name || numberOfNights <= 0) {
-            showNotification("Please provide a City Name and Number of Nights.", true);
+            showNotification("Please provide a City Name and at least 1 Night total.", true);
             return;
         }
         
@@ -581,7 +1018,7 @@
             return;
         }
         
-        const cityData = { name, numberOfNights, hotel3Name, hotel3Price, hotel3Meal, hotel4Name, hotel4Price, hotel4Meal, hotel5Name, hotel5Price, hotel5Meal, mixPref };
+        const cityData = { name, isSplit, numberOfNights, hotel3Nights, hotel4Nights, hotel5Nights, hotel3Name, hotel3Price, hotel3Meal, hotel4Name, hotel4Price, hotel4Meal, hotel5Name, hotel5Price, hotel5Meal, mixPref };
         
         if (index !== null) {
             cityData.selected = availableCities[index].selected;
@@ -612,7 +1049,7 @@
         let listToClear;
         if (type === 'tour') listToClear = availableTours;
         if (type === 'transfer') listToClear = availableTransfers;
-        if (type === 'hotel') listToClear = availableHotels;
+        if (type === 'city') listToClear = availableCities;
 
         if (listToClear) {
             listToClear.forEach(item => item.selected = false);
@@ -653,12 +1090,15 @@
             services: {
                 tours: availableTours,
                 transfers: availableTransfers,
-                hotels: availableHotels
+                cities: availableCities
             },
             inputs: {},
             logo: logoDataUrl
         };
-        allInputIds.forEach(id => { data.inputs[id] = document.getElementById(id).value; });
+        allInputIds.forEach(id => { 
+            const el = document.getElementById(id);
+            if (el) data.inputs[id] = el.value;
+        });
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
         const downloadAnchorNode = document.createElement('a');
         downloadAnchorNode.setAttribute("href", dataStr);
@@ -680,17 +1120,18 @@
                 if (data.inputs) {
                     allInputIds.forEach(id => {
                         if (data.inputs.hasOwnProperty(id)) {
-                            document.getElementById(id).value = data.inputs[id];
+                            const el = document.getElementById(id);
+                            if (el) el.value = data.inputs[id];
                         }
                     });
                 }
                 if (data.services) {
                     availableTours = data.services.tours || [];
                     availableTransfers = data.services.transfers || [];
-                    availableHotels = data.services.hotels || [];
-                    document.getElementById('tourSearch').value = '';
-                    document.getElementById('transferSearch').value = '';
-                    document.getElementById('hotelSearch').value = '';
+                    availableCities = data.services.cities || data.services.hotels || [];
+                    if (document.getElementById('tourSearch')) document.getElementById('tourSearch').value = '';
+                    if (document.getElementById('transferSearch')) document.getElementById('transferSearch').value = '';
+                    if (document.getElementById('citySearch')) document.getElementById('citySearch').value = '';
                     renderAll();
                 }
                 if (data.logo) {
@@ -771,17 +1212,28 @@
             dayByDayHtml += `</ul><div class="image-gallery"></div><button class="add-activity-btn" onclick="addActivity(this)">+ Add Activity</button><button class="add-image-btn" onclick="triggerImageUpload(this)">+ Add Image</button></div>`;
         }
         
-        const lkrAdult3 = document.getElementById('adult_lkr_3star').innerText || "N/A";
-        const lkrChildExtra3 = document.getElementById('child_extra_lkr_3star').innerText || "N/A";
-        const lkrChildSharing3 = document.getElementById('child_sharing_lkr_3star').innerText || "N/A";
+        const lkrAdult3 = document.getElementById('adult_final_lkr_3star') ? document.getElementById('adult_final_lkr_3star').innerText : document.getElementById('adult_lkr_3star').innerText || "N/A";
+        const lkrChildExtra3 = document.getElementById('child_final_lkr_3star') ? document.getElementById('child_final_lkr_3star').innerText : document.getElementById('child_extra_lkr_3star').innerText || "N/A";
+        const lkrChildSharing3 = document.getElementById('child_sharing_final_lkr_3star') ? document.getElementById('child_sharing_final_lkr_3star').innerText : document.getElementById('child_sharing_lkr_3star').innerText || "N/A";
 
-        const lkrAdult4 = document.getElementById('adult_lkr_4star').innerText || "N/A";
-        const lkrChildExtra4 = document.getElementById('child_extra_lkr_4star').innerText || "N/A";
-        const lkrChildSharing4 = document.getElementById('child_sharing_lkr_4star').innerText || "N/A";
+        const lkrAdult4 = document.getElementById('adult_final_lkr_4star') ? document.getElementById('adult_final_lkr_4star').innerText : document.getElementById('adult_lkr_4star').innerText || "N/A";
+        const lkrChildExtra4 = document.getElementById('child_final_lkr_4star') ? document.getElementById('child_final_lkr_4star').innerText : document.getElementById('child_extra_lkr_4star').innerText || "N/A";
+        const lkrChildSharing4 = document.getElementById('child_sharing_final_lkr_4star') ? document.getElementById('child_sharing_final_lkr_4star').innerText : document.getElementById('child_sharing_lkr_4star').innerText || "N/A";
 
-        const lkrAdultMix = document.getElementById('adult_lkr_mix').innerText || "N/A";
-        const lkrChildExtraMix = document.getElementById('child_extra_lkr_mix').innerText || "N/A";
-        const lkrChildSharingMix = document.getElementById('child_sharing_lkr_mix').innerText || "N/A";
+        const lkrAdultMix = document.getElementById('adult_final_lkr_mix') ? document.getElementById('adult_final_lkr_mix').innerText : document.getElementById('adult_lkr_mix').innerText || "N/A";
+        const lkrChildExtraMix = document.getElementById('child_final_lkr_mix') ? document.getElementById('child_final_lkr_mix').innerText : document.getElementById('child_extra_lkr_mix').innerText || "N/A";
+        const lkrChildSharingMix = document.getElementById('child_sharing_final_lkr_mix') ? document.getElementById('child_sharing_final_lkr_mix').innerText : document.getElementById('child_sharing_lkr_mix').innerText || "N/A";
+
+        const showMix = document.getElementById('result_card_mix') && document.getElementById('result_card_mix').style.display !== 'none';
+        const mixTitleHtml = document.getElementById('mix_package_title') ? document.getElementById('mix_package_title').innerText : 'Mixed / Custom Option';
+        
+        const mixRowHtml = showMix ? `
+                        <tr>
+                            <td style="border: 1px solid #ddd; padding: 8px; font-weight: bold;">${mixTitleHtml}</td>
+                            <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${lkrAdultMix}</td>
+                            <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${lkrChildExtraMix}</td>
+                            <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${lkrChildSharingMix}</td>
+                        </tr>` : '';
 
         const priceHtml = `
             <div id="price-section" style="margin-top: 2rem; border-top: 1px solid #eee; padding-top: 1rem;">
@@ -807,13 +1259,7 @@
                             <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${lkrAdult4}</td>
                             <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${lkrChildExtra4}</td>
                             <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${lkrChildSharing4}</td>
-                        </tr>
-                        <tr>
-                            <td style="border: 1px solid #ddd; padding: 8px; font-weight: bold;">Mixed / Custom Option</td>
-                            <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${lkrAdultMix}</td>
-                            <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${lkrChildExtraMix}</td>
-                            <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${lkrChildSharingMix}</td>
-                        </tr>
+                        </tr>${mixRowHtml}
                     </tbody>
                 </table>
             </div>
@@ -1098,6 +1544,7 @@
                     document.addEventListener("DOMContentLoaded", () => {
                         applyStyles();
                         saveState();
+                        loadMasterDatabase();
                     });
                 <\/script>
             </body>
@@ -1143,33 +1590,57 @@
         const manualMarkupChildExtraBed = getOptionalNumber('child_extra_bed_manual_markup');
         const manualMarkupChildSharing = getOptionalNumber('child_sharing_manual_markup');
 
+        // Add-ons Calculation
+        const guideCost = getNumber('guide_price_per_day') * getNumber('guide_days');
+        const waterCost = getNumber('water_price_per_day') * getNumber('water_days');
+        const mealCost = getNumber('meal_price_per_day') * getNumber('meal_days');
+        const totalAddonGroupCost = guideCost + waterCost + mealCost;
+        const addonCostPerAdult = totalAddonGroupCost / numPeopleHotel;
+
         // 3. Separate Hotel & Meal Calculations
         const selectedCities = availableCities.filter(c => c.selected);
 
-        const hotelCost3 = selectedCities.reduce((sum, c) => sum + (c.hotel3Price * c.numberOfNights), 0) / numPeopleHotel;
-        const hotelCost4 = selectedCities.reduce((sum, c) => sum + (c.hotel4Price * c.numberOfNights), 0) / numPeopleHotel;
-        const hotelCost5 = selectedCities.reduce((sum, c) => sum + (c.hotel5Price * c.numberOfNights), 0) / numPeopleHotel;
+        const hotelCost3 = selectedCities.reduce((sum, c) => sum + (c.isSplit ? (c.hotel3Price * c.hotel3Nights + c.hotel4Price * c.hotel4Nights + c.hotel5Price * c.hotel5Nights) : (c.hotel3Price * c.numberOfNights)), 0) / numPeopleHotel;
+        const hotelCost4 = selectedCities.reduce((sum, c) => sum + (c.isSplit ? (c.hotel3Price * c.hotel3Nights + c.hotel4Price * c.hotel4Nights + c.hotel5Price * c.hotel5Nights) : (c.hotel4Price * c.numberOfNights)), 0) / numPeopleHotel;
+        const hotelCost5 = selectedCities.reduce((sum, c) => sum + (c.isSplit ? (c.hotel3Price * c.hotel3Nights + c.hotel4Price * c.hotel4Nights + c.hotel5Price * c.hotel5Nights) : (c.hotel5Price * c.numberOfNights)), 0) / numPeopleHotel;
         const hotelCostMix = selectedCities.reduce((sum, c) => {
+            if (c.isSplit) return sum + (c.hotel3Price * c.hotel3Nights + c.hotel4Price * c.hotel4Nights + c.hotel5Price * c.hotel5Nights);
             let preferredPrice = c.hotel3Price;
             if (c.mixPref === "4") preferredPrice = c.hotel4Price;
             if (c.mixPref === "5") preferredPrice = c.hotel5Price;
             return sum + (preferredPrice * c.numberOfNights);
         }, 0) / numPeopleHotel;
 
-        const totalMealCost3 = selectedCities.reduce((sum, c) => sum + ((c.hotel3Meal || 0) * c.numberOfNights), 0);
-        const totalMealCost4 = selectedCities.reduce((sum, c) => sum + ((c.hotel4Meal || 0) * c.numberOfNights), 0);
-        const totalMealCost5 = selectedCities.reduce((sum, c) => sum + ((c.hotel5Meal || 0) * c.numberOfNights), 0);
+        const totalMealCost3 = selectedCities.reduce((sum, c) => sum + (c.isSplit ? ((c.hotel3Meal||0) * c.hotel3Nights + (c.hotel4Meal||0) * c.hotel4Nights + (c.hotel5Meal||0) * c.hotel5Nights) : ((c.hotel3Meal || 0) * c.numberOfNights)), 0);
+        const totalMealCost4 = selectedCities.reduce((sum, c) => sum + (c.isSplit ? ((c.hotel3Meal||0) * c.hotel3Nights + (c.hotel4Meal||0) * c.hotel4Nights + (c.hotel5Meal||0) * c.hotel5Nights) : ((c.hotel4Meal || 0) * c.numberOfNights)), 0);
+        const totalMealCost5 = selectedCities.reduce((sum, c) => sum + (c.isSplit ? ((c.hotel3Meal||0) * c.hotel3Nights + (c.hotel4Meal||0) * c.hotel4Nights + (c.hotel5Meal||0) * c.hotel5Nights) : ((c.hotel5Meal || 0) * c.numberOfNights)), 0);
         const totalMealCostMix = selectedCities.reduce((sum, c) => {
+            if (c.isSplit) return sum + ((c.hotel3Meal||0) * c.hotel3Nights + (c.hotel4Meal||0) * c.hotel4Nights + (c.hotel5Meal||0) * c.hotel5Nights);
             let preferredMealPrice = c.hotel3Meal || 0;
             if (c.mixPref === "4") preferredMealPrice = c.hotel4Meal || 0;
             if (c.mixPref === "5") preferredMealPrice = c.hotel5Meal || 0;
             return sum + (preferredMealPrice * c.numberOfNights);
         }, 0);
 
+        let mixTitleParts = [];
+        selectedCities.forEach(c => {
+            if (c.isSplit) {
+                if (c.hotel5Nights > 0) mixTitleParts.push(`5* ${c.name}`);
+                if (c.hotel4Nights > 0) mixTitleParts.push(`4* ${c.name}`);
+                if (c.hotel3Nights > 0) mixTitleParts.push(`3* ${c.name}`);
+            } else {
+                mixTitleParts.push(`${c.mixPref}* ${c.name}`);
+            }
+        });
+        const mixTitle = mixTitleParts.length > 0 ? mixTitleParts.join(' + ') : "Mixed Package";
+        if (document.getElementById('mix_package_title')) {
+            document.getElementById('mix_package_title').innerText = mixTitle;
+        }
+
         // Function to calculate and render a package
         const renderPackage = (suffix, hotelCost, totalMealCost) => {
             // ADULT
-            const subtotalAdult = selectedTourCost + perPersonTransferCost + hotelCost;
+            const subtotalAdult = selectedTourCost + perPersonTransferCost + hotelCost + addonCostPerAdult;
             let markupAmountAdult = (manualMarkupAdult !== null) ? manualMarkupAdult : subtotalAdult * markupPercent;
             const totalThbAdult = subtotalAdult + markupAmountAdult;
             const adultMarkupDisplay = (manualMarkupAdult !== null) ? `+ ${formatCurrency(markupAmountAdult, 'THB')} (Manual)` : `+ ${formatCurrency(markupAmountAdult, 'THB')} (${markupPercentValue}%)`;
@@ -1189,15 +1660,30 @@
             // Render to DOM
             document.getElementById(`adult_markup_${suffix}`).innerHTML = adultMarkupDisplay;
             document.getElementById(`adult_thb_${suffix}`).innerText = formatCurrency(totalThbAdult, 'THB');
-            document.getElementById(`adult_lkr_${suffix}`).innerText = formatCurrency(totalThbAdult * lkrRate, 'LKR');
+            let usdAdult = totalThbAdult / usdDivisor;
+            if (document.getElementById(`adult_usd_${suffix}`)) document.getElementById(`adult_usd_${suffix}`).innerText = formatCurrency(usdAdult, 'USD');
+            let lkrAdult = totalThbAdult * lkrRate;
+            document.getElementById(`adult_lkr_${suffix}`).innerText = formatCurrency(lkrAdult, 'LKR');
+            let finalLkrAdult = Math.ceil(lkrAdult / 100) * 100 + 1000;
+            if (document.getElementById(`adult_final_lkr_${suffix}`)) document.getElementById(`adult_final_lkr_${suffix}`).innerText = formatCurrency(finalLkrAdult, 'LKR');
 
             document.getElementById(`child_extra_markup_${suffix}`).innerHTML = childExtraBedMarkupDisplay;
             document.getElementById(`child_extra_thb_${suffix}`).innerText = formatCurrency(totalThbChildExtraBed, 'THB');
-            document.getElementById(`child_extra_lkr_${suffix}`).innerText = formatCurrency(totalThbChildExtraBed * lkrRate, 'LKR');
+            let usdChildExtra = totalThbChildExtraBed / usdDivisor;
+            if (document.getElementById(`child_extra_usd_${suffix}`)) document.getElementById(`child_extra_usd_${suffix}`).innerText = formatCurrency(usdChildExtra, 'USD');
+            let lkrChildExtra = totalThbChildExtraBed * lkrRate;
+            document.getElementById(`child_extra_lkr_${suffix}`).innerText = formatCurrency(lkrChildExtra, 'LKR');
+            let finalLkrChildExtra = Math.ceil(lkrChildExtra / 100) * 100 + 1000;
+            if (document.getElementById(`child_final_lkr_${suffix}`)) document.getElementById(`child_final_lkr_${suffix}`).innerText = formatCurrency(finalLkrChildExtra, 'LKR');
 
             document.getElementById(`child_sharing_markup_${suffix}`).innerHTML = childSharingMarkupDisplay;
             document.getElementById(`child_sharing_thb_${suffix}`).innerText = formatCurrency(totalThbChildSharing, 'THB');
-            document.getElementById(`child_sharing_lkr_${suffix}`).innerText = formatCurrency(totalThbChildSharing * lkrRate, 'LKR');
+            let usdChildSharing = totalThbChildSharing / usdDivisor;
+            if (document.getElementById(`child_sharing_usd_${suffix}`)) document.getElementById(`child_sharing_usd_${suffix}`).innerText = formatCurrency(usdChildSharing, 'USD');
+            let lkrChildSharing = totalThbChildSharing * lkrRate;
+            document.getElementById(`child_sharing_lkr_${suffix}`).innerText = formatCurrency(lkrChildSharing, 'LKR');
+            let finalLkrChildSharing = Math.ceil(lkrChildSharing / 100) * 100 + 1000;
+            if (document.getElementById(`child_sharing_final_lkr_${suffix}`)) document.getElementById(`child_sharing_final_lkr_${suffix}`).innerText = formatCurrency(finalLkrChildSharing, 'LKR');
         };
 
         // 4. Calculate all four
@@ -1210,7 +1696,9 @@
         const isValid3 = selectedCities.length > 0 && selectedCities.every(c => c.hotel3Name);
         const isValid4 = selectedCities.length > 0 && selectedCities.every(c => c.hotel4Name);
         const isValid5 = selectedCities.length > 0 && selectedCities.every(c => c.hotel5Name);
-        const isValidMix = selectedCities.length > 0 && selectedCities.every(c => {
+        const hasNoneMixPref = selectedCities.some(c => !c.isSplit && c.mixPref === "none");
+        const isValidMix = selectedCities.length > 0 && !hasNoneMixPref && selectedCities.every(c => {
+            if (c.isSplit) return true;
             if (c.mixPref === "3") return !!c.hotel3Name;
             if (c.mixPref === "4") return !!c.hotel4Name;
             if (c.mixPref === "5") return !!c.hotel5Name;
@@ -1227,7 +1715,8 @@
     }
 
     // Initial render on page load
-    window.onload = () => {
+    window.onload = async () => {
+        await loadMasterDatabase();
         renderAll();
     };
 </script>
